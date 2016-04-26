@@ -66,11 +66,20 @@ tmp_mean <- cbind(tmp_dat[,1],
   mutate(day = substr(date, 9, 10),
          mon = substr(date, 6, 7),
          date = as.Date("2016"%-%mon%-%day)) %>%
-  select(-mon, -day) %>%
-  melt(id = c("date", "year"))
+  select(-mon, -day)
+
+phu_tot <- tmp_mean %>%
+  summarise_each(., funs(max), starts_with("stat")) %>%
+  ungroup %>%
+  select(starts_with("stat")) %>%
+  colMeans() %>%
+  mean
+
+
 
 # Plot PHU0 ---------------------------------------------------------------
-p_acc <- ggplot(tmp_mean) +
+p_acc <- ggplot(tmp_mean%>%
+                  melt(id = c("date", "year"))) +
   geom_line(aes(x = date, y = value, col = year, lty = variable)) +
   scale_color_grey() +
   theme(legend.position="none") +
