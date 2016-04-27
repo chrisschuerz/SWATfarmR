@@ -7,6 +7,8 @@ require(dplyr)
 require(magrittr)
 require(data.table)
 require(tidyr)
+require(RColorBrewer)
+require(gridExtra)
 
 
 # functions ---------------------------------------------------------------
@@ -59,34 +61,87 @@ tmp_mean <- cbind(tmp_dat[,1],
   rename.col(., lbl = c("YYYYJDN", "stat"%_%seq(1,12))) %>%
   mutate(date = as.Date(as.character(YYYYJDN), "%Y%j"),
          year = substr(as.character(YYYYJDN), 1, 4)) %>%
-  select(-YYYYJDN) %>%
+  select(-YYYYJDN)
+
+phu0_acc <- tmp_mean %>%
   group_by(year) %>%
   mutate_each(., funs(ifelse(. < 0, 0, .)), starts_with("stat")) %>%
   mutate_each(., funs(cumsum), starts_with("stat")) %>%
   mutate(day = substr(date, 9, 10),
          mon = substr(date, 6, 7),
          date = as.Date("2016"%-%mon%-%day)) %>%
-  select(-mon, -day)
+  select(-mon, -day) %>%
+  melt(id = c("date", "year"))
 
-phu_tot <- tmp_mean %>%
-  summarise_each(., funs(max), starts_with("stat")) %>%
+phu_tot <- phu0_acc %>%
   ungroup %>%
-  select(starts_with("stat")) %>%
-  colMeans() %>%
-  mean
+  group_by(year, variable) %>%
+  summarise(value = max(value)) %>%
+  ungroup %>%
+  summarise(mean(value))
+
+phu0_fract <- phu0_acc  %>%
+  mutate(phu0 = value/phu_tot$`mean(value)`) %>%
+  select(-value)
+
+phu_corn <- 900
+tbase_corn <- 8
+
+f_plant <- 0.078
+
+phu <- tmp_mean %>%
+  group_by(year) %>%
+  mutate_each(., funs(. - tbase_corn), starts_with("stat")) %>%
+  mutate_each(., funs(ifelse(. < 0, 0, .)), starts_with("stat")) %>%
+  mutate(day = substr(date, 9, 10),
+         mon = substr(date, 6, 7),
+         date = as.Date("2016"%-%mon%-%day)) %>%
+  select(-mon, -day) %>%
+  melt(id = c("date", "year"))
+
+phu_fract <- phu  %>%
+  mutate(phu = value/phu_corn) %>%
+  select(-value)
+
+phu_corn <- phu0_fract %>%
+  mutate(phu_plant = ifelse(phu0 <= f_plant, phu0, NA)) %>%
+  cbind.data.frame(., phu = phu_fract$phu) %>%
+  mutate(phu_grow = ifelse(is.na(phu_plant), phu, 0)) %>%
+  group_by(year, variable) %>%
+  mutate(phu_grow = cumsum(phu_grow),
+         phu_grow = ifelse(phu_grow < 1.15, phu_grow, NA),
+         stat = variable) %>%
+  ungroup %>%
+  mutate(phu_fall = ifelse(is.na(phu_grow), phu0, NA),
+         phu_grow = ifelse(phu_grow == 0, NA, phu_grow)) %>%
+  select(-phu0, -phu, -variable) %>%
+  melt(id = c("date", "year", "stat")) %>%
+  mutate(col_ind = variable%_%year)
 
 
 
 # Plot PHU0 ---------------------------------------------------------------
-p_acc <- ggplot(tmp_mean%>%
-                  melt(id = c("date", "year"))) +
-  geom_line(aes(x = date, y = value, col = year, lty = variable)) +
+p_acc <- ggplot(phu0_acc) +
+  geom_line(aes(x = date, y = value, col = year, lty = variable), lwd = 0.1) +
   scale_color_grey() +
   theme(legend.position="none") +
-  scale_x_date(date_breaks = "1 month",date_labels = "%b %d")
+  scale_x_date(date_breaks = "1 month",date_labels = "%b")
 
+# Plot PHU corn------------------------------------------------------------
+col_fallow <- colorRampPalette(c("lightblue1", "lightblue4"))(45)
+col_grow <- colorRampPalette(c("coral1", "coral4"))(45)
+col_pal <- c(col_fallow, col_grow, col_fallow)
 
+p_corn <- ggplot(phu_corn) +
+  geom_line(aes(x = date, y = value, lty = stat, col = col_ind), lwd = 0.1) +
+  scale_color_manual(values = col_pal) +
+  theme(legend.position="none") +
+  scale_x_date(date_breaks = "1 month",date_labels = "%b") +
+  theme_minimal()
 
+phu_plot <- grid.arrange(p_acc, p_corn, ncol = 2)
 
+ggsave(filename = "phu_plot.png", plot = phu_plot, device = "png",
+       width = 150, height = 70, units = "mm", scale = 1.3)
 
 
