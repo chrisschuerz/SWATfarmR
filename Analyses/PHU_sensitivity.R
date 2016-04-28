@@ -7,7 +7,6 @@ require(dplyr)
 require(magrittr)
 require(data.table)
 require(tidyr)
-require(RColorBrewer)
 require(gridExtra)
 
 
@@ -50,7 +49,6 @@ rename.col <- function(df, lbl){
 
 # Read TMP data -----------------------------------------------------------
 txtIO_pth <- "D:/Projects_R/Altm_2016/Scenarios/Default/TxtInOut"
-lookup <- read.lookup_tables(txtIO_pth)
 tmp_dat <- read.weather_input(txtIO_pth%/%"Tmp1.Tmp", "XXX.X")
 
 
@@ -112,7 +110,8 @@ phu_corn <- phu0_fract %>%
          phu_grow = ifelse(phu_grow < 1.15, phu_grow, NA),
          stat = variable) %>%
   ungroup %>%
-  mutate(phu_fall = ifelse(is.na(phu_grow), phu0, NA),
+  mutate(
+    # phu_fall = ifelse(is.na(phu_grow), phu0, NA),
          phu_grow = ifelse(phu_grow == 0, NA, phu_grow)) %>%
   select(-phu0, -phu, -variable) %>%
   melt(id = c("date", "year", "stat")) %>%
@@ -124,24 +123,27 @@ phu_corn <- phu0_fract %>%
 p_acc <- ggplot(phu0_acc) +
   geom_line(aes(x = date, y = value, col = year, lty = variable), lwd = 0.1) +
   scale_color_grey() +
+  scale_x_date(date_breaks = "1 month",date_labels = "%b") +
+  theme_bw(base_size = 8) +
   theme(legend.position="none") +
-  scale_x_date(date_breaks = "1 month",date_labels = "%b")
+  xlab("Date") + ylab("accumulated PHU / °C")
 
 # Plot PHU corn------------------------------------------------------------
-col_fallow <- colorRampPalette(c("lightblue1", "lightblue4"))(45)
-col_grow <- colorRampPalette(c("coral1", "coral4"))(45)
-col_pal <- c(col_fallow, col_grow, col_fallow)
+col_fallow <- colorRampPalette(c("lightblue4", "lightblue1"))(45)
+col_grow <- colorRampPalette(c("coral4", "coral1"))(45)
+col_pal <- c(col_grow, col_fallow)
 
 p_corn <- ggplot(phu_corn) +
   geom_line(aes(x = date, y = value, lty = stat, col = col_ind), lwd = 0.1) +
   scale_color_manual(values = col_pal) +
-  theme(legend.position="none") +
   scale_x_date(date_breaks = "1 month",date_labels = "%b") +
-  theme_minimal()
+  theme_bw(base_size = 8) +
+  theme(legend.position="none") +
+  xlab("Date") + ylab("PHU fraction count in SWAT/ -")
 
 phu_plot <- grid.arrange(p_acc, p_corn, ncol = 2)
 
-ggsave(filename = "phu_plot.png", plot = phu_plot, device = "png",
+ggsave(filename = "phu_plot.svg", plot = phu_plot, device = "svg",
        width = 150, height = 70, units = "mm", scale = 1.3)
 
 
