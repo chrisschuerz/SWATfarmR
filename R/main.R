@@ -17,11 +17,11 @@ print("Read and prepare input data:")
 prgr_bar <- txtProgressBar(min = 0, max = 100, initial = 0, style = 3)
 ## Read weather inputs ----------------------------------------------------
 ### Read the min/max tempeartures for the stations:
-tmp_dat <- read_weather(txtIO_pth%/%"Tmp1.Tmp", "XXX.X")
+temp_data <- read_weather(txtIO_pth%/%"Tmp1.Tmp", "XXX.X")
 setTxtProgressBar(prgr_bar, 30)
 
 ### Read the precipitation data for the stations:
-pcp_dat <- read_weather(txtIO_pth%/%"pcp1.pcp", "XXX.XX")
+precip_data <- read_weather(txtIO_pth%/%"pcp1.pcp", "XXX.XX")
 setTxtProgressBar(prgr_bar, 80)
 ## Read management schedule file and all lookup tables --------------------
 ### Management schedule files and lookup tables for curve numbers (CN) according
@@ -38,22 +38,22 @@ lookup <- read.lookup_tables(txtIO_pth)
 ### Edit precipitation data
 #### Assign the station precipitation data to the respective subbasins
 #### and aggregate the precipitation data to daily accumulated values
-pcp_dat %<>% modify_weather(., lookup, "PCP") %>%
-             limit_timespan(., lookup)
+precip_data %<>% modify_weather(., lookup, "PCP") %>%
+                   limit_timespan(., lookup)
 
 ### Edit temperature data
 #### Assign the station temperature data to the respective subbasins
-tmp_min <- tmp_dat[,c(1,seq(3, dim(tmp_dat)[2], 2))]
-tmp_max <- tmp_dat[,c(1,seq(2, dim(tmp_dat)[2], 2))]
-tmp_dat <- cbind(tmp_dat[,1],
-                 (tmp_dat[,seq(2, dim(tmp_dat)[2], 2)] +
-                  tmp_dat[,seq(3, dim(tmp_dat)[2], 2)])/2)
+temp_min <- temp_data[,c(1,seq(3, dim(temp_data)[2], 2))]
+temp_max <- temp_data[,c(1,seq(2, dim(temp_data)[2], 2))]
+temp_mean <- cbind(tmp_dat[,1],
+                 (temp_data[,seq(2, dim(temp_data)[2], 2)] +
+                  temp_data[,seq(3, dim(temp_data)[2], 2)])/2)
 
-tmp_min %<>% modify_weather(., lookup, "TMP") %>%
-             limit_timespan(., lookup)
-tmp_max %<>% modify_weather(., lookup, "TMP") %>%
-             limit_timespan(., lookup)
-tmp_dat %<>% modify_weather(., lookup, "TMP")
+temp_min %<>%  modify_weather(., lookup, "TMP") %>%
+               limit_timespan(., lookup)
+temp_max %<>%  modify_weather(., lookup, "TMP") %>%
+               limit_timespan(., lookup)
+temp_mean %<>% modify_weather(., lookup, "TMP")
 
 #### Calculate normalized deviations to the monthly daily mean tempeartures
 #### for each subbasin.
