@@ -36,9 +36,9 @@ read_weather <- function(file_name, value_format) {
 }
 
 # modify_weatherinput(weather_df, lookup_lst, lbl_string) -----------------
-modify_weather <- function(weather_df, lookup, col_label){
+modify_weather <- function(weather_df, lookup_lst, col_label){
   weather_df %>%
-    assign_weatherstation(., unlist(lookup$station["I"%_%col_label]), "SUB") %>%
+    assign_weatherstation(., lookup_lst, "SUB") %>%
       mutate(., YEAR = as.numeric(substr(DATE,1,4)),
                 JDN  = as.numeric(substr(DATE,5,7))) %>%
     select(., -DATE) %>%
@@ -54,9 +54,9 @@ modify_weather <- function(weather_df, lookup, col_label){
 # limit_timespan(weather_df, lookup) ------------------------------------------
 # Limit the weather data to the time span given in file.cio that is stored in
 # the lookup list
-limit_timespan <- function(weather_df, lookup){
-  weather_df %>% filter(., YEAR >= lookup$bound_yrs[1],
-                           YEAR <= lookup$bound_yrs[2])
+limit_timespan <- function(weather_df, lookup_lst){
+  weather_df %>% filter(., YEAR >= lookup_lst$bound_yrs[1],
+                           YEAR <= lookup_lst$bound_yrs[2])
 }
 
 ## Subfunctions -----------------------------------------------------------
@@ -66,9 +66,10 @@ limit_timespan <- function(weather_df, lookup){
 sum_na.rm  <- function(value) sum (value, na.rm = TRUE)
 
 ## assign_weatherstation(weather_df, station_lookup, col_label) -----------
-assign_weatherstation <- function(weather_df, station_lookup, col_label){
+assign_weatherstation <- function(weather_df, lookup_lst, col_label){
+  station <- unlist(lookup_lst$station["I"%_%col_label])
   weather_df <- cbind(weather_df[,1],
-                  weather_df[,(1 + station_lookup)]) %>%
+                  weather_df[,(1 + station)]) %>%
     rename_colheader(weather_df, col_label)
   return(weather_df)
 }
