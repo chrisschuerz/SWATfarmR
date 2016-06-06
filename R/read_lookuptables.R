@@ -24,17 +24,17 @@ read_lookuptables <- function(txtIO_pth){
   lookup[["fertilizer"]] <- txtIO_pth%/%"fert.dat" %>%
     read.table(file = ., stringsAsFactors = FALSE) %>%
     .[,1:2] %>%
-    rename.col(.,c("IFNUM", "FERTNM"))
+    rename_col(.,c("IFNUM", "FERTNM"))
 
   lookup[["tillage"]] <- txtIO_pth%/%"till.dat" %>%
     read.fwf(file = ., widths = c(4,12,53), stringsAsFactors = FALSE) %>%
     .[,1:2] %>%
-    rename.col(.,c("ITNUM", "TILLNM")) %>%
+    rename_col(.,c("ITNUM", "TILLNM")) %>%
     trim_col(.,2)
 
-  lookup[["crop"]] <- read_croplookup(txtIO_pth%/%"plant.dat")
+  lookup[["crop"]] <- read_croplookup(txtIO_pth, "plant.dat")
 
-  lookup[["station"]] <- read_weaterlookup(txtIO_pth)
+  lookup[["station"]] <- read_weatherlookup(txtIO_pth)
   lookup[["n_subbasin"]] <- dim(lookup[["station"]])[1]
 
   lookup[["n_years"]] <- txtIO_pth%/%"file.cio" %>%
@@ -65,8 +65,8 @@ read_lookuptables <- function(txtIO_pth){
 ## TxtIO directory. For running the function TxtIO must be set as working
 ## directory. The output is a data.frame holding the corresponding pcp and tmp
 ## stations to each subbasin.
-read_weatherlookup <- function(sub_path) {
-  sub_list <- file.names(file_path = sub_path, pat_str = "\\.sub$")
+read_weatherlookup <- function(txtIO_pth) {
+  sub_list <- file.names(file_path = txtIO_pth, pat_str = "\\.sub$")
   stat_lookup <- data.frame(SUB   = character(),
                             I_PCP = numeric(),
                             I_TMP = numeric(),
@@ -91,8 +91,9 @@ read_weatherlookup <- function(sub_path) {
 ## Function to read the plant.dat file from the TxtInOut directory and to create
 ## the crop lookup table from this file requiered to convert crop labels to
 ## codes.
-read_croplookup <- function (plnt_dat) {
-  crop_lkp <- readLines(plnt_dat)
+read_croplookup <- function (txtIO_pth, plant_file) {
+  plant_pth <- txtIO_pth%/%"plant.dat"
+  crop_lkp <- readLines(plant_pth)
   keep_i   <- seq(1, length(crop_lkp), 5)
   crop_lkp <-  crop_lkp[keep_i]
   crop_lkp <- scan(text = crop_lkp, what = "", quiet = TRUE)
