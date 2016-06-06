@@ -1,7 +1,7 @@
 # Select paths for txtIO and mgmt -----------------------------------------
 # mgmt_pth  <- choose.dir(caption = "Set path to management and cnop files")
 # txtIO_pth <- choose.dir(caption = "Set path for txtIO directory")
-mgmt_pth  <- "D:/Projects_R/AM_LUSEMOD/AM_RBM/Input"
+mgt_pth  <- "D:/Projects_R/AM_LUSEMOD/AM_RBM/Input"
 txtIO_pth <- "D:/Projects_R/AM_LUSEMOD/AM_RBM/TxtInOut"
 
 # Libraries ---------------------------------------------------------------
@@ -17,11 +17,11 @@ print("Read and prepare input data:")
 prgr_bar <- txtProgressBar(min = 0, max = 100, initial = 0, style = 3)
 ## Read weather inputs ----------------------------------------------------
 ### Read the min/max tempeartures for the stations:
-tmp_dat <- read.weather_input(txtIO_pth%/%"Tmp1.Tmp", "XXX.X")
+tmp_dat <- read_weather(txtIO_pth%/%"Tmp1.Tmp", "XXX.X")
 setTxtProgressBar(prgr_bar, 30)
 
 ### Read the precipitation data for the stations:
-pcp_dat <- read.weather_input(txtIO_pth%/%"pcp1.pcp", "XXX.XX")
+pcp_dat <- read_weather(txtIO_pth%/%"pcp1.pcp", "XXX.XX")
 setTxtProgressBar(prgr_bar, 80)
 ## Read management schedule file and all lookup tables --------------------
 ### Management schedule files and lookup tables for curve numbers (CN) according
@@ -38,8 +38,8 @@ lookup <- read.lookup_tables(txtIO_pth)
 ### Edit precipitation data
 #### Assign the station precipitation data to the respective subbasins
 #### and aggregate the precipitation data to daily accumulated values
-pcp_dat %<>% mutate.weather_input(., lookup, "PCP") %>%
-             trim.timeseries(., lookup)
+pcp_dat %<>% modify_weather(., lookup, "PCP") %>%
+             limit_timespan(., lookup)
 
 ### Edit temperature data
 #### Assign the station temperature data to the respective subbasins
@@ -49,11 +49,11 @@ tmp_dat <- cbind(tmp_dat[,1],
                  (tmp_dat[,seq(2, dim(tmp_dat)[2], 2)] +
                   tmp_dat[,seq(3, dim(tmp_dat)[2], 2)])/2)
 
-tmp_min %<>% mutate.weather_input(., lookup, "TMP") %>%
-             trim.timeseries(., lookup)
-tmp_max %<>% mutate.weather_input(., lookup, "TMP") %>%
-             trim.timeseries(., lookup)
-tmp_dat %<>% mutate.weather_input(., lookup, "TMP")
+tmp_min %<>% modify_weather(., lookup, "TMP") %>%
+             limit_timespan(., lookup)
+tmp_max %<>% modify_weather(., lookup, "TMP") %>%
+             limit_timespan(., lookup)
+tmp_dat %<>% modify_weather(., lookup, "TMP")
 
 #### Calculate normalized deviations to the monthly daily mean tempeartures
 #### for each subbasin.
