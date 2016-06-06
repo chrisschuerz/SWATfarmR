@@ -26,8 +26,8 @@ setTxtProgressBar(prgr_bar, 80)
 ## Read management schedule file and all lookup tables --------------------
 ### Management schedule files and lookup tables for curve numbers (CN) according
 ### to operation and soil type
-mgmt_cnop_data <- read.mgmt.cnop(mgmt_pth)
-rm(mgmt_pth)
+mgt_cnop <- read_mgmtcnop(mgt_pth)
+rm(mgt_pth)
 
 ### List of lookup tables holding management, fertilizer, tillage, and crop types.
 ### The subbasin files contain the information which weather stations SWAT
