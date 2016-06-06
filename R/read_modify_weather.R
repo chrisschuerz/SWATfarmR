@@ -38,7 +38,7 @@ read_weather <- function(file_name, value_format) {
 # modify_weatherinput(weather_df, lookup_lst, lbl_string) -----------------
 modify_weather <- function(weather_df, lookup_lst, col_label){
   weather_df %>%
-    assign_weatherstation(., lookup_lst, "SUB") %>%
+    assign_weatherstation(., lookup_lst, col_label) %>%
       mutate(., YEAR = as.numeric(substr(DATE,1,4)),
                 JDN  = as.numeric(substr(DATE,5,7))) %>%
     select(., -DATE) %>%
@@ -67,10 +67,10 @@ sum_na.rm  <- function(value) sum (value, na.rm = TRUE)
 
 ## assign_weatherstation(weather_df, station_lookup, col_label) -----------
 assign_weatherstation <- function(weather_df, lookup_lst, col_label){
-  station <- unlist(lookup_lst$station["I"%_%col_label])
+  station_index <- lookup_lst$station[["I"%_%col_label]]
   weather_df <- cbind(weather_df[,1],
-                  weather_df[,(1 + station)]) %>%
-    rename_colheader(weather_df, col_label)
+                  weather_df[,(1 + station_index)]) %>%
+    rename_weatherheader("SUB")
   return(weather_df)
 }
 
@@ -79,9 +79,8 @@ assign_weatherstation <- function(weather_df, lookup_lst, col_label){
 ## columns.
 rename_weatherheader <- function(weather_df, col_label){
   n <- dim(weather_df)[2] - 1
-  col_header <- c("DATE", paste(rep(col_label, n),
-                             sprintf("%03d",seq(1:n)),
-                             sep = "_"))
+  col_header <- c("DATE", paste(col_label, sprintf("%03d",seq(1:n)),
+                                sep = "_"))
   colnames(weather_df) <- col_header
   return(weather_df)
 }
