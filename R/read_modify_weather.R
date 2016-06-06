@@ -7,7 +7,7 @@ read_weather <- function(file_name, value_format) {
 
   # Subset numbers in read data table according to start and end positions of
   # the values in each line of the data table
-  subset_numbers <- function(df, value_startpos, value_endpos){
+  subset_values <- function(df, value_startpos, value_endpos){
     substr(df, value_startpos , value_endpos) %>%
       as.numeric
   }
@@ -30,7 +30,7 @@ read_weather <- function(file_name, value_format) {
   df_valstart <- c(date_strt, df_decpos - shift[1])
   df_valend   <- c(date_end,  df_decpos + shift[2])
   weather_df %<>%
-    mapply(sub_num,., df_valstart, df_valend) %>%
+    mapply(subset_values,., df_valstart, df_valend) %>%
     as.data.frame
   return(weather_df)
 }

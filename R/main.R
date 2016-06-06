@@ -26,14 +26,14 @@ setTxtProgressBar(prgr_bar, 80)
 ## Read management schedule file and all lookup tables --------------------
 ### Management schedule files and lookup tables for curve numbers (CN) according
 ### to operation and soil type
-mgt_cnop <- read_mgmtcnop(mgt_pth)
+mgt_cnop <- read_mgtcnop(mgt_pth)
 rm(mgt_pth)
 
 ### List of lookup tables holding management, fertilizer, tillage, and crop types.
 ### The subbasin files contain the information which weather stations SWAT
 ### allocates to which subbasins. The output is a lookup table of station
 ### allocations. This is also added to the lookup list.
-lookup <- read.lookup_tables(txtIO_pth)
+lookup <- read_lookuptables(txtIO_pth)
 ## Edit weather inputs ----------------------------------------------------
 ### Edit precipitation data
 #### Assign the station precipitation data to the respective subbasins

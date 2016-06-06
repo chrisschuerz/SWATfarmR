@@ -32,7 +32,7 @@ read_lookuptables <- function(txtIO_pth){
     rename_col(.,c("ITNUM", "TILLNM")) %>%
     trim_col(.,2)
 
-  lookup[["crop"]] <- read_croplookup(txtIO_pth, "plant.dat")
+  lookup[["crop"]] <- read_croplookup(txtIO_pth%/%"plant.dat")
 
   lookup[["station"]] <- read_weatherlookup(txtIO_pth)
   lookup[["n_subbasin"]] <- dim(lookup[["station"]])[1]
@@ -66,13 +66,14 @@ read_lookuptables <- function(txtIO_pth){
 ## directory. The output is a data.frame holding the corresponding pcp and tmp
 ## stations to each subbasin.
 read_weatherlookup <- function(txtIO_pth) {
-  sub_list <- file.names(file_path = txtIO_pth, pat_str = "\\.sub$")
+  sub_list <- inquire_filenames(file_pattern = "\\.sub$",
+                                file_path = txtIO_pth)
   stat_lookup <- data.frame(SUB   = character(),
                             I_PCP = numeric(),
                             I_TMP = numeric(),
                             I_LAT = numeric())
   for (i in sub_list){
-    temp  <- readLines(sub_path%/%i, warn = FALSE)
+    temp  <- readLines(txtIO_pth%/%i, warn = FALSE)
     i_sub <- scan(text = temp[1], what = "", quiet = TRUE)[4]
     i_pcp <- scan(text = temp[7], what = "", quiet = TRUE)[1]
     i_tmp <- scan(text = temp[8], what = "", quiet = TRUE)[1]
@@ -91,9 +92,8 @@ read_weatherlookup <- function(txtIO_pth) {
 ## Function to read the plant.dat file from the TxtInOut directory and to create
 ## the crop lookup table from this file requiered to convert crop labels to
 ## codes.
-read_croplookup <- function (txtIO_pth, plant_file) {
-  plant_pth <- txtIO_pth%/%"plant.dat"
-  crop_lkp <- readLines(plant_pth)
+read_croplookup <- function (plant_file) {
+  crop_lkp <- readLines(plant_file)
   keep_i   <- seq(1, length(crop_lkp), 5)
   crop_lkp <-  crop_lkp[keep_i]
   crop_lkp <- scan(text = crop_lkp, what = "", quiet = TRUE)
