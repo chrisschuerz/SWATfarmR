@@ -1,7 +1,7 @@
-## read_weatherinput(file_name, format_int) -------------------------------
-## Function reads the wheater data given in ascii format. The delimiter
-## positions are given by the format integers: (length date, length values,
-## variables per station).
+# read_weatherinput(file_name, format_int) --------------------------------
+# Function reads the wheater data given in ascii format. The delimiter
+# positions are given by the format integers: (length date, length values,
+# variables per station).
 read_weather <- function(file_name, value_format) {
 
   sub_num <- function(df, g1, g2){
@@ -66,7 +66,7 @@ assign_weatherstation <- function(weather_df, station_lookup, col_label){
   return(weather_df)
 }
 
-## set.col.head(df, lbl) --------------------------------------------------
+## rename_weatherheader(df, lbl) ------------------------------------------
 ## Function takes data.frame with the structure: DATE, SUB_i and labels the
 ## columns.
 rename_weatherheader <- function(df, lbl){

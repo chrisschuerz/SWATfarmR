@@ -1,9 +1,9 @@
-## hru.meta(mgmt_file, soil_file, crop_df, cnop_df) -----------------------
-## Function extracts meta information, such as subbasin number, land use, or
-## soil, for an HRU from the header of the management file as well as from the
-## soil file and returns it as a list.
-hru.meta <- function(mgmt_file, soil_file, crop_df, cnop_df) {
-  hru_meta <- mgmt_file[1] %>%
+# inquire_HRUmeta(mgmt_file, soil_file, crop_df, cnop_df) -----------------------
+# Function extracts meta information, such as subbasin number, land use, or
+# soil, for an HRU from the header of the management file as well as from the
+# soil file and returns it as a list.
+inquire_HRUmeta <- function(mgt_file, soil_file, crop_df, cnop_df) {
+  hru_meta <- mgt_file[1] %>%
     strsplit(., "\\ |\\:|\\: ") %>%
     unlist(.) %>%
     list(SUB  = sprintf("%03d",

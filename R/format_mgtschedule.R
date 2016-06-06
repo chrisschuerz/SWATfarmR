@@ -1,7 +1,7 @@
-## schedule.format(sdl_df, meta_data, n_yrs) -----------------------------
+## format_mgtschedule(sdl_df, meta_data, n_yrs) -----------------------------
 ## Function takes the management schedule file and prepares it for writing the
 ## the operations to the management file.
-schedule.format <- function(sdl_df, meta_data, lookup) {
+format_mgtschedule <- function(sdl_df, meta_data, lookup) {
 
   temp_sdl  <- filter(sdl_df, CROP == meta_data$LUSE)
   temp_sdl[temp_sdl == ""] <- NA
