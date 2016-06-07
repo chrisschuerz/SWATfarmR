@@ -1,7 +1,7 @@
 # select_OPdate(sdl_df, i_op, op_year, prv_date, meta_data, -----------
 #                   tmp_df, pcp_df, mon_thrs)
-select_OPdate <- function(sdl_df, i_op, op_year, prv_date, meta_data,
-                              tmp_df, pcp_df, amc_df, mon_thrs, thrs_rule) {
+select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data,
+                        tmp_df, pcp_df, amc_df, mon_thrs, thrs_rule) {
 
   # Routine to avoid errors if previous line is empty or NA
   same_date = FALSE

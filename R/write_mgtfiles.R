@@ -15,8 +15,8 @@ for (i_hru in hru_list){
   soil_i <- readLines(txtIO_pth%/%i_hru%.%"sol", warn = FALSE)
 
   mgtcnop_sel <- select_mgtcnop(input$mgt_cnop)
-  mgt_i_meta <- inquire_HRUmeta(mgt_i, soil_i, input, mgtcnop_sel)
-  mgt_i_sdl  <- format_mgtschedule(input, mgt_i_meta, mgtcnop_sel)
+  mgt_i_meta  <- inquire_HRUmeta(mgt_i, soil_i, input, mgtcnop_sel)
+  mgt_i_sdl   <- format_mgtschedule(input, mgt_i_meta, mgtcnop_sel)
 
   n_op  <- dim(mgt_i_sdl)[1]
   n_rot <- length(which(mgt_i_sdl$OPERATION == "End of year"))

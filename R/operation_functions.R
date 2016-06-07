@@ -31,7 +31,7 @@ plnt_crp <- function(mgt_file, sdl_df, i_op, meta_data, input_lst){
   plnt_sdl  <- initialize_line()
   prev_date <- inquire_prevdate(mgt_file, op_year)
 
-  plnt_sdl[,1:2]   <- select_OPdate(sdl_df, i_op, op_year, prev_date, meta_data,
+  plnt_sdl[,1:2]   <- select_date(sdl_df, i_op, op_year, prev_date, meta_data,
                                     input_lst,
                                     # tmp_df, pcp_df, amc_df,
                                         mon_thrs = 5, thrs_rule = "<")
@@ -58,7 +58,7 @@ fert_crp <- function(mgt_file, sdl_df, i_op, meta_data, mgt_df, fert_df,
   fert_sdl  <- initialize_line()
   prev_date <- inquire_prevdate(mgt_file, op_year)
 
-  fert_sdl[,1:2]   <- select_OPdate(sdl_df, i_op, op_year, prev_date,
+  fert_sdl[,1:2]   <- select_date(sdl_df, i_op, op_year, prev_date,
                                         meta_data, tmp_df, pcp_df, amc_df,
                                         mon_thrs = 5, thrs_rule = "<")
   fert_sdl$OP      <- mgt_df$OPNUM[mgt_df$OP == sdl_df$OPERATION[i_op]]
@@ -81,7 +81,7 @@ hrv_kill <- function(mgt_file, sdl_df, i_op, meta_data, mgt_df, pcp_df,
   hvst_sdl  <- initialize_line()
   prev_date <- inquire_prevdate(mgt_file, op_year)
 
-  hvst_sdl[,1:2]   <- select_OPdate(sdl_df, i_op, op_year, prev_date,
+  hvst_sdl[,1:2]   <- select_date(sdl_df, i_op, op_year, prev_date,
                                         meta_data, tmp_df, pcp_df, amc_df,
                                         mon_thrs = 7, thrs_rule = ">")
   hvst_sdl$OP      <- mgt_df$OPNUM[mgt_df$OP == sdl_df$OPERATION[i_op]]
@@ -104,7 +104,7 @@ till_op  <- function(mgt_file, sdl_df, i_op, meta_data, mgt_df, till_df,
   till_sdl  <- initialize_line()
   prev_date <- inquire_prevdate(mgt_file, op_year)
 
-  till_sdl[,1:2]   <- select_OPdate(sdl_df, i_op, op_year, prev_date,
+  till_sdl[,1:2]   <- select_date(sdl_df, i_op, op_year, prev_date,
                                         meta_data, tmp_df, pcp_df, amc_df,
                                         mon_thrs = 5, thrs_rule = "<")
   till_sdl$OP      <- mgt_df$OPNUM[mgt_df$OP == sdl_df$OPERATION[i_op]]
@@ -128,7 +128,7 @@ hrv_only <- function(mgt_file, sdl_df, i_op, meta_data, mgt_df, pcp_df,
   hvst_sdl  <- initialize_line()
   prev_date <- inquire_prevdate(mgt_file, op_year)
 
-  hvst_sdl[,1:2]   <- select_OPdate(sdl_df, i_op, op_year, prev_date,
+  hvst_sdl[,1:2]   <- select_date(sdl_df, i_op, op_year, prev_date,
                                         meta_data, tmp_df, pcp_df, amc_df,
                                         mon_thrs = 5, thrs_rule = ">")
   hvst_sdl$OP      <- mgt_df$OPNUM[mgt_df$OP == sdl_df$OPERATION[i_op]]
