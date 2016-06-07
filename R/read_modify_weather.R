@@ -3,8 +3,6 @@
 # positions are given by the format integers: (length date, length values,
 # variables per station).
 read_weather <- function(file_name, value_format) {
-
-
   # Subset numbers in read data table according to start and end positions of
   # the values in each line of the data table
   subset_values <- function(df, value_startpos, value_endpos){

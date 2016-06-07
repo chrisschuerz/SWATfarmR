@@ -1,10 +1,17 @@
 Package: SWATfarmR
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
+Title: Rule based setting of farm management operation dates in SWAT2012
+Version: 0.1.1
+Author:  person("Christoph", "Schuerz", email = "christoph.schuerz@boku.ac.at",
+                  role = c("aut", "cre"))
 Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Depends: R (>= 3.1.0)
+License: MIT
 LazyData: TRUE
+Imports:
+    magrittr,
+    dplyr,
+    reshape2,
+    lubridate,
+    data.table
 RoxygenNote: 5.0.1
