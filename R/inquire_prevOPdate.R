@@ -1,7 +1,7 @@
 # inquire_prevOPdate(mgm_file, year_num) -----------------------------------
 # Function extracts the date of the previous operation in the management file
 # in JDN format.
-inquire_prevOPdate <- function(mgmt_file, year_num) {
+inquire_prevdate <- function(mgmt_file, year_num) {
   prv_date <- NULL
   if(length(mgmt_file) > 30){
     prv_date <- mgmt_file %>%

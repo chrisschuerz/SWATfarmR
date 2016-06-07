@@ -15,10 +15,8 @@
 #'   \item \code{$Precipitation}: Precipitation data from the SWAT project
 #'   \item\code{$Antecedent_Precip}: Calculated antecedent precipitation, derived
 #'      from precipitation and temperature data of the SWAT project
-#'   \item \code{$Temperature_Ind}: Normalized temperature index calculated from
+#'   \item \code{$Temperature}: Normalized temperature index calculated from
 #'      tempearture data of the SWAT project and statistics derived from them
-#'   \item\code{$Temperature_Stat}: Long term monthly temperature statistics,
-#'      derived from the SWAT project temperature data.}
 #' @export
 
 
@@ -99,12 +97,11 @@ prepare_inputdata <- function(txtIO_pth, mgt_pth, ant_days = 5){
 
   rm(temp_min, temp_max)
 
-  input_list <- list(MGT_CNOP = mgt_cnop,
-                     Lookup = lookup,
-                     Precipitation = precip_data,
-                     Antecedent_Precip = api_data,
-                     Temperature_Ind = temp_index,
-                     Temperature_stat = temp_stat)
+  input_list <- list(mgt_cnop = mgt_cnop,
+                     lookup = lookup,
+                     precipitation = precip_data,
+                     antecedent_precip = api_data,
+                     temperature = temp_index)
 
   # set and close progress bar
   setTxtProgressBar(prgr_bar, 100)

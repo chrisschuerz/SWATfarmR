@@ -1,16 +1,17 @@
 ## format_mgtschedule(sdl_df, meta_data, n_yrs) -----------------------------
 ## Function takes the management schedule file and prepares it for writing the
 ## the operations to the management file.
-format_mgtschedule <- function(sdl_df, meta_data, lookup) {
+format_mgtschedule <- function(input_lst, meta_lst, mgtcnop_sel) {
 
-  temp_sdl  <- filter(sdl_df, CROP == meta_data$LUSE)
-  temp_sdl[temp_sdl == ""] <- NA
-  n_op <- dim(temp_sdl)[1]
+  sdl <- input_lst$mgt_cnop[["mgt"%_%mgtcnop_sel]] %>%
+    filter(CROP == meta_lst$LUSE)
+  sdl[sdl == ""] <- NA
+  n_op <- dim(sdl)[1]
 
-  temp_sdl <- temp_sdl[rep(seq(1, n_op), lookup$n_years),]
-  temp_sdl %<>%  mutate(.,
-                        YEAR = seq(lookup$bound_yrs[1],
-                                   lookup$bound_yrs[2]) %>%
+  sdl <- sdl[rep(seq(1, n_op), input_lst$lookup$n_years),]
+  sdl %<>%  mutate(.,
+                        YEAR = seq(input_lst$lookup$bound_yrs[1],
+                                   input_lst$lookup$bound_yrs[2]) %>%
                           rep(. , each = n_op),
                         JDN1 = paste(YEAR,
                                      MON_1 %>% sprintf("%02d", .),
@@ -27,9 +28,9 @@ format_mgtschedule <- function(sdl_df, meta_data, lookup) {
     select(., YEAR, JDN1, JDN2, MON_1, MON_2,
            starts_with("OP"))
 
-  temp_sdl <- rbind(filter(temp_sdl, OPERATION == "Initial crop")[1,],
-                    filter(temp_sdl, OPERATION != "Initial crop"))
-  temp_sdl <- filter(temp_sdl, !is.na(OPERATION))
+  sdl <- rbind(filter(sdl, OPERATION == "Initial crop")[1,],
+                    filter(sdl, OPERATION != "Initial crop"))
+  sdl <- filter(sdl, !is.na(OPERATION))
 
-  return(temp_sdl)
+  return(sdl)
 }

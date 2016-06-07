@@ -19,11 +19,13 @@ compute_TIndex <- function (temp_df, lookup_lst) {
               temp_max_range = max(c((temp_mean - temp_min),
                                      (temp_max  - temp_mean))))
 
-  temp_index <- temp_df %>%
+  temp_ind <- temp_df %>%
     left_join(temp_stat, by = "MON") %>%
     mutate_each(funs((. - temp_mean)/temp_max_range),
                      starts_with("SUB")) %>%
     select(-starts_with("temp_"))
 
+  temp_index <- list(Index = temp_ind,
+                     Stat = temp_stat)
   return(temp_index)
 }
