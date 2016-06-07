@@ -61,18 +61,19 @@ temp_mean %<>% modify_weather(., lookup, "TMP")
 # Calculate normalized deviations to the monthly daily mean tempeartures
 # for each subbasin.
 temp_index <- compute_TIndex(temp_mean, lookup) %>%
-  trim.timeseries(., lookup)
-rm(tmp_dat)
+  limit_timespan(., lookup)
+rm(temp_mean)
 setTxtProgressBar(prgr_bar, 90)
 # Calculate antecedent water content
-et0 <- ET0.FAOHargreaves(tmp_min, tmp_max, lookup)
-pcp_et_bal <- pcp_dat[,5:dim(pcp_dat)[2]] - et0
-amc_dat <- apply(pcp_et_bal, 2, AMC.estimate, c(0.8,0.85,0.90, 0.95), 5)
+t1 <- system.time({
+amc_dat <- (select(precip_data, starts_with("SUB")) -
+  compute_ET0Hargreaves(temp_min, temp_max, lookup)) %>%
+  apply(., 2, compute_AMC, c(0.8,0.85,0.90, 0.95), 5) %>%
+  lapply(., cbind, precip_data[,1:4]) %>%
+  lapply(., select,c(YEAR,MON,DAY,JDN,A,B,C,D))
 
-for(i in 1:lookup$n_subbasin){
-  amc_dat[[i]] <- cbind(pcp_dat[,1:4],amc_dat[[i]])
-}
-rm(tmp_min, tmp_max, i, et0,pcp_et_bal)
+})
+rm(tmp_min, tmp_max)
 
 # set and close progress bar
 setTxtProgressBar(prgr_bar, 100)

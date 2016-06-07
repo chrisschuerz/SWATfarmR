@@ -25,5 +25,5 @@ compute_TIndex <- function (temp_df, lookup_lst) {
                      starts_with("SUB")) %>%
     select(-starts_with("temp_"))
 
-  return(tmp_index)
+  return(temp_index)
 }

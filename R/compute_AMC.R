@@ -34,20 +34,20 @@ compute_AMC <- function (wtr_bal, k_ret, n_prevday) {
   return(ant_moist)
 }
 
-# compute_ET0Hargreaves(t_min, t_max, sub_info) ---------------------------
-compute_ET0Hargreaves <- function (t_min, t_max, lookup) {
+# compute_ET0Hargreaves(temp_min, temp_max, lookup) -----------------------
+compute_ET0Hargreaves <- function (temp_min, temp_max, lookup) {
   # Calculate ET values applying FAO-56 Hargreaves (Allen et al., 1998)
   # Estimate Ra according to Allen at al., 1998
   # (http://www.fao.org/docrep/x0490e/x0490e07.htm#calculation%20procedures)
   G_sc <- 0.0820
-  delta <- 0.409*sin(2*pi*t_min$JDN/365 - 1.39)
-  d_r <- 1 + 0.033*cos(2*pi*t_min$JDN/365)
+  delta <- 0.409*sin(2*pi*temp_min$JDN/365 - 1.39)
+  d_r <- 1 + 0.033*cos(2*pi*temp_min$JDN/365)
 
-  t_min  %<>% select(., starts_with("SUB"))
-  t_max  %<>% select(., starts_with("SUB"))
+  temp_min  %<>% select(., starts_with("SUB"))
+  temp_max  %<>% select(., starts_with("SUB"))
 
   R_a <- data.frame(matrix(data = NA,
-                           nrow = dim(t_min)[1],
+                           nrow = dim(temp_min)[1],
                            ncol = lookup$n_subbasin))
   for(i in 1:lookup$n_subbasin){
     phi <- lookup$station$I_LAT [i]*pi/180
@@ -60,8 +60,8 @@ compute_ET0Hargreaves <- function (t_min, t_max, lookup) {
   # http://www.fao.org/docrep/x0490e/x0490e07.htm#an%20alternative%20equation
   # %20for%20eto%20when%20weather%20data%20are%20missing
 
-  et0 <- 0.0023*((t_min + t_max)/2 + 17.8)* (t_max - t_min)^0.5 * R_a
+  et0 <- 0.0023*((temp_min + temp_max)/2 + 17.8)* (temp_max - temp_min)^0.5 * R_a
 
-  et0 <- rename.col(et0, "SUB"%_%sprintf("%03d",1:lookup$n_subbasin))
+  et0 <- rename_col(et0, "SUB"%_%sprintf("%03d",1:lookup$n_subbasin))
   return(et0)
 }
