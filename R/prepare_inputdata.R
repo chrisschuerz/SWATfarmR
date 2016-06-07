@@ -1,4 +1,31 @@
-prepare_inputdata <- function(txtIO_pth, mgt_pth, antecedent_days = 5){
+
+
+
+#' Prepare input data for further steps.
+#'
+#' @param txtIO_pth Path for the txtInOut folder of the SWAT2012 project
+#' @param mgt_pth Path for the folder holding the user management schedule and
+#'   CNOP .csv files
+#' @param antecedent_days Antecendent days considered for the development of the
+#'   API (Antecedent Precipitation Index)
+#'
+#' @return Returns a list structure holding following components: \itemize{
+#'   \item \code{$MGT_CNOP}: A list of the user management schedules and
+#'      respective CNOP tables
+#'   \item \code{$Lookup}: A lookup table holding codes for management operations,
+#'      fertilizers, tillage operations, crop types from SWAT, Linking table for
+#'      weather stations to Subbasins, and simulation period from file.cio.
+#'   \item \code{$Precipitation}: Precipitation data from the SWAT project
+#'   \item\code{$Antecedent_Precip}: Calculated antecedent precipitation, derived
+#'      from precipitation and temperature data of the SWAT project
+#'   \item \code{$Temperature_Ind}: Normalized temperature index calculated from
+#'      tempearture data of the SWAT project and statistics derived from them
+#'   \item\code{$Temperature_Stat}: Long term monthly temperature statistics,
+#'      derived from the SWAT project temperature data.}
+#' @export
+
+
+prepare_inputdata <- function(txtIO_pth, mgt_pth, ant_days = 5){
 
   # Libraries ---------------------------------------------------------------
   library(dplyr)
@@ -69,7 +96,7 @@ prepare_inputdata <- function(txtIO_pth, mgt_pth, antecedent_days = 5){
   # Calculate antecedent water content
   api_data <- (select(precip_data, starts_with("SUB")) -
                 compute_ET0Hargreaves(temp_min, temp_max, lookup)) %>%
-    apply(., 2, compute_AMC, c(0.8,0.85,0.90, 0.95), antecedent_days) %>%
+    apply(., 2, compute_AMC, c(0.8,0.85,0.90, 0.95), ant_days) %>%
     lapply(., cbind, precip_data[,1:4]) %>%
     lapply(., select,c(YEAR,MON,DAY,JDN,A,B,C,D))
 
