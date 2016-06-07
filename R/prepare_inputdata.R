@@ -1,6 +1,3 @@
-
-
-
 #' Prepare input data for further steps.
 #'
 #' @param txtIO_pth Path for the txtInOut folder of the SWAT2012 project
