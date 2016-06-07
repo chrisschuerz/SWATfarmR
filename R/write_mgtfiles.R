@@ -11,7 +11,7 @@ hru_list <- inquire_filenames(file_path = txtIO_pth,
 hru_list <- substr(hru_list, 1, 9)
 ## Get individual mgt files and edit them --------------------------------
 for (i_hru in hru_list){
-  mgt_i <- readLines(txtIO_pth%/%i_hru%.%"mgt", warn = FALSE)
+  mgt_i  <- readLines(txtIO_pth%/%i_hru%.%"mgt", warn = FALSE)
   soil_i <- readLines(txtIO_pth%/%i_hru%.%"sol", warn = FALSE)
 
   mgtcnop_sel <- select_mgtcnop(input$mgt_cnop)

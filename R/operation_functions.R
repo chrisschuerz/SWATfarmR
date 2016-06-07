@@ -1,4 +1,4 @@
-## init.crp(mgt_file, sdl_df, i_op) --------------------------------------
+## init_crp(mgt_file, sdl_df, i_op) --------------------------------------
 ## Function writes initial plant cover into the management operation file.
 init_crp <- function(mgt_file, sdl_df, i_op, crop_lkp) {
   mgt_file[4] <- paste(sprintf("%16i", 1),
@@ -15,7 +15,7 @@ init_crp <- function(mgt_file, sdl_df, i_op, crop_lkp) {
   return(mgt_file)
 }
 
-## end.year(mgt_file, sdl_df, i_op, mgt_df) -----------------------------
+## end_year(mgt_file, sdl_df, i_op, mgt_df) -----------------------------
 ## Function writes end of year operation into the management operation file.
 end_year <- function(mgt_file, sdl_df, i_op, mgt_df) {
   sdl <- sdl_df[i_op, -c(1,2)]
@@ -50,7 +50,7 @@ plnt_crp <- function(mgt_file, sdl_df, i_op, meta_data, input_lst){
   return(mgt_file)
 }
 
-## fert.crp(mgt_file, sdl_file, i_op, meta_data, mgt_df, fert_df, -------
+## fert_crp(mgt_file, sdl_file, i_op, meta_data, mgt_df, fert_df, -------
 ##          pcp_df, tmp_df, amc_df)
 fert_crp <- function(mgt_file, sdl_df, i_op, meta_data, mgt_df, fert_df,
                      pcp_df, tmp_df, amc_df) {
@@ -72,7 +72,7 @@ fert_crp <- function(mgt_file, sdl_df, i_op, meta_data, mgt_df, fert_df,
   return(mgt_file)
 }
 
-## hrv.kill(mgt_file, sdl_file, i_op, meta_data, mgt_df, pcp_df, --------
+## hrv_kill(mgt_file, sdl_file, i_op, meta_data, mgt_df, pcp_df, --------
 ##          tmp_df, amc_df)
 hrv_kill <- function(mgt_file, sdl_df, i_op, meta_data, mgt_df, pcp_df,
                      tmp_df, amc_df) {
@@ -96,7 +96,7 @@ hrv_kill <- function(mgt_file, sdl_df, i_op, meta_data, mgt_df, pcp_df,
   return(mgt_file)
 }
 
-## till.op (mgt_file, sdl_file, i_op, meta_data, mgt_df, till_df, -------
+## till_op (mgt_file, sdl_file, i_op, meta_data, mgt_df, till_df, -------
 ##          pcp_df, tmp_df, amc_df)
 till_op  <- function(mgt_file, sdl_df, i_op, meta_data, mgt_df, till_df,
                      pcp_df, tmp_df, amc_df) {
@@ -120,7 +120,7 @@ till_op  <- function(mgt_file, sdl_df, i_op, meta_data, mgt_df, till_df,
   return(mgt_file)
 }
 
-## hrv.only(mgt_file, sdl_file, i_op, meta_data, mgt_df, pcp_df, -------
+## hrv_only(mgt_file, sdl_file, i_op, meta_data, mgt_df, pcp_df, -------
 ##          tmp_df, amc_df)
 hrv_only <- function(mgt_file, sdl_df, i_op, meta_data, mgt_df, pcp_df,
                      tmp_df, amc_df) {

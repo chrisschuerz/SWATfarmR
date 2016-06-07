@@ -1,7 +1,11 @@
 # select_OPdate(sdl_df, i_op, op_year, prv_date, meta_data, -----------
 #                   tmp_df, pcp_df, mon_thrs)
-select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data,
-                        tmp_df, pcp_df, amc_df, mon_thrs, thrs_rule) {
+select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data, input_lst,
+                        mon_thrs, thrs_rule, pcp_thrs, api_thrs) {
+
+  pcp_df  <- input_lst$precipitation
+  tmp_df  <- input_lst$temperature$index
+  api_lst <- input_lst$antecedent_precip
 
   # Routine to avoid errors if previous line is empty or NA
   same_date = FALSE
@@ -15,7 +19,7 @@ select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data,
   }
 
   if(same_date) {
-    op_date <- jdn.to.monday(prv_date, op_year, 0)
+    op_date <- convert_jdn2monday(prv_date, op_year, 0)
   } else if (do.call(thrs_rule, list(sdl_df$MON_1[i_op], mon_thrs))) {
 
     if(thrs_rule == "<") {
@@ -45,7 +49,7 @@ select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data,
       select(., JDN, contains(meta_data$SUB)) %>%
       rename.col(.,c("JDN", "PCP"))
 
-    amc_date <- amc_df %>%
+    api_date <- api_lst %>%
       .[["SUB"%_%meta_data$SUB]] %>%
       filter(., YEAR == op_year) %>%
       filter(., JDN >= (jdn_init - 5) &
@@ -53,7 +57,7 @@ select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data,
       select(., JDN, ends_with(meta_data$SOIL)) %>%
       rename.col(.,c("JDN", "AMC"))
 
-    op_date <- select.op.date(pcp_date, amc_date, 3, 25) %>%
+    op_date <- select_opdate(pcp_date, api_date, 3, 25) %>%
       jdn.to.monday(., op_year, prv_date)
   } else {
     pcp_date <- pcp_df %>%
@@ -63,7 +67,7 @@ select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data,
       select(., JDN, contains(meta_data$SUB)) %>%
       rename.col(.,c("JDN", "PCP"))
 
-    amc_date <- amc_df %>%
+    api_date <- api_lst %>%
       .[["SUB"%_%meta_data$SUB]] %>%
       filter(., YEAR == op_year) %>%
       filter(., JDN >= (sdl_df$JDN1[i_op] - 5) &
@@ -71,7 +75,7 @@ select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data,
       select(., JDN, ends_with(meta_data$SOIL)) %>%
       rename.col(.,c("JDN", "AMC"))
 
-    op_date <- select.op.date(pcp_date, amc_date, 5, 25) %>%
+    op_date <- select_opdate(pcp_date, api_date, 5, 25) %>%
       jdn.to.monday(., op_year, prv_date)
   }
   return(op_date)
@@ -80,11 +84,11 @@ select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data,
 
 
 ## Subfunctions -----------------------------------------------------------
-## select.op.date <- function(pcp_date, amc_date, pcp_thrs, amc_thrs)
+## select_opdate <- function(pcp_date, api_date, pcp_thrs, amc_thrs)
 ##
-select.op.date <- function(pcp_date, amc_date, pcp_thrs, amc_thrs){
+select_opdate <- function(pcp_date, api_date, pcp_thrs, amc_thrs){
   pcp_sel <- pcp_date %>% filter(., PCP < pcp_thrs)
-  amc_sel <- amc_date %>% filter(., AMC < amc_thrs)
+  amc_sel <- api_date %>% filter(., AMC < amc_thrs)
   op_date <- inner_join(pcp_sel, amc_sel, by = "JDN")
 
   if(dim(op_date)[1] > 0){
@@ -92,7 +96,7 @@ select.op.date <- function(pcp_date, amc_date, pcp_thrs, amc_thrs){
       select(., JDN) %>%
       sample_n(., 1)
   } else {
-    op_date <- inner_join(pcp_date, amc_date, by = "JDN") %>%
+    op_date <- inner_join(pcp_date, api_date, by = "JDN") %>%
       mutate(., WGT = 10*PCP + AMC) %>%
       filter(., .$WGT == min(.$WGT)) %>%
       select(., JDN)
@@ -105,7 +109,7 @@ select.op.date <- function(pcp_date, amc_date, pcp_thrs, amc_thrs){
 ## month and day. Additionally the date is compared to previous date. If the
 ## date is lower than the previous date then it is set to prev_date + 1 before
 ## conversion.
-jdn.to.monday <- function(jdn_num, year_num, prv_date) {
+convert_jdn2monday <- function(jdn_num, year_num, prv_date) {
   if(jdn_num <= prv_date) jdn_num <- prv_date + 1
 
   paste(year_num,jdn_num, sep = "") %>%
