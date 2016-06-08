@@ -1,7 +1,7 @@
 # select_OPdate(sdl_df, i_op, op_year, prv_date, meta_data, -----------
 #                   tmp_df, pcp_df, mon_thrs)
 select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data, input_lst,
-                        pcp_thrs, api_thrs, ant_d, sub_d) {
+                        thrs, day_rnd) {
 
   pcp_df  <- input_lst$precipitation
   tmp_df  <- input_lst$temperature$index
@@ -14,42 +14,34 @@ select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data, input_lst,
             "n" = {
               jdn_start <- sdl_df$JDN1[i_op]
               jdn_end   <- sdl_df$JDN2[i_op]
-              ant_days  <- 0
-              sub_days  <- 0
+              day_rnd <- c(0,0)
             },
             "o" = {
               jdn_init <- select_jdninit(tmp_df, sdl_df, op_year, i_op, 0, 0,
                                          meta_data$SUB)
               jdn_start <- jdn_init
               jdn_end   <- jdn_init
-              ant_days <- ant_d
-              sub_days <- sub_d
             },
             "<" = {
               jdn_init <- select_jdninit(tmp_df, sdl_df, op_year, i_op, 1, 0,
                                          meta_data$SUB)
               jdn_start <- jdn_init
               jdn_end   <- jdn_init
-              ant_days <- ant_d
-              sub_days <- sub_d
             },
             ">" = {
               jdn_init <- select_jdninit(tmp_df, sdl_df, op_year, i_op, 0, 1,
                                          meta_data$SUB)
               jdn_start <- jdn_init
               jdn_end   <- jdn_init
-              ant_days <- ant_d
-              sub_days <- sub_d
             }
     )
 
     pcp_date <- select_timespan(pcp_df, sdl_df, op_year, jdn_start, jdn_end,
-                                ant_days, sub_days, meta_data$SUB, "PCP")
-    api_date <-select_timespan(api_lst[["SUB"%_%meta_data$SUB]],
-                               sdl_df, op_year, jdn_start, jdn_end,
-                               ant_days, sub_days, meta_data$SUB, "API")
+                                day_rnd, meta_data$SUB, "PCP")
+    api_date <-select_timespan(api_lst[["SUB"%_%meta_data$SUB]], sdl_df, op_year,
+                               jdn_start, jdn_end, day_rnd, meta_data$SUB, "API")
 
-    op_date <- select_opdate(pcp_date, api_date, pcp_thrs, api_thrs) %>%
+    op_date <- select_opdate(pcp_date, api_date, thrs) %>%
       convert_jdn2monday(., op_year, prv_date)
   }
 
@@ -59,11 +51,11 @@ select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data, input_lst,
 
 ## Subfunctions -----------------------------------------------------------
 select_timespan <- function(weather_df, sdl_df, op_year, jdn_1, jdn_2,
-                            ant_d, sub_d, sel_label, col_label){
+                            day_rnd, sel_label, col_label){
   sel_timespan <- weather_df %>%
     filter(., YEAR == op_year) %>%
-    filter(., JDN >= (jdn_1 - ant_d) &
-              JDN <= (jdn_2 + sub_d)) %>%
+    filter(., JDN >= (jdn_1 - day_rnd[1]) &
+              JDN <= (jdn_2 + day_rnd[2])) %>%
     select(., JDN, ends_with(comp_label)) %>%
     rename.col(.,c("JDN", col_label))
 }
@@ -85,9 +77,9 @@ select_jdninit <- function(temp_df, sdl_df, op_year, i_op, prev_mon, next_mon,
 }
 ## select_opdate <- function(pcp_date, api_date, pcp_thrs, amc_thrs)
 ##
-select_opdate <- function(pcp_date, api_date, pcp_thrs, amc_thrs){
-  pcp_sel <- pcp_date %>% filter(., PCP < pcp_thrs)
-  amc_sel <- api_date %>% filter(., AMC < amc_thrs)
+select_opdate <- function(pcp_date, api_date, thrs){
+  pcp_sel <- pcp_date %>% filter(., PCP < thrs[1])
+  amc_sel <- api_date %>% filter(., AMC < thrs[2])
   op_date <- inner_join(pcp_sel, amc_sel, by = "JDN")
 
   if(dim(op_date)[1] > 0){
