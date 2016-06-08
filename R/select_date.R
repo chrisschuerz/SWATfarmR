@@ -16,7 +16,7 @@ select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data, input_lst,
               jdn_end   <- sdl_df$JDN2[i_op]
               ant_days  <- 0
               sub_days  <- 0
-            }
+            },
             "o" = {
               jdn_init <- select_jdninit(tmp_df, sdl_df, op_year, i_op, 0, 0,
                                          meta_data$SUB)
@@ -24,7 +24,7 @@ select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data, input_lst,
               jdn_end   <- jdn_init
               ant_days <- ant_d
               sub_days <- sub_d
-            }
+            },
             "<" = {
               jdn_init <- select_jdninit(tmp_df, sdl_df, op_year, i_op, 1, 0,
                                          meta_data$SUB)
@@ -32,7 +32,7 @@ select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data, input_lst,
               jdn_end   <- jdn_init
               ant_days <- ant_d
               sub_days <- sub_d
-            }
+            },
             ">" = {
               jdn_init <- select_jdninit(tmp_df, sdl_df, op_year, i_op, 0, 1,
                                          meta_data$SUB)
