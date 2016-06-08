@@ -13,7 +13,7 @@ write_mgtfiles <- function(input, txtIO_pth,
 
   ## Initiate progress bar for writing MGT files ----------------------------
   print("Rewrite management input files:")
-  prgr_bar <- txtProgressBar(min = 0, max = 100, initial = 0)
+  prgr_bar <- txtProgressBar(min = 0, max = 100, initial = 0, style = 3)
 
 
   ## List all management and soil files in TxtIO ----------------------------

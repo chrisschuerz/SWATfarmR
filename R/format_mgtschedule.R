@@ -25,7 +25,7 @@ format_mgtschedule <- function(input_lst, meta_lst, mgtcnop_sel) {
                                      sep = "") %>%
                           as.Date(.,"%Y%m%d") %>%
                           yday(.)) %>%
-    select(., YEAR, JDN1, JDN2, MON_1, MON_2,
+    select(., YEAR, JDN1, JDN2, MON_1, MON_2, DATE_RULE,
            starts_with("OP"))
 
   sdl <- rbind(filter(sdl, OPERATION == "Initial crop")[1,],
