@@ -17,10 +17,9 @@ init_crp <- function(mgt_file, sdl_df, i_op, crop_lkp) {
 
 ## end_year(mgt_file, sdl_df, i_op, mgt_df) -----------------------------
 ## Function writes end of year operation into the management operation file.
-end_year <- function(mgt_file, sdl_df, i_op, input_lst) {
+end_year <- function(mgt_file, sdl_df, i_op, mgt_df) {
   sdl <- sdl_df[i_op, -c(1,2)]
-  sdl$OPERATION <- input_lst$lookup$management$OPNUM[
-                   input_lst$lookup$management$OP == sdl_df$OPERATION[i_op]]
+  sdl$OPERATION <- mgt_df$OPNUM[mgt_df$OP ==  sdl$OPERATION]
   sdl <- format_mgtstringout(sdl)
   mgt_file <- c(mgt_i, sdl)
 }
@@ -139,10 +138,9 @@ hrv_only <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs, day_rnd
 }
 
 ## skip(mgt_file, sdl_df, i_op, mgt_df) ---------------------------------
-skip <- function(mgt_file, sdl_df, i_op, input_lst) {
+skip <- function(mgt_file, sdl_df, i_op, mgt_df) {
   sdl <- sdl_df[i_op, -c(1,2)]
-  sdl$OPERATION <- input_lst$lookup$management$OPNUM[
-                   input_lst$lookup$management$OP == sdl_df$OPERATION[i_op]]
+  sdl$OPERATION <- mgt_df$OPNUM[mgt_df$OP ==  sdl$OPERATION]
   sdl <- format_mgtstringout(sdl)
   mgt_file <- c(mgt_file, sdl)
   return(mgt_file)

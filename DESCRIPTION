@@ -15,3 +15,4 @@ Imports:
     lubridate,
     data.table
 RoxygenNote: 5.0.1
+ByteCompile: TRUE

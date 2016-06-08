@@ -2,14 +2,9 @@
 # Function reads the wheater data given in ascii format. The delimiter
 # positions are given by the format integers: (length date, length values,
 # variables per station).
-read_weather <- function(file_name, value_format) {
-  # Subset numbers in read data table according to start and end positions of
-  # the values in each line of the data table
-  subset_values <- function(df, value_startpos, value_endpos){
-    substr(df, value_startpos , value_endpos) %>%
-      as.numeric
-  }
 
+read_weather <- function(file_name, value_format) {
+  library(magrittr)
   #Position of the decimal point according to the given data format
   dec_pos <- gregexpr("\\.", value_format)[[1]]
   # positions before and after the decimal point for each value
@@ -24,13 +19,21 @@ read_weather <- function(file_name, value_format) {
 
   # Positions of decimal point, start and end of a value in each line of the
   # data table
-  df_decpos   <- gregexpr("\\.", weather_df[1])[[1]]
+  df_decpos   <- gregexpr("\\.", weather_df[,1])[[1]]
   df_valstart <- c(date_strt, df_decpos - shift[1])
   df_valend   <- c(date_end,  df_decpos + shift[2])
+
+  subset_values <- function(df, value_startpos, value_endpos){
+    substr(df, value_startpos , value_endpos) %>%
+    as.numeric
+  }
+
   weather_df %<>%
     mapply(subset_values,., df_valstart, df_valend) %>%
-    as.data.frame
+    as.data.frame()
+
   return(weather_df)
+
 }
 
 # modify_weatherinput(weather_df, lookup_lst, lbl_string) -----------------
@@ -44,7 +47,7 @@ modify_weather <- function(weather_df, lookup_lst, col_label){
     summarize_each(.,funs(sum_na.rm)) %>%
     ungroup(.) %>%
     mutate(., DATE = as.Date(JDN%/%YEAR, "%j/%Y"),
-              MON  = as.numeric(substr(DATE, 6, 7)),
+              MON = as.numeric(substr(DATE, 6, 7)),
               DAY  = as.numeric(substr(DATE, 9, 10))) %>%
     select(., YEAR, MON, DAY, JDN, starts_with("SUB"))
 }
@@ -58,6 +61,13 @@ limit_timespan <- function(weather_df, lookup_lst){
 }
 
 ## Subfunctions -----------------------------------------------------------
+# Subset numbers in read data table according to start and end positions of
+# the values in each line of the data table
+subset_values <- function(df, value_startpos, value_endpos){
+  substr(df, value_startpos , value_endpos) %>%
+    as.numeric
+}
+
 ## sum_na.rm(val)
 ## calculates the mean excluding NA values. Required in this form for the
 ## summarize_each() command above

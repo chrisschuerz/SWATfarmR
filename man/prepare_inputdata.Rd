@@ -2,7 +2,7 @@
 % Please edit documentation in R/prepare_inputdata.R
 \name{prepare_inputdata}
 \alias{prepare_inputdata}
-\title{Prepare the input data.}
+\title{Prepare input data for further steps.}
 \usage{
 prepare_inputdata(txtIO_pth, mgt_pth, ant_days = 5)
 }
@@ -12,11 +12,12 @@ prepare_inputdata(txtIO_pth, mgt_pth, ant_days = 5)
 \item{mgt_pth}{Path for the folder holding the user management schedule and
 CNOP .csv files}
 
-\item{antecedent_days}{Antecendent days considered for the development of the
+\item{ant_days}{Antecendent days considered for the development of the
 API (Antecedent Precipitation Index)}
 }
 \value{
-Returns a list structure holding following components: \itemize{
+Returns a list structure holding following components:
+\itemize{
   \item \code{$MGT_CNOP}: A list of the user management schedules and
      respective CNOP tables
   \item \code{$Lookup}: A lookup table holding codes for management operations,
@@ -25,12 +26,11 @@ Returns a list structure holding following components: \itemize{
   \item \code{$Precipitation}: Precipitation data from the SWAT project
   \item\code{$Antecedent_Precip}: Calculated antecedent precipitation, derived
      from precipitation and temperature data of the SWAT project
-  \item \code{$Temperature_Ind}: Normalized temperature index calculated from
+  \item \code{$Temperature}: Normalized temperature index calculated from
      tempearture data of the SWAT project and statistics derived from them
-  \item\code{$Temperature_Stat}: Long term monthly temperature statistics,
-     derived from the SWAT project temperature data.}
+ }
 }
 \description{
-Prepare the input data.
+Prepare input data for further steps.
 }
 
