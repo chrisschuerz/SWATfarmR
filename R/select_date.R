@@ -1,7 +1,7 @@
-# select_OPdate(sdl_df, i_op, op_year, prv_date, meta_data, -----------
+# select_date(sdl_df, i_op, op_year, prv_date, meta_data, -----------
 #                   tmp_df, pcp_df, mon_thrs)
 select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data, input_lst,
-                        thrs, day_rnd, sel_type) {
+                        thrs, day_rnd, day_ssp, sel_type) {
 
   pcp_df  <- input_lst$precipitation
   tmp_df  <- input_lst$temperature$index
@@ -39,9 +39,9 @@ select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data, input_lst,
     pcp_date <- select_timespan(pcp_df, op_year, jdn_start, jdn_end,
                                 day_rnd, meta_data$SUB, "PCP")
     pcp_sseq <- select_timespan(pcp_df, op_year, jdn_start, jdn_end,
-                                c(day_rnd[1], day_rnd[2] + n_day),
+                                c(day_rnd[1], day_rnd[2] + day_ssp),
                                 meta_data$SUB, "PCP") %>%
-      mutate(SSP = compute_subseqprecip(PCP, n_day)) %>%
+      mutate(SSP = compute_subseqprecip(PCP, day_ssp)) %>%
       filter(JDN <= pcp_date$JDN) %>%
       select(-PCP)
     api_date <- select_timespan(api_lst[["SUB"%_%meta_data$SUB]], op_year,
@@ -89,17 +89,18 @@ select_opdate <- function(pcp_date, pcp_sseq, api_date, thrs, sel_wgt){
 
   pcp_sel <- pcp_date %>% filter(., PCP < thrs[1])
   ssp_sel <- pcp_sseq %>% filter(., SSP < thrs[2])
-  api_sel <- api_date %>% filter(., API < thrs[3])
+  api_sel <- api_date %>% cbind(., WGT = sel_wgt) %>%
+                          filter(., API < thrs[3])
   op_date <- inner_join(pcp_sel, ssp_sel, by = "JDN") %>%
     inner_join(., api_sel, by = "JDN")
 
   if(dim(op_date)[1] > 0){
     op_date %<>%
-      select(., JDN) %>%
-      sample_n(., 1, weight = sel_wgt)
+      sample_n(., 1, weight = WGT) %>%
+      select(., JDN)
   } else {
     wgt <- sum(thrs)/thrs*c(2,1,1) #PCP should have twice the priority to others
-    op_date <- inner_join(pcp_date, api_date, by = "JDN") %>%
+    op_date %>%
       mutate(., WGT = wgt[1]*PCP + wgt[2]*SSP + wgt[3]*API) %>%
       filter(., .$WGT == min(.$WGT)) %>%
       select(., JDN)

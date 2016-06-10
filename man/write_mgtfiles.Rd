@@ -4,8 +4,8 @@
 \alias{write_mgtfiles}
 \title{Write management dates for the SWAT project}
 \usage{
-write_mgtfiles(input, txtIO_pth, precip_thrs = c(2, 25), days_random = c(0,
-  0))
+write_mgtfiles(input, txtIO_pth, precip_thrs = c(2, 10, 25),
+  days_random = c(0, 0), day_ssp = 3, select_type = "unif")
 }
 \arguments{
 \item{days_random}{}
