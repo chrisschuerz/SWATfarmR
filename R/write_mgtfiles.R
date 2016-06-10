@@ -9,7 +9,9 @@
 #' @export
 
 write_mgtfiles <- function(input, txtIO_pth,
-                           precip_thrs = c(2,25), days_random = c(0,0)){
+                           precip_thrs = c(2, 10, 25),
+                           days_random = c(0,0),
+                           select_type = "unif"){
 
   ## Initiate progress bar for writing MGT files ----------------------------
   print("Rewrite management input files:")
