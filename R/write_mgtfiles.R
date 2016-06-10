@@ -15,7 +15,7 @@ write_mgtfiles <- function(input, txtIO_pth,
                            select_type = "unif"){
 
   ## Initiate progress bar for writing MGT files ----------------------------
-  print("Rewrite management input files:")
+  print("Rewrite management input files: Be patient! This may take a while :)")
   prgr_bar <- txtProgressBar(min = 0, max = 100, initial = 0, style = 3)
 
 
