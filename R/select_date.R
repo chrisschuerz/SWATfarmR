@@ -100,9 +100,12 @@ select_opdate <- function(pcp_date, pcp_sseq, api_date, thrs, sel_wgt){
       select(., JDN)
   } else {
     wgt <- sum(thrs)/thrs*c(2,1,1) #PCP should have twice the priority to others
-    op_date %>%
-      mutate(., WGT = wgt[1]*PCP + wgt[2]*SSP + wgt[3]*API) %>%
+    op_date <- inner_join(pcp_date, pcp_sseq, by = "JDN") %>%
+      inner_join(., api_date, by = "JDN")
+    op_date %<>%
+      mutate(., WGT = (wgt[1]*PCP + wgt[2]*SSP + wgt[3]*API)) %>%
       filter(., .$WGT == min(.$WGT)) %>%
+      sample_n(., 1) %>%
       select(., JDN)
   }
   return(op_date)
