@@ -4,7 +4,7 @@ select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data, input_lst,
                         thrs, day_rnd, day_ssp, sel_type) {
 
   pcp_df  <- input_lst$precipitation
-  tmp_df  <- input_lst$temperature$index
+  tmp_df  <- input_lst$temperature_index
   api_lst <- input_lst$antecedent_precip
 
   if(sdl_df$DATE_RULE[i_op] == "p"){
@@ -16,14 +16,14 @@ select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data, input_lst,
               jdn_end   <- sdl_df$JDN2[i_op]
               day_rnd <- c(0,0)
             },
-            "o" = {
-              jdn_init <- select_jdninit(tmp_df, sdl_df, op_year, i_op, 0, 0,
-                                         meta_data$SUB)
-              jdn_start <- jdn_init
-              jdn_end   <- jdn_init
-            },
+            # "o" = {
+            #   jdn_init <- select_jdninit(tmp_df, sdl_df, op_year, i_op, 0, 0,
+            #                              meta_data$SUB)
+            #   jdn_start <- jdn_init
+            #   jdn_end   <- jdn_init
+            # },
             "<" = {
-              jdn_init <- select_jdninit(tmp_df, sdl_df, op_year, i_op, 1, 0,
+              jdn_init <- select_jdninit(tmp_df, sdl_df, op_year, i_op, -1, 0,
                                          meta_data$SUB)
               jdn_start <- jdn_init
               jdn_end   <- jdn_init
@@ -39,7 +39,7 @@ select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data, input_lst,
     pcp_date <- select_timespan(pcp_df, op_year, jdn_start, jdn_end,
                                 day_rnd, meta_data$SUB, "PCP")
     pcp_sseq <- select_timespan(pcp_df, op_year, jdn_start, jdn_end,
-                                c(day_rnd[1], day_rnd[2] + day_ssp),
+                                c(day_rnd[1], (day_rnd[2] + day_ssp)),
                                 meta_data$SUB, "PCP") %>%
       mutate(SSP = compute_subseqprecip(PCP, day_ssp)) %>%
       filter(JDN <= pcp_date$JDN) %>%
@@ -72,10 +72,11 @@ select_jdninit <- function(temp_df, sdl_df, op_year, i_op, prev_mon, next_mon,
                            sel_label){
   tmp_op <- temp_df %>%
     filter(., YEAR == op_year) %>%
-    filter(., MON >= (sdl_df$MON_1[i_op] - prev_mon) &
+    filter(., MON >= (sdl_df$MON_1[i_op] + prev_mon) &
               MON <= (sdl_df$MON_2[i_op] + next_mon)) %>%
     select(., contains(sel_label)) %>%
-    mean(.[,1], na.rm = TRUE)
+    colMeans(na.rm = TRUE) %>%
+    unname
 
   jdn_dates <- c(sdl_df$JDN2[i_op],sdl_df$JDN1[i_op])
   jdn_init  <- (mean(jdn_dates) +
@@ -123,8 +124,8 @@ compute_subseqprecip <- function(pcp_vec, n_day){
 compute_sampwghts <- function(day_rnd, sel_type){
   switch (sel_type,
           "unif" = {rep(1,(sum(day_rnd)+1))},
-          "norm" = {c((-day_rnd[1]:-1)/day_rnd[1],
-                      (0:day_rnd[2])/day_rnd[2]) %>%
+          "norm" = {c(2*(-day_rnd[1]:-1)/day_rnd[1],
+                      2*(0:day_rnd[2])/day_rnd[2]) %>%
                     dnorm}
   )
 }

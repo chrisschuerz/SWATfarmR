@@ -8,11 +8,18 @@
 #' @return
 #' @export
 
+
 write_mgtfiles <- function(input, txtIO_pth,
                            precip_thrs = c(2, 10, 25),
                            days_random = c(0,0),
                            day_ssp = 3,
                            select_type = "unif"){
+
+# Libraries ---------------------------------------------------------------
+library(dplyr)
+library(reshape2)
+library(magrittr)
+library(lubridate)
 
   ## Initiate progress bar for writing MGT files ----------------------------
   print("Rewrite management input files: Be patient! This may take a while :)")

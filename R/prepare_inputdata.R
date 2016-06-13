@@ -85,11 +85,11 @@ prepare_inputdata <- function(txtIO_pth, mgt_pth, ant_days = 5){
 
   # Calculate normalized deviations to the monthly daily mean tempeartures
   # for each subbasin.
-  # temp_index <- compute_TIndex(temp_mean, lookup)
-  # temp_stat <- temp_index[["stat"]]
-  # temp_index <- temp_index[["index"]]
-  # temp_index %<>% limit_timespan(., lookup)
-  # rm(temp_mean)
+  temp_index <- compute_TIndex(temp_mean, lookup)
+  temp_stat <- temp_index[["stat"]]
+  temp_index <- temp_index[["index"]]
+  temp_index %<>% limit_timespan(., lookup)
+  rm(temp_mean)
   setTxtProgressBar(prgr_bar, 90)
 
   # Calculate antecedent water content
@@ -104,9 +104,9 @@ prepare_inputdata <- function(txtIO_pth, mgt_pth, ant_days = 5){
   input_list <- list(mgt_cnop = mgt_cnop,
                      lookup = lookup,
                      precipitation = precip_data,
-                     antecedent_precip = api_data)#,
-                    # temperature_index = temp_index)#,
-                     # temperature_stat  = temp_stat)
+                     antecedent_precip = api_data,
+                     temperature_index = temp_index,
+                     temperature_stat  = temp_stat)
 
   # set and close progress bar
   setTxtProgressBar(prgr_bar, 100)

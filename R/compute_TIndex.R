@@ -4,7 +4,8 @@ compute_TIndex <- function (temp_df, lookup_lst) {
   temp_df %<>%
     group_by(., YEAR, MON) %>%
     summarize_each(.,funs(mean(., na.rm = TRUE))) %>%
-    select(., YEAR, MON, starts_with("SUB"))
+    select(., YEAR, MON, starts_with("SUB")) %>%
+    ungroup
 
   # Calculate normalized deviations to the monthly daily mean tempeartures
   # for each subbasin.
@@ -17,7 +18,8 @@ compute_TIndex <- function (temp_df, lookup_lst) {
               temp_min  = min(value, na.rm = TRUE),
               temp_max  = max(value, na.rm = TRUE),
               temp_max_range = max(c((temp_mean - temp_min),
-                                     (temp_max  - temp_mean))))
+                                     (temp_max  - temp_mean)))) %>%
+    ungroup
 
   temp_ind <- temp_df %>%
     left_join(temp_stat, by = "MON") %>%
@@ -25,7 +27,7 @@ compute_TIndex <- function (temp_df, lookup_lst) {
                      starts_with("SUB")) %>%
     select(-starts_with("temp_"))
 
-  # temp_index <- list(index = temp_ind,
-  #                    stat = temp_stat)
-  return(temp_ind)
+  temp_index <- list(index = temp_ind,
+                     stat = temp_stat)
+  return(temp_index)
 }
