@@ -15,6 +15,7 @@ select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data, input_lst,
               jdn_start <- sdl_df$JDN1[i_op]
               jdn_end   <- sdl_df$JDN2[i_op]
               day_rnd <- c(0,0)
+              sel_wgt <- rep(1,(jdn_end-jdn_start+1))
             },
             # "o" = {
             #   jdn_init <- select_jdninit(tmp_df, sdl_df, op_year, i_op, 0, 0,
@@ -27,12 +28,14 @@ select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data, input_lst,
                                          meta_data$SUB)
               jdn_start <- jdn_init
               jdn_end   <- jdn_init
+              sel_wgt <- compute_sampwghts(day_rnd, sel_type)
             },
             ">" = {
               jdn_init <- select_jdninit(tmp_df, sdl_df, op_year, i_op, 0, 1,
                                          meta_data$SUB)
               jdn_start <- jdn_init
               jdn_end   <- jdn_init
+              sel_wgt <- compute_sampwghts(day_rnd, sel_type)
             }
     )
 
@@ -47,7 +50,6 @@ select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data, input_lst,
     api_date <- select_timespan(api_lst[["SUB"%_%meta_data$SUB]], op_year,
                                jdn_start, jdn_end, day_rnd, meta_data$SOIL,
                                "API")
-    sel_wgt <- compute_sampwghts(day_rnd, sel_type)
 
     op_date <- select_opdate(pcp_date, pcp_sseq, api_date, thrs, sel_wgt) %>%
       convert_jdn2monday(., op_year, prv_date)
