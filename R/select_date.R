@@ -124,10 +124,12 @@ compute_subseqprecip <- function(pcp_vec, n_day){
 }
 
 compute_sampwghts <- function(day_rnd, sel_type){
-  switch (sel_type,
+  type <- substr(sel_type,1,4)
+  sigma <- as.numeric(substr(sel_type,5,nchar(sel_type)))
+  switch (type,
           "unif" = {rep(1,(sum(day_rnd)+1))},
-          "norm" = {c(2*(-day_rnd[1]:-1)/day_rnd[1],
-                      2*(0:day_rnd[2])/day_rnd[2]) %>%
+          "norm" = {c((-day_rnd[1]:-1)/sigma,
+                      (0:day_rnd[2])/sigma) %>%
                     dnorm}
   )
 }
