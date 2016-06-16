@@ -41,16 +41,16 @@ limit_simperiod <- function(txtIO_pth, start_year, end_year, nyskip){
 
   # Rewrite file.cio --------------------------------------------------------
   file_cio[8] <- paste(sprintf("%16i", n_yr),
-                       "    | NBYR : Number of years simulated")
+                       "   | NBYR : Number of years simulated")
   file_cio[9] <- paste(sprintf("%16i", start_year),
-                       "    | IYR : Beginning year of simulation")
+                       "   | IYR : Beginning year of simulation")
   if(leap_year(start_year)){
     file_cio[11] <- "             366    | IDAL : Ending julian day of simulation"
   } else {
     file_cio[11] <- "             365    | IDAL : Ending julian day of simulation"
   }
   file_cio[60] <- paste(sprintf("%16i", nyskip),
-                       "    | NYSKIP: number of years to skip output printing/summarization")
+                       "   | NYSKIP: number of years to skip output printing/summarization")
 
   file.remove(txtIO_pth%/%"file.cio")
   writeLines(file_cio, con = txtIO_pth%/%"file.cio")
@@ -74,7 +74,7 @@ limit_simperiod <- function(txtIO_pth, start_year, end_year, nyskip){
     pos_skip  <- which(trim(mgt_i) == "17")
     if(length(pos_endyr) > 0){
       mgt_i[29] <- paste(sprintf("%16i", n_yr),
-                           "    | NROT: number of years of rotation")
+                           "   | NROT: number of years of rotation")
 
       pos_strtop <- c(31,(pos_endyr[-length(pos_endyr)] + 1))
     } else {
