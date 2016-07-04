@@ -39,7 +39,7 @@ plnt_crp <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
                       input_lst$lookup$management$OP == sdl_df$OPERATION[i_op]]
   plnt_sdl$OP_TYPE <- input_lst$lookup$crop$ICNUM[
                       input_lst$lookup$crop$CPNM == sdl_df$OP_TYPE[i_op]]
-  plnt_sdl[,6:12]  <- sdl_df[i_op,8:14]
+  plnt_sdl[,6:12]  <- sdl_df[i_op,9:15]
   plnt_sdl$PAR8    <- meta_data$CNOP$CN[meta_data$CNOP$OP ==
                                         sdl_df$OPERATION[i_op]]
 
@@ -64,7 +64,7 @@ fert_crp <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
                       input_lst$lookup$management$OP == sdl_df$OPERATION[i_op]]
   fert_sdl$OP_TYPE <- input_lst$lookup$fertilizer$IFNUM[
                       input_lst$lookup$fertilizer$FERTNM == sdl_df$OP_TYPE[i_op]]
-  fert_sdl[,6:13]  <- sdl_df[i_op,8:15]
+  fert_sdl[,6:13]  <- sdl_df[i_op,9:16]
 
   mgt_file <- fert_sdl %>%
     format_mgtstringout(.) %>%
@@ -86,7 +86,7 @@ hrv_kill <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
                                   input_lst, thrs, day_rnd, day_ssp, select_type)
   hvst_sdl$OP      <- input_lst$lookup$management$OPNUM[
                       input_lst$lookup$management$OP == sdl_df$OPERATION[i_op]]
-  hvst_sdl[,6:13]  <- sdl_df[i_op,8:15]
+  hvst_sdl[,6:13]  <- sdl_df[i_op,9:16]
   hvst_sdl$PAR3    <- meta_data$CNOP$CN[meta_data$CNOP$OP ==
                                         sdl_df$OPERATION[i_op]]
 
@@ -111,7 +111,7 @@ till_op  <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
                       input_lst$lookup$management$OP == sdl_df$OPERATION[i_op]]
   till_sdl$OP_TYPE <- input_lst$lookup$tillage$ITNUM[
                       input_lst$lookup$tillage$TILLNM == sdl_df$OP_TYPE[i_op]]
-  till_sdl[,6:13]  <- sdl_df[i_op,8:15]
+  till_sdl[,6:13]  <- sdl_df[i_op,9:16]
   till_sdl$PAR3    <- meta_data$CNOP$CN[meta_data$CNOP$OP ==
                                         sdl_df$OPERATION[i_op]]
 
@@ -134,7 +134,7 @@ hrv_only <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
                                   input_lst, thrs, day_rnd, day_ssp, select_type)
   hvst_sdl$OP      <- input_lst$lookup$management$OPNUM[
                       input_lst$lookup$management$OP == sdl_df$OPERATION[i_op]]
-  hvst_sdl[,6:13]  <- sdl_df[i_op,8:15]
+  hvst_sdl[,6:13]  <- sdl_df[i_op,9:16]
 
   mgt_file <- hvst_sdl %>%
     format_mgtstringout(.) %>%
