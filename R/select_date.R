@@ -107,7 +107,7 @@ select_opdate <- function(pcp_date, pcp_sseq, api_date, thrs, sel_wgt){
       inner_join(., api_date, by = "JDN")
     op_date %<>%
       mutate(., WGT = (wgt[1]*PCP + wgt[2]*SSP + wgt[3]*API)) %>%
-      filter(., .$WGT == min(.$WGT)) %>%
+      filter(., .$WGT == min(.$WGT, na.rm = TRUE)) %>%
       sample_n(., 1) %>%
       select(., JDN)
   }
