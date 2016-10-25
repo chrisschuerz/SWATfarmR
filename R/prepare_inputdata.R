@@ -37,8 +37,11 @@ prepare_inputdata <- function(txtIO_pth, mgt_pth, ant_days = 5){
 
   # Read weather inputs ----------------------------------------------------
   # Read the min/max tempeartures for the stations:
-  if()
-  temp_data <- read_weather(txtIO_pth%//%"Tmp1.Tmp", "XXX.X")
+  if(file.exists(txtIO_pth%//%"Tmp1.Tmp")){
+    file.rename(txtIO_pth%//%"Tmp1.Tmp",
+                txtIO_pth%//%"tmp1.tmp") #Solves bug in Linux SWAT execution
+  }
+  temp_data <- read_weather(txtIO_pth%//%"tmp1.tmp", "XXX.X")
   setTxtProgressBar(prgr_bar, 20)
 
   # Read the precipitation data for the stations:
