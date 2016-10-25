@@ -21,30 +21,30 @@ read_lookuptables <- function(txtIO_pth){
                                               "Burn",
                                               "Skip"))
 
-  lookup[["fertilizer"]] <- txtIO_pth%/%"fert.dat" %>%
+  lookup[["fertilizer"]] <- txtIO_pth%//%"fert.dat" %>%
     read.table(file = ., stringsAsFactors = FALSE) %>%
     .[,1:2] %>%
     rename_col(.,c("IFNUM", "FERTNM"))
 
-  lookup[["tillage"]] <- txtIO_pth%/%"till.dat" %>%
+  lookup[["tillage"]] <- txtIO_pth%//%"till.dat" %>%
     read.fwf(file = ., widths = c(4,12,53), stringsAsFactors = FALSE) %>%
     .[,1:2] %>%
     rename_col(.,c("ITNUM", "TILLNM")) %>%
     trim_col(.,2)
 
-  lookup[["crop"]] <- read_croplookup(txtIO_pth%/%"plant.dat")
+  lookup[["crop"]] <- read_croplookup(txtIO_pth%//%"plant.dat")
 
   lookup[["station"]] <- read_weatherlookup(txtIO_pth)
   lookup[["n_subbasin"]] <- dim(lookup[["station"]])[1]
 
-  lookup[["n_years"]] <- txtIO_pth%/%"file.cio" %>%
+  lookup[["n_years"]] <- txtIO_pth%//%"file.cio" %>%
     readLines(.) %>%
     .[8] %>%
     scan(text = ., what = "", quiet = TRUE) %>%
     .[1] %>%
     as.numeric(.)
 
-  lookup[["bound_yrs"]] <- txtIO_pth%/%"file.cio" %>%
+  lookup[["bound_yrs"]] <- txtIO_pth%//%"file.cio" %>%
     readLines(.) %>%
     .[9] %>%
     scan(text = ., what = "", quiet = TRUE) %>%
@@ -73,7 +73,7 @@ read_weatherlookup <- function(txtIO_pth) {
                             I_TMP = numeric(),
                             I_LAT = numeric())
   for (i in sub_list){
-    temp  <- readLines(txtIO_pth%/%i, warn = FALSE)
+    temp  <- readLines(txtIO_pth%//%i, warn = FALSE)
     i_sub <- scan(text = temp[1], what = "", quiet = TRUE)[4]
     i_pcp <- scan(text = temp[7], what = "", quiet = TRUE)[1]
     i_tmp <- scan(text = temp[8], what = "", quiet = TRUE)[1]

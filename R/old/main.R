@@ -18,11 +18,11 @@ print("Read and prepare input data:")
 prgr_bar <- txtProgressBar(min = 0, max = 100, initial = 0, style = 3)
 # Read weather inputs ----------------------------------------------------
 # Read the min/max tempeartures for the stations:
-temp_data <- read_weather(txtIO_pth%/%"Tmp1.Tmp", "XXX.X")
+temp_data <- read_weather(txtIO_pth%//%"Tmp1.Tmp", "XXX.X")
 setTxtProgressBar(prgr_bar, 30)
 
 # Read the precipitation data for the stations:
-precip_data <- read_weather(txtIO_pth%/%"pcp1.pcp", "XXX.XX")
+precip_data <- read_weather(txtIO_pth%//%"pcp1.pcp", "XXX.XX")
 setTxtProgressBar(prgr_bar, 80)
 # Read management schedule file and all lookup tables --------------------
 # Management schedule files and lookup tables for curve numbers (CN) according
@@ -89,8 +89,8 @@ hru_list <- file.names(pat_str = "\\.hru$", file_path = txtIO_pth)
 hru_list <- substr(hru_list, 1, 9)
 ## Get individual mgmt files and edit them --------------------------------
 for (i_hru in hru_list){
-  mgmt_i <- readLines(txtIO_pth%/%i_hru%.%"mgt", warn = FALSE)
-  soil_i <- readLines(txtIO_pth%/%i_hru%.%"sol", warn = FALSE)
+  mgmt_i <- readLines(txtIO_pth%//%i_hru%.%"mgt", warn = FALSE)
+  soil_i <- readLines(txtIO_pth%//%i_hru%.%"sol", warn = FALSE)
 
   mgmt_cnop_sel <- select.mgmt.cnop(mgmt_cnop_data)
 
@@ -169,7 +169,7 @@ for (i_hru in hru_list){
                         )
   }
 ## Write files in TxtIO ---------------------------------------------------
-  writeLines(mgmt_i, con = txtIO_pth%/%i_hru%.%"mgt")
+  writeLines(mgmt_i, con = txtIO_pth%//%i_hru%.%"mgt")
 ## Update progress bar for writing MGT files ------------------------------
   i_prog <- which(i_hru == hru_list)/length(hru_list)
   setTxtProgressBar(prgr_bar, i_prog*100)

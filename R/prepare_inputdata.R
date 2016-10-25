@@ -37,11 +37,12 @@ prepare_inputdata <- function(txtIO_pth, mgt_pth, ant_days = 5){
 
   # Read weather inputs ----------------------------------------------------
   # Read the min/max tempeartures for the stations:
-  temp_data <- read_weather(txtIO_pth%/%"Tmp1.Tmp", "XXX.X")
+  if()
+  temp_data <- read_weather(txtIO_pth%//%"Tmp1.Tmp", "XXX.X")
   setTxtProgressBar(prgr_bar, 20)
 
   # Read the precipitation data for the stations:
-  precip_data <- read_weather(txtIO_pth%/%"pcp1.pcp", "XXX.XX")
+  precip_data <- read_weather(txtIO_pth%//%"pcp1.pcp", "XXX.XX")
   setTxtProgressBar(prgr_bar, 40)
 
   # Read management schedule file and all lookup tables --------------------

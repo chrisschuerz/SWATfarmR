@@ -38,7 +38,7 @@ read.weather_input <- function(file_name, val_format) {
 ## paste functions --------------------------------------------------------
 '%_%' <- function(a, b) paste(a, b, sep = "_")
 '%.%' <- function(a, b) paste(a, b, sep = ".")
-'%/%' <- function(a, b) paste(a, b, sep = "/")
+'%//%' <- function(a, b) paste(a, b, sep = "/")
 '%-%' <- function(a, b) paste(a, b, sep = "-")
 ## rename.col(df, lbl) ----------------------------------------------------
 ## Function takes data.frame and labels the columns.
@@ -49,7 +49,7 @@ rename.col <- function(df, lbl){
 
 # Read TMP data -----------------------------------------------------------
 txtIO_pth <- "D:/Projects_R/Altm_2016/Scenarios/Default/TxtInOut"
-tmp_dat <- read.weather_input(txtIO_pth%/%"Tmp1.Tmp", "XXX.X")
+tmp_dat <- read.weather_input(txtIO_pth%//%"Tmp1.Tmp", "XXX.X")
 
 
 # Mutate TMP data ---------------------------------------------------------

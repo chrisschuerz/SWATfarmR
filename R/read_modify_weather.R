@@ -46,7 +46,7 @@ modify_weather <- function(weather_df, lookup_lst, col_label){
     group_by(.,YEAR, JDN) %>%
     summarize_each(.,funs(sum_na.rm)) %>%
     ungroup(.) %>%
-    mutate(., DATE = as.Date(JDN%/%YEAR, "%j/%Y"),
+    mutate(., DATE = as.Date(JDN%//%YEAR, "%j/%Y"),
               MON = as.numeric(substr(DATE, 6, 7)),
               DAY  = as.numeric(substr(DATE, 9, 10))) %>%
     select(., YEAR, MON, DAY, JDN, starts_with("SUB"))

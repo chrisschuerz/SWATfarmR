@@ -15,7 +15,7 @@ limit_simperiod <- function(txtIO_pth, start_year, end_year, nyskip){
   require(lubridate)
 
   # General check of inputs -----------------------------------------------
-  if(!dir.exists(txtIO_pth%/%"mgt_backup")){
+  if(!dir.exists(txtIO_pth%//%"mgt_backup")){
     stop("No management backup done yet. Please perform write_mgtbackup() before!")
   }
   if(start_year > end_year){
@@ -23,7 +23,7 @@ limit_simperiod <- function(txtIO_pth, start_year, end_year, nyskip){
   }
 
   # Get information of file.cio ---------------------------------------------
-  file_cio <- readLines(con = txtIO_pth%/%"mgt_backup"%/%"file.cio")
+  file_cio <- readLines(con = txtIO_pth%//%"mgt_backup"%//%"file.cio")
   n_yr <- end_year - start_year + 1
 
   ny_old <- as.numeric(scan(text = file_cio[8], what = "", quiet = TRUE)[1])
@@ -52,8 +52,8 @@ limit_simperiod <- function(txtIO_pth, start_year, end_year, nyskip){
   file_cio[60] <- paste(sprintf("%16i", nyskip),
                        "   | NYSKIP: number of years to skip output printing/summarization")
 
-  file.remove(txtIO_pth%/%"file.cio")
-  writeLines(file_cio, con = txtIO_pth%/%"file.cio")
+  file.remove(txtIO_pth%//%"file.cio")
+  writeLines(file_cio, con = txtIO_pth%//%"file.cio")
 
 
   # Modyfy and rewrite mgt files --------------------------------------------
@@ -64,11 +64,11 @@ limit_simperiod <- function(txtIO_pth, start_year, end_year, nyskip){
   del_init <- start_year - start_old
   del_end  <- end_old - end_year
 
-  mgt_files <- inquire_filenames(file_path = txtIO_pth%/%"mgt_backup",
+  mgt_files <- inquire_filenames(file_path = txtIO_pth%//%"mgt_backup",
                                  file_pattern = "\\.mgt$")
 
   for (i in mgt_files){
-    mgt_i <- readLines(con = txtIO_pth%/%"mgt_backup"%/%i)
+    mgt_i <- readLines(con = txtIO_pth%//%"mgt_backup"%//%i)
 
     pos_endyr <- which(trim(mgt_i) == "0")
     pos_skip  <- which(trim(mgt_i) == "17")
@@ -86,8 +86,8 @@ limit_simperiod <- function(txtIO_pth, start_year, end_year, nyskip){
     op_pos[2] <- op_pos[2] - 1
 
     mgt_i <- c(mgt_i[1:30], mgt_i[op_pos[1]:op_pos[2]])
-    file.remove(txtIO_pth%/%i)
-    writeLines(mgt_i, con = txtIO_pth%/%i)
+    file.remove(txtIO_pth%//%i)
+    writeLines(mgt_i, con = txtIO_pth%//%i)
     setTxtProgressBar(prgr_bar, count*100/length(mgt_files))
     count <- count + 1
   }

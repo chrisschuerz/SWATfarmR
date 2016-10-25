@@ -32,8 +32,8 @@ library(lubridate)
   hru_list <- substr(hru_list, 1, 9)
   ## Get individual mgt files and edit them --------------------------------
   for (i_hru in hru_list){
-    mgt_i  <- readLines(txtIO_pth%/%i_hru%.%"mgt", warn = FALSE)
-    soil_i <- readLines(txtIO_pth%/%i_hru%.%"sol", warn = FALSE)
+    mgt_i  <- readLines(txtIO_pth%//%i_hru%.%"mgt", warn = FALSE)
+    soil_i <- readLines(txtIO_pth%//%i_hru%.%"sol", warn = FALSE)
 
     mgtcnop_sel <- select_mgtcnop(input$mgt_cnop)
     mgt_i_meta  <- inquire_HRUmeta(mgt_i, soil_i, input, mgtcnop_sel)
@@ -107,7 +107,7 @@ library(lubridate)
       )
     }
     ## Write files in TxtIO ---------------------------------------------------
-    writeLines(mgt_i, con = txtIO_pth%/%i_hru%.%"mgt")
+    writeLines(mgt_i, con = txtIO_pth%//%i_hru%.%"mgt")
     ## Update progress bar for writing MGT files ------------------------------
     i_prog <- which(i_hru == hru_list)/length(hru_list)
     setTxtProgressBar(prgr_bar, i_prog*100)

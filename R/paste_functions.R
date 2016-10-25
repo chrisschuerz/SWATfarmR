@@ -5,4 +5,4 @@
 '%.%' <- function(a, b) paste(a, b, sep = ".")
 
 # Paste function pasting two character strings "/" as seperator
-'%/%' <- function(a, b) paste(a, b, sep = "/")
+'%//%' <- function(a, b) paste(a, b, sep = "/")

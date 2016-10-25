@@ -12,9 +12,9 @@ read_mgtcnop <- function(mgt_pth){
                          FRAC = numeric())
 
   for(i in name){
-    mgt <- read.csv(file = mgt_pth%/%"mgt"%_%i%.%"csv",
+    mgt <- read.csv(file = mgt_pth%//%"mgt"%_%i%.%"csv",
                      header = TRUE, sep = ",", stringsAsFactors = FALSE)
-    cnop <- read.csv(file = mgt_pth%/%"cnop"%_%i%.%"csv",
+    cnop <- read.csv(file = mgt_pth%//%"cnop"%_%i%.%"csv",
                      header = TRUE, sep = ",", stringsAsFactors = FALSE)
     fraction <- rbind(fraction,
                       data.frame(NAME = name,
