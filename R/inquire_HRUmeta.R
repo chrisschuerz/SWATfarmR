@@ -15,10 +15,13 @@ inquire_HRUmeta <- function(mgt_file, soil_file, input_lst, mgtcnop_sel) {
   hru_meta$LUID <- input_lst$lookup$crop
   hru_meta$SOIL <- scan(text = soil_file[3], what = "",
                         quiet = TRUE)[4]
-  hru_meta$CNOP <- cnop %>%
-    select(., OPERATION,
-           which(colnames(cnop) ==
-                   hru_meta$SOIL))
-  colnames(hru_meta$CNOP) <- c("OP", "CN")
+
+  if(!is.null(cnop)){
+    hru_meta$CNOP <- cnop %>%
+      select(., OPERATION, CROP,
+             which(colnames(cnop) ==
+                     hru_meta$SOIL))
+    colnames(hru_meta$CNOP) <- c("OP","CROP", "CN")
+  }
   return(hru_meta)
 }

@@ -3,14 +3,14 @@
 init_crp <- function(mgt_file, sdl_df, i_op, crop_lkp) {
   mgt_file[4] <- paste(sprintf("%16i", 1),
                         "   | IGRO: Land cover status: 0-none growing; 1-growing")
-  crop_id   <- which(crop_lkp$CPNM == sdl_df[i_op,]$OP_TYPE)
+  crop_id   <- which(crop_lkp$CPNM == sdl_df[i_op,]$MGT_1)
   mgt_file[5] <- paste(sprintf("%16i", crop_id),
                         "   | PLANT_ID: Land cover ID number (IGRO = 1)")
-  mgt_file[6] <- paste(sprintf("%16.2f", sdl_df[i_op,]$OP_VAL_1),
+  mgt_file[6] <- paste(sprintf("%16.2f", sdl_df[i_op,]$MGT_2),
                         "   | LAI_INIT: Initial leaf are index (IGRO = 1)")
-  mgt_file[7] <- paste(sprintf("%16.2f", sdl_df[i_op,]$OP_VAL_2),
+  mgt_file[7] <- paste(sprintf("%16.2f", sdl_df[i_op,]$MGT_3),
                         "   | BIO_INIT: Initial biomass (kg/ha) (IGRO = 1)")
-  mgt_file[8] <- paste(sprintf("%16.2f", sdl_df[i_op,]$OP_VAL_3),
+  mgt_file[8] <- paste(sprintf("%16.2f", sdl_df[i_op,]$MGT_4),
                         "   | PHU_PLT: Number of heat units to bring plant to maturity (IGRO = 1)")
   return(mgt_file)
 }
@@ -18,7 +18,8 @@ init_crp <- function(mgt_file, sdl_df, i_op, crop_lkp) {
 ## end_year(mgt_file, sdl_df, i_op, mgt_df) -----------------------------
 ## Function writes end of year operation into the management operation file.
 end_year <- function(mgt_file, sdl_df, i_op, mgt_df) {
-  sdl <- sdl_df[i_op, -c(1,2,5)]
+  sdl <- sdl_df[i_op, -c(1:4)]
+  sdl[i_op,c(1:3,5:13)] <- NA
   sdl$OPERATION <- mgt_df$OPNUM[mgt_df$OP ==  sdl$OPERATION]
   sdl <- format_mgtstringout(sdl)
   mgt_file <- c(mgt_file, sdl)
@@ -37,9 +38,11 @@ plnt_crp <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
 
   plnt_sdl$OP      <- input_lst$lookup$management$OPNUM[
                       input_lst$lookup$management$OP == sdl_df$OPERATION[i_op]]
-  plnt_sdl$OP_TYPE <- input_lst$lookup$crop$ICNUM[
-                      input_lst$lookup$crop$CPNM == sdl_df$OP_TYPE[i_op]]
-  plnt_sdl[,6:12]  <- sdl_df[i_op,9:15]
+  plnt_sdl$MGT_1   <- input_lst$lookup$crop$ICNUM[
+                      input_lst$lookup$crop$CPNM == sdl_df$MGT_1[i_op]]
+  plnt_sdl[,6:12]  <- sdl_df[i_op,10:16]
+
+  # if()
   plnt_sdl$PAR8    <- meta_data$CNOP$CN[meta_data$CNOP$OP ==
                                         sdl_df$OPERATION[i_op]]
 
