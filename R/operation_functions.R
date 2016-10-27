@@ -19,7 +19,7 @@ init_crp <- function(mgt_file, sdl_df, i_op, crop_lkp) {
 ## Function writes end of year operation into the management operation file.
 end_year <- function(mgt_file, sdl_df, i_op, mgt_df) {
   sdl <- sdl_df[i_op, -c(1:4)]
-  sdl[i_op,c(1:3,5:13)] <- NA
+  sdl[,c(1:3,5:13)] <- NA
   sdl$OPERATION <- mgt_df$OPNUM[mgt_df$OP ==  sdl$OPERATION]
   sdl <- format_mgtstringout(sdl)
   mgt_file <- c(mgt_file, sdl)
@@ -43,7 +43,7 @@ plnt_crp <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
   plnt_sdl[,6:12]  <- sdl_df[i_op,10:16]
 
   if(!is.null(meta_data$CNOP)){
-    plnt_sdl$PAR8    <- meta_data$CNOP$CN[meta_data$CNOP$OP ==
+    plnt_sdl$MGT_9    <- meta_data$CNOP$CN[meta_data$CNOP$OP ==
                                           sdl_df$OPERATION[i_op] &
                                           meta_data$CNOP$CROP ==
                                           sdl_df$CROP[i_op]]
@@ -68,9 +68,9 @@ fert_crp <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
                                   input_lst, thrs, day_rnd, day_ssp, select_type)
   fert_sdl$OP      <- input_lst$lookup$management$OPNUM[
                       input_lst$lookup$management$OP == sdl_df$OPERATION[i_op]]
-  fert_sdl$OP_TYPE <- input_lst$lookup$fertilizer$IFNUM[
-                      input_lst$lookup$fertilizer$FERTNM == sdl_df$OP_TYPE[i_op]]
-  fert_sdl[,6:13]  <- sdl_df[i_op,9:16]
+  fert_sdl$MGT_1 <- input_lst$lookup$fertilizer$IFNUM[
+                      input_lst$lookup$fertilizer$FERTNM == sdl_df$MGT_1[i_op]]
+  fert_sdl[,6:13]  <- sdl_df[i_op,10:17]
 
   mgt_file <- fert_sdl %>%
     format_mgtstringout(.) %>%
@@ -92,9 +92,15 @@ hrv_kill <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
                                   input_lst, thrs, day_rnd, day_ssp, select_type)
   hvst_sdl$OP      <- input_lst$lookup$management$OPNUM[
                       input_lst$lookup$management$OP == sdl_df$OPERATION[i_op]]
-  hvst_sdl[,6:13]  <- sdl_df[i_op,9:16]
-  hvst_sdl$PAR3    <- meta_data$CNOP$CN[meta_data$CNOP$OP ==
-                                        sdl_df$OPERATION[i_op]]
+  hvst_sdl[,6:13]  <- sdl_df[i_op,10:17]
+
+  if(!is.null(meta_data$CNOP)){
+    hvst_sdl$MGT_4    <- meta_data$CNOP$CN[meta_data$CNOP$OP ==
+                                            sdl_df$OPERATION[i_op] &
+                                            meta_data$CNOP$CROP ==
+                                            sdl_df$CROP[i_op]]
+  }
+
 
   mgt_file <- hvst_sdl %>%
     format_mgtstringout(.) %>%
@@ -115,11 +121,16 @@ till_op  <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
                                   input_lst, thrs, day_rnd, day_ssp, select_type)
   till_sdl$OP      <- input_lst$lookup$management$OPNUM[
                       input_lst$lookup$management$OP == sdl_df$OPERATION[i_op]]
-  till_sdl$OP_TYPE <- input_lst$lookup$tillage$ITNUM[
-                      input_lst$lookup$tillage$TILLNM == sdl_df$OP_TYPE[i_op]]
-  till_sdl[,6:13]  <- sdl_df[i_op,9:16]
-  till_sdl$PAR3    <- meta_data$CNOP$CN[meta_data$CNOP$OP ==
-                                        sdl_df$OPERATION[i_op]]
+  till_sdl$MGT_1 <- input_lst$lookup$tillage$ITNUM[
+                      input_lst$lookup$tillage$TILLNM == sdl_df$MGT_1[i_op]]
+  till_sdl[,6:13]  <- sdl_df[i_op,10:17]
+
+  if(!is.null(meta_data$CNOP)){
+    till_sdl$MGT_4    <- meta_data$CNOP$CN[meta_data$CNOP$OP ==
+                                             sdl_df$OPERATION[i_op] &
+                                             meta_data$CNOP$CROP ==
+                                             sdl_df$CROP[i_op]]
+  }
 
   mgt_file <- till_sdl %>%
     format_mgtstringout(.) %>%
@@ -140,7 +151,7 @@ hrv_only <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
                                   input_lst, thrs, day_rnd, day_ssp, select_type)
   hvst_sdl$OP      <- input_lst$lookup$management$OPNUM[
                       input_lst$lookup$management$OP == sdl_df$OPERATION[i_op]]
-  hvst_sdl[,6:13]  <- sdl_df[i_op,9:16]
+  hvst_sdl[,6:13]  <- sdl_df[i_op,10:17]
 
   mgt_file <- hvst_sdl %>%
     format_mgtstringout(.) %>%
@@ -151,7 +162,8 @@ hrv_only <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
 
 ## skip(mgt_file, sdl_df, i_op, mgt_df) ---------------------------------
 skip <- function(mgt_file, sdl_df, i_op, mgt_df) {
-  sdl <- sdl_df[i_op, -c(1,2,5)]
+  sdl <- sdl_df[i_op, -c(1:4)]
+  sdl[,c(1:3,5:13)] <- NA
   sdl$OPERATION <- mgt_df$OPNUM[mgt_df$OP ==  sdl$OPERATION]
   sdl <- format_mgtstringout(sdl)
   mgt_file <- c(mgt_file, sdl)
