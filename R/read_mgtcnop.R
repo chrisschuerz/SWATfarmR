@@ -17,9 +17,9 @@ read_mgtcnop <- function(mgt_pth){
     cnop <- read.csv(file = mgt_pth%//%"cnop"%_%i%.%"csv",
                      header = TRUE, sep = ",", stringsAsFactors = FALSE)
     fraction <- rbind(fraction,
-                      data.frame(NAME = name,
+                      data.frame(NAME = i,
                                  FRAC = as.numeric(
-                                   mgt$OP_TYPE[mgt$OPERATION == "Fraction"]),
+                                   mgt$MGT_1[mgt$OPERATION == "Fraction"]),
                                  stringsAsFactors = FALSE))
     mgt <- mgt[!mgt$OPERATION == "Fraction",]
     mgt_cnop[["mgt"%_%i]] <- mgt

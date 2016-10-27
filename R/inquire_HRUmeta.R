@@ -12,11 +12,10 @@ inquire_HRUmeta <- function(mgt_file, soil_file, input_lst, mgtcnop_sel) {
          HRU  = as.numeric(.[grep("HRU", .)[2]+1]),
          LUSE = .[grep("Luse", .)+1])
 
-  hru_meta$LUID <- which(input_lst$lookup$crop$CPNM == hru_meta$LUSE)
+  hru_meta$LUID <- input_lst$lookup$crop
   hru_meta$SOIL <- scan(text = soil_file[3], what = "",
                         quiet = TRUE)[4]
   hru_meta$CNOP <- cnop %>%
-    filter(., CROP == hru_meta$LUSE) %>%
     select(., OPERATION,
            which(colnames(cnop) ==
                    hru_meta$SOIL))

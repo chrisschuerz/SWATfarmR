@@ -3,7 +3,7 @@
 ## as empty data.frame.
 
 initialize_line <- function() {
-  data.frame(MON = NA, DAY = NA, HUSC = NA, OP = NA, OP_TYPE = NA,
-             PAR1 = NA, PAR2 = NA, PAR3 = NA, PAR4 = NA, PAR5 = NA,
-             PAR6 = NA, PAR7 = NA, PAR8 = NA )
+  data.frame(MON = NA, DAY = NA, HUSC = NA, OP = NA, MGT_1 = NA,
+             MGT_2 = NA, MGT_3 = NA, MGT_4 = NA, MGT_5 = NA,
+             MGT_6 = NA, MGT_7 = NA, MGT_8 = NA, MGT_9 = NA )
 }
