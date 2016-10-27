@@ -42,9 +42,12 @@ plnt_crp <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
                       input_lst$lookup$crop$CPNM == sdl_df$MGT_1[i_op]]
   plnt_sdl[,6:12]  <- sdl_df[i_op,10:16]
 
-  # if()
-  plnt_sdl$PAR8    <- meta_data$CNOP$CN[meta_data$CNOP$OP ==
-                                        sdl_df$OPERATION[i_op]]
+  if(!is.null(meta_data$CNOP)){
+    plnt_sdl$PAR8    <- meta_data$CNOP$CN[meta_data$CNOP$OP ==
+                                          sdl_df$OPERATION[i_op] &
+                                          meta_data$CNOP$CROP ==
+                                          sdl_df$CROP[i_op]]
+  }
 
   mgt_file <- plnt_sdl %>%
     format_mgtstringout(.) %>%

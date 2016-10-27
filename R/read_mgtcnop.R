@@ -8,7 +8,7 @@ read_mgtcnop <- function(mgt_pth){
     .[. != "mgt" & . != "csv"]
 
   cnop_use = TRUE
-  if(any(!file.exists(mgt_pth%//%"cnop"%_%name))){
+  if(any(!file.exists(mgt_pth%//%"cnop"%_%name%.%"csv"))){
     warning("At least one CNOP file does not exist! No CNOP values considered for this SWAT project!")
     cnop_use = FALSE
   }
