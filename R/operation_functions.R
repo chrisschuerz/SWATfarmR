@@ -20,7 +20,7 @@ init_crp <- function(mgt_file, sdl_df, i_op, crop_lkp) {
 end_year <- function(mgt_file, sdl_df, i_op, mgt_df) {
   sdl <- sdl_df[i_op, -c(1:4)]
   sdl[,c(1:3,5:13)] <- NA
-  sdl$OPERATION <- mgt_df$OPNUM[mgt_df$OP ==  sdl$OPERATION]
+  sdl[4] <- mgt_df$OPNUM[mgt_df$OP ==  sdl[4]]
   mgt_line <- format_mgtstringout(sdl)
 
   return(mgt_line)
@@ -29,7 +29,7 @@ end_year <- function(mgt_file, sdl_df, i_op, mgt_df) {
 ##          pcp_df, tmp_df, amc_df)
 plnt_crp <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
                      day_rnd, day_ssp, select_type){
-  op_year   <- sdl_df$YEAR[i_op]
+  op_year   <- sdl_df[2]
   plnt_sdl  <- initialize_line()
   prev_date <- inquire_prevdate(mgt_file, op_year)
 
