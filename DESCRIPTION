@@ -1,7 +1,7 @@
 Package: SWATfarmR
 Type: Package
-Title: Rule based setting of farm management operation dates in SWAT2012
-Version: 0.1.1
+Title: Simple rule based scheduling of management operations in SWAT2012
+Version: 0.2.0
 Author:  person("Christoph", "Schuerz", email = "christoph.schuerz@boku.ac.at",
                   role = c("aut", "cre"))
 Description: More about what it does (maybe more than one line)
@@ -13,6 +13,8 @@ Imports:
     dplyr,
     reshape2,
     lubridate,
-    data.table
+    data.table,
+    doSNOW,
+    parallel
 RoxygenNote: 5.0.1
 ByteCompile: TRUE
