@@ -58,12 +58,18 @@ library(doParallel)
       i_init <- 1
     }
 
-    # mgt_op <- rep("", (n_op - (i_init - 1)))
+    mgt_op <- rep("", (n_op - (i_init - 1)))
 
     # foreach (i = i_init:n_op, .packages = c("dplyr"))  %do% {
-    mgt_op <- apply(mgt_i_sdl, 1, select_opwrite, mgt_i,input, i, mgt_i_meta,
-                    precip_thrs, days_random, day_ssp,
-                    select_type)
+    # mgt_op <- apply(mgt_i_sdl, 1, select_opwrite, mgt_i,input, i, mgt_i_meta,
+    #                 precip_thrs, days_random, day_ssp,
+    #                 select_type)
+    for(i in i_init:n_op){
+    mgt_i_sdl_i <- mgt_i_sdl[i,]
+    mgt_op[i] <- select_opwrite(mgt_i_sdl_i, mgt_i,input, i, mgt_i_meta,
+      precip_thrs, days_random, day_ssp,
+      select_type)
+    }
 
 
     # }
@@ -81,7 +87,7 @@ library(doParallel)
       select_opwrite <- function(mgt_i_sdl, mgt_i,input, i, mgt_i_meta,
                                  precip_thrs, days_random, day_ssp,
                                  select_type) {
-        switch (mgt_i_sdl$OPERATION,
+        switch (mgt_i_sdl[8],
                               "End of year"    = end_year(mgt_i,
                                                           mgt_i_sdl,
                                                           i,
