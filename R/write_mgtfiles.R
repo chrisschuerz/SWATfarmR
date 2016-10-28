@@ -20,11 +20,10 @@ library(dplyr)
 library(reshape2)
 library(magrittr)
 library(lubridate)
-library(doParallel)
+library(doSNOW)
 
   ## Initiate progress bar for writing MGT files ----------------------------
   print("Rewrite management input files: Be patient! This may take a while :)")
-  prgr_bar <- txtProgressBar(min = 0, max = 100, initial = 0, style = 3)
 
 
   ## List all management and soil files in TxtIO ----------------------------
@@ -32,12 +31,19 @@ library(doParallel)
                                 file_pattern = "\\.hru$")
   hru_list <- substr(hru_list, 1, 9)
   ## Get individual mgt files and edit them --------------------------------
-  # cl <- makeCluster(detectCores())
-  # registerDoParallel(cl)
+  cl <- makeCluster(detectCores())
+  registerDoSNOW(cl)
 
-  for (i_hru in hru_list){
-    mgt_i  <- readLines(txtIO_pth%//%i_hru%.%"mgt", warn = FALSE)
-    soil_i <- readLines(txtIO_pth%//%i_hru%.%"sol", warn = FALSE)
+    prgr_bar <- txtProgressBar(max = length(hru_list), initial = 0, style = 3)
+  progress <- function(n) setTxtProgressBar(prgr_bar, n)
+  opts <- list(progress = progress)
+
+  foreach (i_hru = 1:length(hru_list),
+           .packages = c("dplyr", "lubridate", "magrittr", "reshape2"),
+           .options.snow = opts)  %dopar% {
+
+    mgt_i  <- readLines(txtIO_pth%//%hru_list[i_hru]%.%"mgt", warn = FALSE)
+    soil_i <- readLines(txtIO_pth%//%hru_list[i_hru]%.%"sol", warn = FALSE)
 
     mgtcnop_sel <- select_mgtcnop(input$mgt_cnop)
     mgt_i_meta  <- inquire_HRUmeta(mgt_i, soil_i, input, mgtcnop_sel)
@@ -52,36 +58,23 @@ library(doParallel)
     mgt_op <- rep(NA, n_op)
 
     if(mgt_i_sdl[1,]$OPERATION == "Initial crop"){
-      mgt_i <- init_crp(mgt_i, mgt_i_sdl, i, input$lookup$crop)
+      mgt_i <- init_crp(mgt_i, mgt_i_sdl, 1, input$lookup$crop)
       i_init <- 2
+      mgt_i_sdl <- mgt_i_sdl[2:nrow(mgt_i_sdl),]
     } else {
       i_init <- 1
     }
 
-    mgt_op <- rep("", (n_op - (i_init - 1)))
+    mgt_op <- apply(mgt_i_sdl, 1, select_opwrite, mgt_i,input, i, mgt_i_meta,
+                    precip_thrs, days_random, day_ssp,
+                    select_type)
 
-    # foreach (i = i_init:n_op, .packages = c("dplyr"))  %do% {
-    # mgt_op <- apply(mgt_i_sdl, 1, select_opwrite, mgt_i,input, i, mgt_i_meta,
-    #                 precip_thrs, days_random, day_ssp,
-    #                 select_type)
-    for(i in i_init:n_op){
-    mgt_i_sdl_i <- mgt_i_sdl[i,]
-    mgt_op[i] <- select_opwrite(mgt_i_sdl_i, mgt_i,input, i, mgt_i_meta,
-      precip_thrs, days_random, day_ssp,
-      select_type)
-    }
-
-
-    # }
     mgt_i <- c(mgt_i, mgt_op)
     ## Write files in TxtIO ---------------------------------------------------
-    writeLines(mgt_i, con = txtIO_pth%//%i_hru%.%"mgt")
-    ## Update progress bar for writing MGT files ------------------------------
-    i_prog <- which(i_hru == hru_list)/length(hru_list)
-    setTxtProgressBar(prgr_bar, i_prog*100)
+    writeLines(mgt_i, con = txtIO_pth%//%hru_list[i_hru]%.%"mgt")
   }
-  # stopCluster(cl)
   close(prgr_bar)
+  stopCluster(cl)
 }
 
       select_opwrite <- function(mgt_i_sdl, mgt_i,input, i, mgt_i_meta,

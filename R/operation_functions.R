@@ -18,9 +18,8 @@ init_crp <- function(mgt_file, sdl_df, i_op, crop_lkp) {
 ## end_year(mgt_file, sdl_df, i_op, mgt_df) -----------------------------
 ## Function writes end of year operation into the management operation file.
 end_year <- function(mgt_file, sdl_df, i_op, mgt_df) {
-  sdl <- sdl_df[-c(1:4)]
-  sdl[c(1:3,5:13)] <- NA
-  sdl[4] <- mgt_df$OPNUM[mgt_df$OP ==  sdl[4]]
+  sdl <- rep(NA,13)
+  sdl[4] <- mgt_df$OPNUM[mgt_df$OP ==  sdl_df[8]]
   mgt_line <- format_mgtstringout(sdl)
 
   return(mgt_line)
@@ -29,7 +28,7 @@ end_year <- function(mgt_file, sdl_df, i_op, mgt_df) {
 ##          pcp_df, tmp_df, amc_df)
 plnt_crp <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
                      day_rnd, day_ssp, select_type){
-  op_year   <- sdl_df[2]
+  op_year   <- as.numeric(sdl_df[2])
   plnt_sdl  <- initialize_line()
   prev_date <- inquire_prevdate(mgt_file, op_year)
 
@@ -40,7 +39,7 @@ plnt_crp <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
                       input_lst$lookup$management$OP == sdl_df[8]]
   plnt_sdl$MGT_1   <- input_lst$lookup$crop$ICNUM[
                       input_lst$lookup$crop$CPNM == sdl_df[9]]
-  plnt_sdl[,6:12]  <- sdl_df[10:16]
+  plnt_sdl[,6:12]  <- as.numeric(sdl_df[10:16])
 
   if(!is.null(meta_data$CNOP)){
     plnt_sdl$MGT_9    <- meta_data$CNOP$CN[meta_data$CNOP$OP ==
@@ -58,7 +57,7 @@ plnt_crp <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
 ##          pcp_df, tmp_df, amc_df)
 fert_crp <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
                      day_rnd, day_ssp, select_type) {
-  op_year   <- sdl_df[2]
+  op_year   <- as.numeric(sdl_df[2])
   fert_sdl  <- initialize_line()
   prev_date <- inquire_prevdate(mgt_file, op_year)
 
@@ -68,7 +67,7 @@ fert_crp <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
                       input_lst$lookup$management$OP == sdl_df[8]]
   fert_sdl$MGT_1 <- input_lst$lookup$fertilizer$IFNUM[
                       input_lst$lookup$fertilizer$FERTNM == sdl_df[9]]
-  fert_sdl[,6:13]  <- sdl_df[10:17]
+  fert_sdl[,6:13]  <- as.numeric(sdl_df[10:17])
 
   mgt_line <- format_mgtstringout(fert_sdl)
 
@@ -80,7 +79,7 @@ fert_crp <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
 hrv_kill <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
                      day_rnd, day_ssp, select_type) {
 
-  op_year   <- sdl_df[2]
+  op_year   <- as.numeric(sdl_df[2])
   hvst_sdl  <- initialize_line()
   prev_date <- inquire_prevdate(mgt_file, op_year)
 
@@ -88,7 +87,7 @@ hrv_kill <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
                                   input_lst, thrs, day_rnd, day_ssp, select_type)
   hvst_sdl$OP      <- input_lst$lookup$management$OPNUM[
                       input_lst$lookup$management$OP == sdl_df[8]]
-  hvst_sdl[,6:13]  <- sdl_df[10:17]
+  hvst_sdl[,6:13]  <- as.numeric(sdl_df[10:17])
 
   if(!is.null(meta_data$CNOP)){
     hvst_sdl$MGT_4    <- meta_data$CNOP$CN[meta_data$CNOP$OP ==
@@ -107,7 +106,7 @@ hrv_kill <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
 ##          pcp_df, tmp_df, amc_df)
 till_op  <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
                      day_rnd, day_ssp, select_type) {
-  op_year   <- sdl_df[2]
+  op_year   <- as.numeric(sdl_df[2])
   till_sdl  <- initialize_line()
   prev_date <- inquire_prevdate(mgt_file, op_year)
 
@@ -117,7 +116,7 @@ till_op  <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
                       input_lst$lookup$management$OP == sdl_df[8]]
   till_sdl$MGT_1 <- input_lst$lookup$tillage$ITNUM[
                       input_lst$lookup$tillage$TILLNM == sdl_df[9]]
-  till_sdl[,6:13]  <- sdl_df[10:17]
+  till_sdl[,6:13]  <- as.numeric(sdl_df[10:17])
 
   if(!is.null(meta_data$CNOP)){
     till_sdl$MGT_4    <- meta_data$CNOP$CN[meta_data$CNOP$OP ==
@@ -135,7 +134,7 @@ till_op  <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
 ##          tmp_df, amc_df)
 hrv_only <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
                      day_rnd, day_ssp, select_type) {
-  op_year   <- sdl_df[2]
+  op_year   <- as.numeric(sdl_df[2])
   hvst_sdl  <- initialize_line()
   prev_date <- inquire_prevdate(mgt_file, op_year)
 
@@ -143,7 +142,7 @@ hrv_only <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
                                   input_lst, thrs, day_rnd, day_ssp, select_type)
   hvst_sdl$OP      <- input_lst$lookup$management$OPNUM[
                       input_lst$lookup$management$OP == sdl_df[8]]
-  hvst_sdl[,6:13]  <- sdl_df[10:17]
+  hvst_sdl[,6:13]  <- as.numeric(sdl_df[10:17])
 
   mgt_line <- format_mgtstringout(hvst_sdl)
 
@@ -152,11 +151,11 @@ hrv_only <- function(mgt_file, sdl_df, i_op, meta_data, input_lst, thrs,
 
 ## skip(mgt_file, sdl_df, i_op, mgt_df) ---------------------------------
 skip <- function(mgt_file, sdl_df, i_op, mgt_df) {
-  sdl <- sdl_df[-c(1:4)]
-  sdl[,c(1:3,5:13)] <- NA
-  sdl$OPERATION <- mgt_df$OPNUM[mgt_df$OP ==  sdl[8]]
-
+  sdl <- rep(NA,13)
+  sdl[4] <- mgt_df$OPNUM[mgt_df$OP ==  sdl_df[8]]
   mgt_line <- format_mgtstringout(sdl)
+
+  return(mgt_line)
 
   return(mgt_line)
 }

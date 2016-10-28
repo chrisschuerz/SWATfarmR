@@ -12,8 +12,8 @@ select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data, input_lst,
   } else {
     switch (sdl_df[7],
             "n" = {
-              jdn_start <- sdl_df[3]
-              jdn_end   <- sdl_df[4]
+              jdn_start <- as.numeric(sdl_df[3])
+              jdn_end   <- as.numeric(sdl_df[4])
               day_rnd <- c(0,0)
               sel_wgt <- rep(1,(jdn_end-jdn_start+1))
             },
@@ -74,13 +74,13 @@ select_jdninit <- function(temp_df, sdl_df, op_year, i_op, prev_mon, next_mon,
                            sel_label){
   tmp_op <- temp_df %>%
     filter(., YEAR == op_year) %>%
-    filter(., MON >= (sdl_df[5] + prev_mon) &
-              MON <= (sdl_df[6] + next_mon)) %>%
+    filter(., MON >= (as.numeric(sdl_df[5]) + prev_mon) &
+              MON <= (as.numeric(sdl_df[6]) + next_mon)) %>%
     select(., contains(sel_label)) %>%
     colMeans(na.rm = TRUE) %>%
     unname
 
-  jdn_dates <- c(sdl_df[3],sdl_df[4])
+  jdn_dates <- c(as.numeric(sdl_df[3]),as.numeric(sdl_df[4]))
   jdn_init  <- (mean(jdn_dates) +
                   diff(jdn_dates)*tmp_op*(prev_mon + next_mon)) %>%
     round(., digits = 0)
