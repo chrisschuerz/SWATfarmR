@@ -21,6 +21,7 @@ library(reshape2)
 library(magrittr)
 library(lubridate)
 library(doSNOW)
+library(parallel)
 
   ## Initiate progress bar for writing MGT files ----------------------------
   print("Rewrite management input files: Be patient! This may take a while :)")
