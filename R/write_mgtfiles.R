@@ -1,11 +1,25 @@
 #' Write management dates for the SWAT project
 #'
-#' @param input
-#' @param txtIO_pth
-#' @param precip_thrs
-#' @param days_random
+#' @param input The input list structure generated with the function
+#'   prepare_inputdata()
+#' @param txtIO_pth Path to the SWAT project to apply SWATfarmR
+#' @param precip_thrs Vector of length 3 giving the threshold values for
+#'   maximum precipitation on the same day of an operation, in the
+#'   subsequent days, and for antecedent precipitation.
+#' @param days_random Vector of length 2; Defining timespan before and after
+#'   the temperatur dependend date, from which the final opeartion date will
+#'   be selected finally. This is only active for date rules "<" and ">".
+#' @param day_ssp Number of days for which subsequent precipitation should
+#'   be considered.
+#' @param select_type Distribution for random selection. Valid input is
+#'   "unif" for a uniform distribution, and e.g. "norm5" for normal
+#'   distribution. This option makes dates around the initial date mor
+#'   probable to be selected. INstead of "norm5" any combination of norm +
+#'   integer is possible.
 #'
-#' @return
+#' @return The function overwrites the management files in the selected
+#'   txtInOut folder with selected operation dates according to the set
+#'   parameters.
 #' @export
 
 
