@@ -2,19 +2,21 @@ Package: SWATfarmR
 Type: Package
 Title: Simple rule based scheduling of management operations in SWAT2012
 Version: 0.2.0
-Author:  person("Christoph", "Schuerz", email = "christoph.schuerz@boku.ac.at",
-                  role = c("aut", "cre"))
-Description: More about what it does (maybe more than one line)
+Author:  person("Christoph", "Schuerz", 
+                email = "christoph.schuerz@boku.ac.at",
+                role = c("aut", "cre"))
+Description: Simple rule based scheduling of management operations based on 
+             climate data and operation schedules for the specific landuses 
+             in a SWAT model
 Depends: R (>= 3.1.0)
 License: MIT
 LazyData: TRUE
 Imports:
     magrittr,
     dplyr,
-    reshape2,
-    lubridate,
     data.table,
     doSNOW,
+    foreach,
     parallel
 RoxygenNote: 5.0.1
 ByteCompile: TRUE

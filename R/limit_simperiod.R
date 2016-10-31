@@ -7,8 +7,7 @@
 #'
 #' @return Writes the subsetted .mgt files from the backup folder to txtInOut.
 #' @export
-#'
-#' @examples
+
 limit_simperiod <- function(txtIO_pth, start_year, end_year, nyskip){
 
   # Libraries ---------------------------------------------------------------

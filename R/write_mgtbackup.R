@@ -10,7 +10,7 @@
 #'   limit_simperiod().
 #' @export
 #'
-#' @examples
+
 write_mgtbackup <- function(txtIO_pth, overwrite = FALSE){
   if(dir.exists(txtIO_pth%//%"mgt_backup") & !overwrite){
     stop("Backup already exists! Set overwrite = TRUE to overwrite old backup")

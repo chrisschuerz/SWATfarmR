@@ -17,6 +17,11 @@
 #'   probable to be selected. INstead of "norm5" any combination of norm +
 #'   integer is possible.
 #'
+#' @import dplyr
+#' @import foreach
+#' @import doSNOW
+#' @importFrom parallel makeCluster stopCluster detectCores
+#'
 #' @return The function overwrites the management files in the selected
 #'   txtInOut folder with selected operation dates according to the set
 #'   parameters.
@@ -28,14 +33,6 @@ write_mgtfiles <- function(input, txtIO_pth,
                            days_random = c(0,0),
                            day_ssp = 3,
                            select_type = "unif"){
-
-# Libraries ---------------------------------------------------------------
-library(dplyr)
-library(reshape2)
-library(magrittr)
-library(lubridate)
-library(doSNOW)
-library(parallel)
 
   ## Initiate progress bar for writing MGT files ----------------------------
   print("Rewrite management input files: Be patient! This may take a while :)")
