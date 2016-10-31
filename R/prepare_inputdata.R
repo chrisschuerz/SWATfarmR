@@ -21,6 +21,7 @@
 #'  }
 #'
 #' @import dplyr
+#' @importFrom reshape2 melt
 #' @importFrom data.table fread
 #' @importFrom magrittr '%<>%'
 #'
