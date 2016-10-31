@@ -1,9 +1,13 @@
 #' Write management backup
 #'
-#' @param txtIO_pth Path to SWAT project
+#' @param txtIO_pth Path to the SWAT project to apply SWATfarmR
 #' @param overwrite Logical, TRUE for overwrite of old managament files
 #'
-#' @return
+#' @return Writes a backup folder for the .mgt Files of a project. This is
+#'   required when subsections of simulation periods are needed for e.g.
+#'   calibration and validation. The entire simulation period is saved in
+#'   backup. The subsetted .mgt files can be written to txtInOut applying
+#'   limit_simperiod().
 #' @export
 #'
 #' @examples

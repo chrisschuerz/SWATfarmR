@@ -1,11 +1,11 @@
 #' Limit the simulation period and write management files for this period
 #'
-#' @param txtIO_pth
-#' @param start_year
-#' @param end_year
-#' @param nyskip
+#' @param txtIO_pth  Path to the SWAT project to apply SWATfarmR
+#' @param start_year Interger value; Start year for the considered simulation period.
+#' @param end_year Interger value; End year for the considered simulation period.
+#' @param nyskip Numbers of years that should be skipped for simulation outputs.
 #'
-#' @return
+#' @return Writes the subsetted .mgt files from the backup folder to txtInOut.
 #' @export
 #'
 #' @examples

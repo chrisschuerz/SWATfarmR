@@ -8,7 +8,32 @@ write_mgtfiles(input, txtIO_pth, precip_thrs = c(2, 10, 25),
   days_random = c(0, 0), day_ssp = 3, select_type = "unif")
 }
 \arguments{
-\item{days_random}{}
+\item{input}{The input list structure generated with the function
+prepare_inputdata()}
+
+\item{txtIO_pth}{Path to the SWAT project to apply SWATfarmR}
+
+\item{precip_thrs}{Vector of length 3 giving the threshold values for
+maximum precipitation on the same day of an operation, in the
+subsequent days, and for antecedent precipitation.}
+
+\item{days_random}{Vector of length 2; Defining timespan before and after
+the temperatur dependend date, from which the final opeartion date will
+be selected finally. This is only active for date rules "<" and ">".}
+
+\item{day_ssp}{Number of days for which subsequent precipitation should
+be considered.}
+
+\item{select_type}{Distribution for random selection. Valid input is
+"unif" for a uniform distribution, and e.g. "norm5" for normal
+distribution. This option makes dates around the initial date mor
+probable to be selected. INstead of "norm5" any combination of norm +
+integer is possible.}
+}
+\value{
+The function overwrites the management files in the selected
+  txtInOut folder with selected operation dates according to the set
+  parameters.
 }
 \description{
 Write management dates for the SWAT project

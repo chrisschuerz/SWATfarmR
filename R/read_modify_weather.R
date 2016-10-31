@@ -4,7 +4,6 @@
 # variables per station).
 
 read_weather <- function(file_name, value_format) {
-  library(magrittr)
   #Position of the decimal point according to the given data format
   dec_pos <- gregexpr("\\.", value_format)[[1]]
   # positions before and after the decimal point for each value
@@ -19,7 +18,8 @@ read_weather <- function(file_name, value_format) {
 
   # Positions of decimal point, start and end of a value in each line of the
   # data table
-  df_decpos   <- gregexpr("\\.", weather_df[,1])[[1]]
+  df_decpos   <- gregexpr("\\.", weather_df[1,])[[1]]
+
   df_valstart <- c(date_strt, df_decpos - shift[1])
   df_valend   <- c(date_end,  df_decpos + shift[2])
 

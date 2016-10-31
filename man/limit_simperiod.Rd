@@ -7,7 +7,16 @@
 limit_simperiod(txtIO_pth, start_year, end_year, nyskip)
 }
 \arguments{
-\item{nyskip}{}
+\item{txtIO_pth}{Path to the SWAT project to apply SWATfarmR}
+
+\item{start_year}{Interger value; Start year for the considered simulation period.}
+
+\item{end_year}{Interger value; End year for the considered simulation period.}
+
+\item{nyskip}{Numbers of years that should be skipped for simulation outputs.}
+}
+\value{
+Writes the subsetted .mgt files from the backup folder to txtInOut.
 }
 \description{
 Limit the simulation period and write management files for this period

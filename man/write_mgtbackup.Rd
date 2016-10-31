@@ -7,9 +7,16 @@
 write_mgtbackup(txtIO_pth, overwrite = FALSE)
 }
 \arguments{
-\item{txtIO_pth}{Path to SWAT project}
+\item{txtIO_pth}{Path to the SWAT project to apply SWATfarmR}
 
 \item{overwrite}{Logical, TRUE for overwrite of old managament files}
+}
+\value{
+Writes a backup folder for the .mgt Files of a project. This is
+  required when subsections of simulation periods are needed for e.g.
+  calibration and validation. The entire simulation period is saved in
+  backup. The subsetted .mgt files can be written to txtInOut applying
+  limit_simperiod().
 }
 \description{
 Write management backup

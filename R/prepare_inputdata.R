@@ -19,17 +19,16 @@
 #'   \item \code{$Temperature}: Normalized temperature index calculated from
 #'      tempearture data of the SWAT project and statistics derived from them
 #'  }
+#'
+#' @import dplyr
+#' @importFrom data.table fread
+#' @importFrom magrittr '%<>%'
+#'
+#'
 #' @export
 
 
 prepare_inputdata <- function(txtIO_pth, mgt_pth, ant_days = 5){
-
-  # Libraries ---------------------------------------------------------------
-  library(dplyr)
-  library(reshape2)
-  library(magrittr)
-  library(lubridate)
-  library(data.table)
 
   # Initiate progress bar for writing MGT files ----------------------------
   print("Read and prepare input data:")
