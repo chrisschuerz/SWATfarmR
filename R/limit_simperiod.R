@@ -44,7 +44,7 @@ limit_simperiod <- function(txtIO_pth, start_year, end_year, nyskip){
                        "   | NBYR : Number of years simulated")
   file_cio[9] <- paste(sprintf("%16i", start_year),
                        "   | IYR : Beginning year of simulation")
-  if(leap_year(start_year)){
+  if(leap_year(end_year)){
     file_cio[11] <- "             366    | IDAL : Ending julian day of simulation"
   } else {
     file_cio[11] <- "             365    | IDAL : Ending julian day of simulation"
@@ -61,8 +61,7 @@ limit_simperiod <- function(txtIO_pth, start_year, end_year, nyskip){
   prgr_bar <- txtProgressBar(min = 0, max = 100, initial = 0, style = 3)
   count <- 0
 
-  del_init <- start_year - start_old
-  del_end  <- end_old - end_year
+  op_ind <- (start_year - start_old) + c(1, n_yr)
 
   mgt_files <- inquire_filenames(file_path = txtIO_pth%//%"mgt_backup",
                                  file_pattern = "\\.mgt$")
@@ -70,20 +69,16 @@ limit_simperiod <- function(txtIO_pth, start_year, end_year, nyskip){
   for (i in mgt_files){
     mgt_i <- readLines(con = txtIO_pth%//%"mgt_backup"%//%i)
 
-    pos_endyr <- which(trim(mgt_i) == "0")
-    pos_skip  <- which(trim(mgt_i) == "17")
-    if(length(pos_endyr) > 0){
-      mgt_i[29] <- paste(sprintf("%16i", n_yr),
+    mgt_i[29] <- paste(sprintf("%16i", n_yr),
                            "   | NROT: number of years of rotation")
 
-      pos_strtop <- c(31,(pos_endyr[-length(pos_endyr)] + 1))
-    } else {
-      pos_strtop <- pos_skip
-    }
+    pos_endyr <- which(trim(mgt_i) == "0")
+    pos_skip  <- which(trim(mgt_i) == "17")
 
-    op_pos <- pos_strtop[c((del_init + 1),
-                           length(pos_strtop) - del_end + 1)]
-    op_pos[2] <- op_pos[2] - 1
+    pos_opend   <- sort(c(pos_endyr, pos_skip))
+    pos_opstart <- c(31, pos_opend + 1)
+
+    op_pos <- c(pos_opstart[op_ind[1]], pos_opend[op_ind[2]])
 
     mgt_i <- c(mgt_i[1:30], mgt_i[op_pos[1]:op_pos[2]])
     file.remove(txtIO_pth%//%i)
