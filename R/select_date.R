@@ -10,7 +10,7 @@ select_date <- function(sdl_df, i_op, op_year, prv_date, meta_data, input_lst,
   if(sdl_df$DATE_RULE[i_op] == "p"){
     op_date <- convert_jdn2monday(prv_date, op_year, 0)
   } else {
-    switch (sdl_df[7],
+    switch (sdl_df$DATE_RULE[i_op],
             "n" = {
               jdn_start <- sdl_df$JDN1[i_op]
               jdn_end   <- sdl_df$JDN2[i_op]
@@ -80,7 +80,7 @@ select_jdninit <- function(temp_df, sdl_df, op_year, i_op, prev_mon, next_mon,
     colMeans(na.rm = TRUE) %>%
     unname
 
-  c(sdl_df$JDN2[i_op],sdl_df$JDN1[i_op])
+  jdn_dates <- c(sdl_df$JDN2[i_op],sdl_df$JDN1[i_op])
   jdn_init  <- (mean(jdn_dates) +
                   diff(jdn_dates)*tmp_op*(prev_mon + next_mon)) %>%
     round(., digits = 0)

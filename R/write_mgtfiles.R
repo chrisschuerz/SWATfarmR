@@ -50,11 +50,11 @@ write_mgtfiles <- function(input, txtIO_pth,
   progress <- function(n) setTxtProgressBar(prgr_bar, n)
   opts <- list(progress = progress)
 
-  # foreach (i_hru = 1:length(hru_list),
-  #          .packages = c("dplyr", "lubridate", "magrittr", "reshape2"),
-  #          .options.snow = opts)  %dopar% {
+  foreach (i_hru = 1:length(hru_list),
+           .packages = c("dplyr", "lubridate", "magrittr", "reshape2"),
+           .options.snow = opts)  %dopar% {
 
-  for(i_hru in 1:length(hru_list)){
+  # for(i_hru in 1:length(hru_list)){
 
     mgt_i  <- readLines(txtIO_pth%//%hru_list[i_hru]%.%"mgt", warn = FALSE)
     soil_i <- readLines(txtIO_pth%//%hru_list[i_hru]%.%"sol", warn = FALSE)
@@ -97,7 +97,7 @@ write_mgtfiles <- function(input, txtIO_pth,
       select_opwrite <- function(mgt_i_sdl, mgt_i,input, i, mgt_i_meta,
                                  precip_thrs, days_random, day_ssp,
                                  select_type) {
-        switch (mgt_i_sdl[8],
+        switch (mgt_i_sdl[i,]$OPERATION,
                               "End of year"    = end_year(mgt_i,
                                                           mgt_i_sdl,
                                                           i,
