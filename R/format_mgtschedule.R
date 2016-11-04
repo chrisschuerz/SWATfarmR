@@ -25,13 +25,15 @@ format_mgtschedule <- function(input_lst, meta_lst, mgtcnop_sel) {
                                      DAY_1 %>% sprintf("%02d", .),
                                      sep = "") %>%
                           as.Date(.,"%Y%m%d") %>%
-                          yday(.),
+                          format(., "%j") %>%
+                          as.numeric(.),
                         JDN2 = paste(YEAR,
                                      MON_2 %>% sprintf("%02d", .),
                                      DAY_2 %>% sprintf("%02d", .),
                                      sep = "") %>%
                           as.Date(.,"%Y%m%d") %>%
-                          yday(.)) %>%
+                          format(., "%j") %>%
+                          as.numeric(.)) %>%
     select(., CROP, YEAR, JDN1, JDN2, MON_1, MON_2, DATE_RULE,
            OPERATION, starts_with("MGT"))
 

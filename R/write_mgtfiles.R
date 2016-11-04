@@ -46,13 +46,15 @@ write_mgtfiles <- function(input, txtIO_pth,
   cl <- makeCluster(detectCores())
   registerDoSNOW(cl)
 
-    prgr_bar <- txtProgressBar(max = length(hru_list), initial = 0, style = 3)
+  prgr_bar <- txtProgressBar(max = length(hru_list), initial = 0, style = 3)
   progress <- function(n) setTxtProgressBar(prgr_bar, n)
   opts <- list(progress = progress)
 
-  foreach (i_hru = 1:length(hru_list),
-           .packages = c("dplyr", "lubridate", "magrittr", "reshape2"),
-           .options.snow = opts)  %dopar% {
+  # foreach (i_hru = 1:length(hru_list),
+  #          .packages = c("dplyr", "lubridate", "magrittr", "reshape2"),
+  #          .options.snow = opts)  %dopar% {
+
+  for(i_hru in 1:length(hru_list)){
 
     mgt_i  <- readLines(txtIO_pth%//%hru_list[i_hru]%.%"mgt", warn = FALSE)
     soil_i <- readLines(txtIO_pth%//%hru_list[i_hru]%.%"sol", warn = FALSE)
@@ -61,7 +63,7 @@ write_mgtfiles <- function(input, txtIO_pth,
     mgt_i_meta  <- inquire_HRUmeta(mgt_i, soil_i, input, mgtcnop_sel)
     mgt_i_sdl   <- format_mgtschedule(input, mgt_i_meta, mgtcnop_sel)
 
-    n_op  <- dim(mgt_i_sdl)[1]
+    n_op  <- nrow(mgt_i_sdl)
     n_rot <- length(which(mgt_i_sdl$OPERATION == "End of year"))
     mgt_i[29] <- paste(sprintf("%16i", n_rot),
                         "   | NROT: number of years of rotation")
@@ -72,14 +74,17 @@ write_mgtfiles <- function(input, txtIO_pth,
     if(mgt_i_sdl[1,]$OPERATION == "Initial crop"){
       mgt_i <- init_crp(mgt_i, mgt_i_sdl, 1, input$lookup$crop)
       i_init <- 2
-      mgt_i_sdl <- mgt_i_sdl[2:nrow(mgt_i_sdl),]
     } else {
       i_init <- 1
     }
 
-    mgt_op <- apply(mgt_i_sdl, 1, select_opwrite, mgt_i,input, i, mgt_i_meta,
-                    precip_thrs, days_random, day_ssp,
-                    select_type)
+    mgt_op <- rep("", (n_op - (i_init - 1)))
+    for(i in i_init:n_op){
+      mgt_op[i] <- select_opwrite(mgt_i_sdl, mgt_i, input, i, mgt_i_meta,
+                                  precip_thrs, days_random, day_ssp,
+                                  select_type)
+
+    }
 
     mgt_i <- c(mgt_i, mgt_op)
     ## Write files in TxtIO ---------------------------------------------------
