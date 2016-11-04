@@ -16,7 +16,8 @@ inquire_prevdate <- function(mgmt_file, year_num) {
                         prv_date[2],
                         sep = "-") %>%
         as.Date(.) %>%
-        yday(.)
+        format(., "%j") %>%
+        as.numeric(.)
     }else prv_date = 0
   }else prv_date = 0
   return(prv_date)

@@ -69,24 +69,13 @@ write_mgtfiles <- function(input, txtIO_pth,
                         "   | NROT: number of years of rotation")
     mgt_i <- mgt_i[1:30]
 
-    mgt_op <- rep(NA, n_op)
-
-    if(mgt_i_sdl[1,]$OPERATION == "Initial crop"){
-      mgt_i <- init_crp(mgt_i, mgt_i_sdl, 1, input$lookup$crop)
-      i_init <- 2
-    } else {
-      i_init <- 1
-    }
-
-    mgt_op <- rep("", (n_op - (i_init - 1)))
-    for(i in i_init:n_op){
-      mgt_op[i] <- select_opwrite(mgt_i_sdl, mgt_i, input, i, mgt_i_meta,
+    for(i in 1:n_op){
+      mgt_i <- select_opwrite(mgt_i_sdl, mgt_i, input, i, mgt_i_meta,
                                   precip_thrs, days_random, day_ssp,
                                   select_type)
 
     }
 
-    mgt_i <- c(mgt_i, mgt_op)
     ## Write files in TxtIO ---------------------------------------------------
     writeLines(mgt_i, con = txtIO_pth%//%hru_list[i_hru]%.%"mgt")
   }
@@ -94,10 +83,14 @@ write_mgtfiles <- function(input, txtIO_pth,
   stopCluster(cl)
 }
 
-      select_opwrite <- function(mgt_i_sdl, mgt_i,input, i, mgt_i_meta,
-                                 precip_thrs, days_random, day_ssp,
-                                 select_type) {
+select_opwrite <- function(mgt_i_sdl, mgt_i,input, i, mgt_i_meta,
+                           precip_thrs, days_random, day_ssp,
+                           select_type) {
         switch (mgt_i_sdl[i,]$OPERATION,
+                              "Initial crop"   = init_crp(mgt_i,
+                                                          mgt_i_sdl,
+                                                          i,
+                                                          input$lookup$crop),
                               "End of year"    = end_year(mgt_i,
                                                           mgt_i_sdl,
                                                           i,
