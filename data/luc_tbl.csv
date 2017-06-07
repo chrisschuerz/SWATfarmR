@@ -1,0 +1,3 @@
+luse_from,luse_to,fraction,year_from,year_to,sub,soil,slope
+FESC,WWHT,0.1,2005,2030,"c(1,2)",,
+FESC,CORN,0.1,2015,2035,,,

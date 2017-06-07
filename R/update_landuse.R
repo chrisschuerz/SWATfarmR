@@ -2,6 +2,9 @@ library(tidyverse)
 library(magrittr)
 library(pasta)
 
+
+luc_tbl <- read_csv("D:/Projects_R/SWATfarmR/data/luc_tbl.csv")
+
 txt_pth <- "D:/UnLoadC3/00_RB_SWAT/raab_sb4/Scenarios/Default/TxtInOut"
 
 hru_list <- inquire_filenames(file_pattern = ".hru$",
@@ -57,13 +60,11 @@ hru_res <- hru_to %>%
   mutate(frct_res = frct_res/n) %>%
   select(sub, frct_res)
 
-
 hru_to %<>%
   filter(!is.na(frct)) %>%
   left_join(hru_res, by = "sub") %>%
   mutate(frct_res = ifelse(is.na(frct_res), 0, frct_res),
          frct_mod = frct_mod + frct_res)
-
 
 hru_decr %<>%
   left_join(hru_from, by = "hru") %>%
@@ -76,6 +77,5 @@ hru_incr %<>%
   mutate(frct_mod  = ifelse(is.na(frct_mod), 0, frct_mod),
          frct_incr = frct_incr + frct_mod) %>%
   select(hru, frct_incr)
-
 
 lup$hru_updt <- lup$hru_init + hru_incr$frct_incr - hru_decr$frct_decr
