@@ -3,21 +3,22 @@ library(magrittr)
 library(pasta)
 
 
-luc_tbl <- read_csv("D:/Projects_R/SWATfarmR/data/luc_tbl.csv")
 
+# Read HRU data from txtinout folder ----------------------------------
 txt_pth <- "D:/UnLoadC3/00_RB_SWAT/raab_sb4/Scenarios/Default/TxtInOut"
 
 hru_list <- inquire_filenames(file_pattern = ".hru$",
                               file_path = txt_pth)
+n_hru <- length(hru_list)
 
-hru <- tibble(hru  = rep(NA_integer_, length(hru_list)),
-              sub  = rep(NA_integer_, length(hru_list)),
-              luse = rep(NA_character_, length(hru_list)),
-              soil = rep(NA_character_, length(hru_list)),
-              slp  = rep(NA_character_, length(hru_list)),
-              frct = rep(NA_real_, length(hru_list)))
+hru <- tibble(hru  = rep(NA_integer_, n_hru),
+              sub  = rep(NA_integer_, n_hru),
+              luse = rep(NA_character_, n_hru),
+              soil = rep(NA_character_, n_hru),
+              slp  = rep(NA_character_, n_hru),
+              frct = rep(NA_real_, n_hru))
 
-for(i_hru in 1:length(hru_list)){
+for(i_hru in 1:n_hru){
   hru_i <- readLines(txt_pth%//%hru_list[i_hru])
   hru_meta <- strsplit(hru_i[1], "\\ |\\:") %>% unlist()
   hru[i_hru, 1] <- as.numeric(hru_meta[6])
@@ -28,23 +29,45 @@ for(i_hru in 1:length(hru_list)){
   hru[i_hru, 6] <- as.numeric(substr(hru_i[2], 1, 16))
 }
 
-frct_chg <- 0.1
+# Read and modify luc_tbl ---------------------------------------------
+luc_tbl <- read_csv("D:/Projects_R/SWATfarmR/data/luc_tbl.csv")
+sub_all <- unique(hru$sub)
+sol_all <- unique(hru$soil)
+slp_all <- unique(hru$slp)
 
-lup <- hru %>%
-  mutate(hru_init = frct,
-         hru_updt = NA) %>%
-  select(hru, hru_init, hru_updt)
+luc_tbl %<>%
+  mutate(sub =   ifelse(is.na(sub),
+                        "c("%&%paste(sub_all, collapse = ",")%&%")",
+                        sub),
+         soil =  ifelse(is.na(soil),
+                       "c("%&%paste(sol_all, collapse = ",")%&%")",
+                       soil),
+         slope = ifelse(is.na(slope),
+                        "c("%&%paste(slp_all, collapse = ",")%&%")",
+                        slope))
 
-hru_decr <- hru %>%
-  select(hru) %>%
-  mutate(frct_decr = 0)
+# Build lup, incr, and decr tables ------------------------------------
+n_yr <- max(luc_tbl$year_to) -min(luc_tbl$year_from) + 1
 
-hru_incr <- hru %>%
-  select(hru) %>%
-  mutate(frct_incr = 0)
+lup <- matrix(data = hru$frct, ncol = n_yr, nrow = n_hru) %>%
+  as_tibble() %>%
+  set_colnames(min(luc_tbl$year_from):max(luc_tbl$year_to)) %>%
+  add_column(hru = hru$hru, .before = 1)
+
+hru_decr <- matrix(data = 0, ncol = n_yr, nrow = n_hru) %>%
+  as_tibble() %>%
+  set_colnames(min(luc_tbl$year_from):max(luc_tbl$year_to)) %>%
+  add_column(hru = hru$hru, .before = 1)
+
+hru_incr <- hru_decr
+
+
+# Testing one step of land use change ---------------------------------
+i_luc <- 1
 
 hru_from <- hru %>%
-  filter(luse %in% "FESC") %>%
+  filter(luse ==   luc_tbl$luse_from[i_luc]) %>%
+  filter(sub  %in% luc_tbl$sub[i_luc]) %>%
   mutate(frct_mod = frct * frct_chg)
 
 hru_to   <- hru %>%
