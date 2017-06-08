@@ -4,9 +4,9 @@ library(pasta)
 
 #' Create progressive land use update (LUP) files for a SWAT project
 #'
-#' @param luc_tbl A tibble or data.frame that provides the information for
-#'   the progressive land use changes. For an example see the examples
-#'   below.
+#' @param luc_tbl Either a data.frame or the path to a .csv file that
+#'   provides the information for the progressive land use changes. See the
+#'   examples below.
 #' @param txtIO_pth Path to the txtInOut folder of the project for which the
 #'   LUP files should be created.
 #'
@@ -15,6 +15,9 @@ library(pasta)
 #' @export
 #'
 #' @examples
+#' # To get a template for the luc_tbl
+#'
+#' write_luctemp(choose.dir()) # only windows
 
 update_landuse <- function(luc_tbl, txtIO_pth) {
   # Read HRU data from txtinout folder ----------------------------------
@@ -67,7 +70,7 @@ update_landuse <- function(luc_tbl, txtIO_pth) {
 
 
 
-  # Testing one step of land use change ---------------------------------
+  # calculating updated HRU fractions -----------------------------------
   for(i_luc in 1:nrow(luc_tbl)){
     hru_from <- hru %>%
       filter(luse ==   luc_tbl$luse_from[i_luc]) %>%
@@ -122,7 +125,23 @@ update_landuse <- function(luc_tbl, txtIO_pth) {
     lup <- lup + hru_incr - hru_decr
   }
   # Write LUP input files for SWAT model to txtIO_path ------------------
+  lup_dat <- tibble(idx  = sprintf("%5d", 1:ncol(lup)),
+                    day  = sprintf("%4d", rep(1,ncol(lup))),
+                    mon  = day,
+                    year = sprintf("%4d", yr_min:yr_max),
+                    file = sprintf("%13s", "lupin"%&% yr_min:yr_max%.%"dat"))
 
+  write.table(x = lup_dat, file = txtIO_pth%//%"lup.dat",
+              quote = FALSE, col.names = FALSE, row.names = FALSE)
+
+  for(i_yr in yr_min:yr_max){
+    lup_tmp <- tibble(hru = sprintf("%5d", hru$hru),
+                      lup = round(lup[[as.character(i_yr)]], digits = 6) %>%
+                            sprintf("%.6f", .))
+
+    write.table(x = lup_tmp, file = txtIO_pth%//%"lupin"%&%i_yr%.%"dat",
+                quote = FALSE, row.names = FALSE)
+  }
 }
 
 
