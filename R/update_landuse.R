@@ -1,7 +1,3 @@
-library(tidyverse)
-library(magrittr)
-library(pasta)
-
 #' Create progressive land use update (LUP) files for a SWAT project
 #'
 #' @param luc_tbl Either a data.frame or the path to a .csv file that
