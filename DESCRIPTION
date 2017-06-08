@@ -1,7 +1,7 @@
 Package: SWATfarmR
 Type: Package
 Title: Simple rule based scheduling of management operations in SWAT2012
-Version: 0.2.1
+Version: 0.2.2
 Author:  person("Christoph", "Schuerz", 
                 email = "christoph.schuerz@boku.ac.at",
                 role = c("aut", "cre"))
@@ -13,6 +13,7 @@ License: MIT
 LazyData: TRUE
 Imports:
     magrittr,
+    pasta,
     dplyr,
     reshape2,
     data.table,

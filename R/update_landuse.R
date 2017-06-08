@@ -12,6 +12,11 @@ library(pasta)
 #'
 #' @return Writes the lup.dat file and the lup input files for the time
 #'   period given in the luc_tbl into the txtInOut project folder.
+#' @importFrom dplyr mutate select filter full_join left_join right_join
+#'   group_by summarise count
+#' @importFrom tibble tibble as_tibble
+#' @importFrom magrittr %>% %<>% set_colnames
+#' @importFrom pasta %&% %//%
 #' @export
 #'
 #' @examples
