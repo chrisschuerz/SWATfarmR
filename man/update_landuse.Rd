@@ -7,9 +7,9 @@
 update_landuse(luc_tbl, txtIO_pth)
 }
 \arguments{
-\item{luc_tbl}{A tibble or data.frame that provides the information for
-the progressive land use changes. For an example see the examples
-below.}
+\item{luc_tbl}{Either a data.frame or the path to a .csv file that
+provides the information for the progressive land use changes. See the
+examples below.}
 
 \item{txtIO_pth}{Path to the txtInOut folder of the project for which the
 LUP files should be created.}
@@ -20,5 +20,11 @@ Writes the lup.dat file and the lup input files for the time
 }
 \description{
 Create progressive land use update (LUP) files for a SWAT project
+}
+\examples{
+# To get a template for the luc_tbl
+
+write_luctemp(choose.dir()) # only windows
+write_luctemp() #Returns tibble to .Globalenv
 }
 

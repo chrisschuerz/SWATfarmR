@@ -3,6 +3,7 @@
 export(limit_simperiod)
 export(prepare_inputdata)
 export(update_landuse)
+export(write_luctemp)
 export(write_mgtbackup)
 export(write_mgtfiles)
 import(doSNOW)

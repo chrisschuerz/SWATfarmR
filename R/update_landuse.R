@@ -18,6 +18,7 @@ library(pasta)
 #' # To get a template for the luc_tbl
 #'
 #' write_luctemp(choose.dir()) # only windows
+#' write_luctemp() #Returns tibble to .Globalenv
 
 update_landuse <- function(luc_tbl, txtIO_pth) {
   # Read HRU data from txtinout folder ----------------------------------
