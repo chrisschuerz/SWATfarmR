@@ -9,7 +9,7 @@
 #' @return Writes the lup.dat file and the lup input files for the time
 #'   period given in the lup_tbl into the txtInOut project folder.
 #' @importFrom dplyr mutate select filter full_join left_join right_join
-#'   group_by summarise count
+#'   group_by ungroup summarise count
 #' @importFrom tibble tibble as_tibble
 #' @importFrom magrittr %>% %<>% set_colnames
 #' @importFrom pasta %&% %//%
@@ -92,38 +92,41 @@ update_landuse <- function(lup_tbl, hru_pth) {
   # calculating updated HRU fractions -----------------------------------
   for(i_luc in 1:nrow(lup_tbl)){
     hru_from <- hru %>%
-      filter(luse ==   lup_tbl$luse_from[i_luc]) %>%
+      filter(luse == lup_tbl$luse_from[i_luc]) %>%
       filter(sub   %in% eval(parse(text = lup_tbl$sub[i_luc]))) %>%
       filter(soil  %in% eval(parse(text = lup_tbl$soil[i_luc]))) %>%
       filter(slp   %in% eval(parse(text = lup_tbl$slope[i_luc]))) %>%
       mutate(frct_mod = frct * lup_tbl$fraction[i_luc])
 
     hru_to   <- hru %>%
-      filter(luse %in% lup_tbl$luse_to[i_luc]) %>%
+      filter(luse == lup_tbl$luse_to[i_luc]) %>%
       filter(sub   %in% eval(parse(text = lup_tbl$sub[i_luc]))) %>%
       filter(soil  %in% eval(parse(text = lup_tbl$soil[i_luc]))) %>%
       filter(slp   %in% eval(parse(text = lup_tbl$slope[i_luc]))) %>%
       full_join(., hru_from %>% select(sub, soil, slp, frct_mod),
-                by = c("sub", "soil", "slp"))
+                by = c("sub", "soil", "slp")) %>%
+      filter(!is.na(frct))
 
-    hru_res <- hru_to %>%
-      filter(is.na(frct)) %>%
+    frct_sum <- hru_from %>%
       group_by(sub) %>%
-      summarise(frct_res = sum(frct_mod)) %>%
-      left_join(hru_to %>% filter(!is.na(frct)) %>% count(sub), by = "sub") %>%
-      mutate(frct_res = frct_res/n) %>%
-      select(sub, frct_res)
+      summarise(frct_mod = sum(frct_mod)) %>%
+      full_join(., hru_to %>%
+                     group_by(sub) %>%
+                     summarise(frct_mod = sum(frct_mod)),
+                by = "sub") %>%
+      mutate(corr_fct = frct_mod.x/frct_mod.y) %>%
+      select(sub,corr_fct)
 
     hru_from %<>%
+      left_join(frct_sum, by = "sub") %>%
+      mutate(frct_mod = ifelse(is.na(corr_fct), 0, frct_mod)) %>%
       right_join(hru %>% select(hru), by = "hru") %>%
       mutate(frct_mod = ifelse(is.na(frct_mod), 0, frct_mod)) %>%
       select(frct_mod)
 
     hru_to %<>%
-      filter(!is.na(frct)) %>%
-      left_join(hru_res, by = "sub") %>%
-      mutate(frct_res = ifelse(is.na(frct_res), 0, frct_res),
-             frct_mod = frct_mod + frct_res) %>%
+      left_join(frct_sum, by = "sub") %>%
+      mutate(frct_mod = ifelse(is.na(corr_fct), 0, frct_mod*corr_fct)) %>%
       right_join(hru %>% select(hru), by = "hru") %>%
       mutate(frct_mod = ifelse(is.na(frct_mod), 0, frct_mod)) %>%
       select(frct_mod)
