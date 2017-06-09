@@ -1,13 +1,13 @@
 #' Create progressive land use update (LUP) files for a SWAT project
 #'
-#' @param luc_tbl Either a data.frame or the path to a .csv file that
+#' @param lup_tbl Either a data.frame or the path to a .csv file that
 #'   provides the information for the progressive land use changes. See the
 #'   examples below.
-#' @param txtIO_pth Path to the txtInOut folder of the project for which the
+#' @param hru_pth Path to the txtInOut folder of the project for which the
 #'   LUP files should be created.
 #'
 #' @return Writes the lup.dat file and the lup input files for the time
-#'   period given in the luc_tbl into the txtInOut project folder.
+#'   period given in the lup_tbl into the txtInOut project folder.
 #' @importFrom dplyr mutate select filter full_join left_join right_join
 #'   group_by summarise count
 #' @importFrom tibble tibble as_tibble
@@ -16,41 +16,58 @@
 #' @export
 #'
 #' @examples
-#' # To get a template for the luc_tbl
+#' # To get a template for the lup_tbl
 #'
 #' write_luctemp(choose.dir()) # only windows
 #' write_luctemp() #Returns tibble to .Globalenv
 
-update_landuse <- function(luc_tbl, txtIO_pth) {
+update_landuse <- function(lup_tbl, hru_pth) {
   # Read HRU data from txtinout folder ----------------------------------
-  hru_list <- inquire_filenames(file_pattern = ".hru$",
-                                file_path = txtIO_pth)
-  n_hru <- length(hru_list)
 
-  hru <- tibble(hru  = rep(NA_integer_, n_hru),
-                sub  = rep(NA_integer_, n_hru),
-                luse = rep(NA_character_, n_hru),
-                soil = rep(NA_character_, n_hru),
-                slp  = rep(NA_character_, n_hru),
-                frct = rep(NA_real_, n_hru))
+  substr_right <- function(x, n){
+    substr(x, nchar(x)-n+1, nchar(x))
+  }
+  if (substr_right(hru_pth, 4) == ".csv"){
+    hru <- read.csv(hru_path) %>%
+      mutate(frct = ARSLP/ARSUB) %>%
+      rename(hru  = HRU_ID,
+             sub  = SUBBASIN,
+             luse = LANDUSE,
+             soil = SOIL,
+             slp  = SLP) %>%
+      select(hru, sub, luse, soil, slp, frct)
 
-  for(i_hru in 1:n_hru){
-    hru_i <- readLines(txt_pth%//%hru_list[i_hru])
-    hru_meta <- strsplit(hru_i[1], "\\ |\\:") %>% unlist()
-    hru[i_hru, 1] <- as.numeric(hru_meta[6])
-    hru[i_hru, 2] <- as.numeric(hru_meta[8])
-    hru[i_hru, 3] <- hru_meta[12]
-    hru[i_hru, 4] <- hru_meta[15]
-    hru[i_hru, 5] <- hru_meta[18]
-    hru[i_hru, 6] <- as.numeric(substr(hru_i[2], 1, 16))
+  } else {
+    hru_list <- inquire_filenames(file_pattern = ".hru$",
+                                  file_path = hru_pth)
+    n_hru <- length(hru_list)
+
+    hru <- tibble(hru  = rep(NA_integer_, n_hru),
+                  sub  = rep(NA_integer_, n_hru),
+                  luse = rep(NA_character_, n_hru),
+                  soil = rep(NA_character_, n_hru),
+                  slp  = rep(NA_character_, n_hru),
+                  frct = rep(NA_real_, n_hru))
+
+    for(i_hru in 1:n_hru){
+      hru_i <- readLines(txt_pth%//%hru_list[i_hru])
+      hru_meta <- strsplit(hru_i[1], "\\ |\\:") %>% unlist()
+      hru[i_hru, 1] <- as.numeric(hru_meta[6])
+      hru[i_hru, 2] <- as.numeric(hru_meta[8])
+      hru[i_hru, 3] <- hru_meta[12]
+      hru[i_hru, 4] <- hru_meta[15]
+      hru[i_hru, 5] <- hru_meta[18]
+      hru[i_hru, 6] <- as.numeric(substr(hru_i[2], 1, 16))
+    }
   }
 
-  # Read and modify luc_tbl ---------------------------------------------
+
+  # Read and modify lup_tbl ---------------------------------------------
   sub_all <- unique(hru$sub)
   sol_all <- "'"%&%unique(hru$soil)%&%"'"
   slp_all <- "'"%&%unique(hru$slp)%&%"'"
 
-  luc_tbl %<>%
+  lup_tbl %<>%
     mutate(sub =   ifelse(is.na(sub),
                           "c("%&%paste(sub_all, collapse = ",")%&%")",
                           sub),
@@ -62,30 +79,30 @@ update_landuse <- function(luc_tbl, txtIO_pth) {
                           slope))
 
   # Build lup table -----------------------------------------------------
-  yr_min <- min(luc_tbl$year_from)
-  yr_max <- max(luc_tbl$year_to)
+  yr_min <- min(lup_tbl$year_from)
+  yr_max <- max(lup_tbl$year_to)
   n_yr <- yr_max - yr_min + 1
 
   lup <- matrix(data = hru$frct, ncol = n_yr, nrow = n_hru) %>%
     as_tibble() %>%
-    set_colnames(min(luc_tbl$year_from):max(luc_tbl$year_to))
+    set_colnames(min(lup_tbl$year_from):max(lup_tbl$year_to))
 
 
 
   # calculating updated HRU fractions -----------------------------------
-  for(i_luc in 1:nrow(luc_tbl)){
+  for(i_luc in 1:nrow(lup_tbl)){
     hru_from <- hru %>%
-      filter(luse ==   luc_tbl$luse_from[i_luc]) %>%
-      filter(sub   %in% eval(parse(text = luc_tbl$sub[i_luc]))) %>%
-      filter(soil  %in% eval(parse(text = luc_tbl$soil[i_luc]))) %>%
-      filter(slp   %in% eval(parse(text = luc_tbl$slope[i_luc]))) %>%
-      mutate(frct_mod = frct * luc_tbl$fraction[i_luc])
+      filter(luse ==   lup_tbl$luse_from[i_luc]) %>%
+      filter(sub   %in% eval(parse(text = lup_tbl$sub[i_luc]))) %>%
+      filter(soil  %in% eval(parse(text = lup_tbl$soil[i_luc]))) %>%
+      filter(slp   %in% eval(parse(text = lup_tbl$slope[i_luc]))) %>%
+      mutate(frct_mod = frct * lup_tbl$fraction[i_luc])
 
     hru_to   <- hru %>%
-      filter(luse %in% luc_tbl$luse_to[i_luc]) %>%
-      filter(sub   %in% eval(parse(text = luc_tbl$sub[i_luc]))) %>%
-      filter(soil  %in% eval(parse(text = luc_tbl$soil[i_luc]))) %>%
-      filter(slp   %in% eval(parse(text = luc_tbl$slope[i_luc]))) %>%
+      filter(luse %in% lup_tbl$luse_to[i_luc]) %>%
+      filter(sub   %in% eval(parse(text = lup_tbl$sub[i_luc]))) %>%
+      filter(soil  %in% eval(parse(text = lup_tbl$soil[i_luc]))) %>%
+      filter(slp   %in% eval(parse(text = lup_tbl$slope[i_luc]))) %>%
       full_join(., hru_from %>% select(sub, soil, slp, frct_mod),
                 by = c("sub", "soil", "slp"))
 
@@ -111,21 +128,22 @@ update_landuse <- function(luc_tbl, txtIO_pth) {
       mutate(frct_mod = ifelse(is.na(frct_mod), 0, frct_mod)) %>%
       select(frct_mod)
 
-    luc_ramp <- c(rep(0, (luc_tbl$year_from[i_luc] - yr_min)),
-                  seq(0, 1, length.out = (luc_tbl$year_to[i_luc] -
-                                          luc_tbl$year_from[i_luc] + 2))[-1],
-                  rep(1, (yr_max - luc_tbl$year_to[i_luc])))
+    luc_ramp <- c(rep(0, (lup_tbl$year_from[i_luc] - yr_min)),
+                  seq(0, 1, length.out = (lup_tbl$year_to[i_luc] -
+                                          lup_tbl$year_from[i_luc] + 2))[-1],
+                  rep(1, (yr_max - lup_tbl$year_to[i_luc])))
 
     hru_decr <- matrix(data = luc_ramp, ncol = n_hru, nrow = n_yr) %>%
       t() %>%
       as_tibble() %>%
-      set_colnames(min(luc_tbl$year_from):max(luc_tbl$year_to))
+      set_colnames(min(lup_tbl$year_from):max(lup_tbl$year_to))
 
     hru_incr <- hru_decr * hru_to[[1]]
     hru_decr <- hru_decr * hru_from[[1]]
 
     lup <- lup + hru_incr - hru_decr
   }
+  lup[lup[,] <= 1e-6] <- 1e-6
   # Write LUP input files for SWAT model to txtIO_path ------------------
   lup_dat <- tibble(idx  = sprintf("%5d", 1:ncol(lup)),
                     day  = sprintf("%4d", rep(1,ncol(lup))),
@@ -133,7 +151,7 @@ update_landuse <- function(luc_tbl, txtIO_pth) {
                     year = sprintf("%4d", yr_min:yr_max),
                     file = sprintf("%13s", "lupin"%&% yr_min:yr_max%.%"dat"))
 
-  write.table(x = lup_dat, file = txtIO_pth%//%"lup.dat",
+  write.table(x = lup_dat, file = hru_pth%//%"lup.dat",
               quote = FALSE, col.names = FALSE, row.names = FALSE)
 
   for(i_yr in yr_min:yr_max){
@@ -141,11 +159,10 @@ update_landuse <- function(luc_tbl, txtIO_pth) {
                       lup = round(lup[[as.character(i_yr)]], digits = 6) %>%
                             sprintf("%.6f", .))
 
-    write.table(x = lup_tmp, file = txtIO_pth%//%"lupin"%&%i_yr%.%"dat",
+    write.table(x = lup_tmp, file = hru_pth%//%"lupin"%&%i_yr%.%"dat",
                 quote = FALSE, row.names = FALSE)
   }
 }
-
 
 
 
