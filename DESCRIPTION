@@ -15,6 +15,7 @@ Imports:
     magrittr,
     pasta,
     dplyr,
+    tibble,
     reshape2,
     data.table,
     doSNOW,

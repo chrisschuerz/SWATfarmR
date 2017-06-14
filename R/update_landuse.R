@@ -50,7 +50,7 @@ update_landuse <- function(lup_tbl, hru_pth) {
                   frct = rep(NA_real_, n_hru))
 
     for(i_hru in 1:n_hru){
-      hru_i <- readLines(txt_pth%//%hru_list[i_hru])
+      hru_i <- readLines(hru_pth%//%hru_list[i_hru])
       hru_meta <- strsplit(hru_i[1], "\\ |\\:") %>% unlist()
       hru[i_hru, 1] <- as.numeric(hru_meta[6])
       hru[i_hru, 2] <- as.numeric(hru_meta[8])
