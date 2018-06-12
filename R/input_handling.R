@@ -1,3 +1,19 @@
+#' Read a weather input file
+#'
+#' @param file Path string to weather input file.
+#' @param var  Character vector that defines the variables
+#' @param skip Integer to skip the header
+#' @param digit_var Integer, number of digits per variable
+#' @param digit_date Vector of length 2 Integers give digits of year and jdn
+
+#' @importFrom readr cols fwf_widths read_fwf
+#' @importFrom dplyr mutate select everything
+#' @importFrom lubridate month day
+#' @importFrom magrittr %>%
+#'
+#' @return Generates a new farmr_project in the working environment (as an R6
+#'   object) and saves the project the TxtInOut folder.
+
 read_weather <- function(file, var, skip, digit_var, digit_date) {
   n_var <-  (nchar(readLines(file, n = (skip + 1))[(skip + 1)]) -
                sum(digit_date)) / digit_var

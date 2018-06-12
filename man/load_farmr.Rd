@@ -2,7 +2,7 @@
 % Please edit documentation in R/farmr_handling.R
 \name{load_farmr}
 \alias{load_farmr}
-\title{Load an existing swatfarmr project}
+\title{Load an existing SWATfarmR project}
 \usage{
 load_farmr(file)
 }
@@ -14,5 +14,5 @@ Generates a new farmr_project in the working environment (as an R6
   object) and saves the project the TxtInOut folder.
 }
 \description{
-Load an existing swatfarmr project
+Load an existing SWATfarmR project
 }

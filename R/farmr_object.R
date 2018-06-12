@@ -20,6 +20,19 @@ farmr_project <- R6::R6Class(
 
       self$.data$meta$project_name <- project_name
       self$.data$meta$project_path <- project_path
+
+      weather_file <- list.files(project_path)
+      weather_file <- weather_file[tolower(weather_file) %in% c("pcp1.pcp", "tmp1.tmp")]
+      self$.data$weather$pcp <- read_weather(file = project_path%//%weather_file[1],
+                                             var = "pcp",
+                                             skip = 4,
+                                             digit_var = 5,
+                                             digit_date = c(4,3))
+      self$.data$weather$tmp <- read_weather(file = project_path%//%weather_file[2],
+                                             var = c("tmax", "tmin"),
+                                             skip = 4,
+                                             digit_var = 5,
+                                             digit_date = c(4,3))
     },
 
     save = function(){

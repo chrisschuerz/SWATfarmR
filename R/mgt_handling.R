@@ -11,7 +11,6 @@
 #'
 #' @return Generates a new farmr_project in the working environment (as an R6
 #'   object) and saves the project the TxtInOut folder.
-#' @export
 
 add_management <- function(mgt_name, mgt_schedule, cnop_table = NULL) {
 

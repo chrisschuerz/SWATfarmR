@@ -2,7 +2,7 @@
 % Please edit documentation in R/farmr_handling.R
 \name{new_farmr}
 \alias{new_farmr}
-\title{Initiate a new swatfarmr project}
+\title{Initiate a new SWATfarmR project}
 \usage{
 new_farmr(project_name, project_path)
 }
@@ -17,5 +17,5 @@ Generates a new farmr_project in the working environment (as an R6
   object) and saves the project the TxtInOut folder.
 }
 \description{
-Initiate a new swatfarmr project
+Initiate a new SWATfarmR project
 }
