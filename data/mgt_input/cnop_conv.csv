@@ -1,0 +1,129 @@
+OPERATION,CROP,A,B,C,D
+Tillage,AGRC,,,,
+Tillage,AGRL,,,,
+Tillage,AGRR,,,,
+Tillage,ALFA,,77,85,89
+Tillage,CANA,,69,76,81
+Tillage,CORN,,78,85,89
+Tillage,CRRT,,,,
+Tillage,CSIL,,78,85,89
+Tillage,FRST,,,70,77
+Tillage,FRSE,,,,
+Tillage,FRSD,,,,
+Tillage,HAY,,,,
+Tillage,OATS,,,,
+Tillage,ORCD,,58,72,79
+Tillage,PAST,,,74,80
+Tillage,POTA,,78,85,89
+Tillage,RNGB,,48,65,73
+Tillage,RNGE,,,74,80
+Tillage,SOYB,,78,85,89
+Tillage,SGBT,,78,85,89
+Tillage,SWHT,,75,83,87
+Tillage,SWCH,,61,74,80
+Tillage,STRW,,75,82,
+Tillage,UCOM,,,,
+Tillage,URML,,75,83,87
+Tillage,URMD,,,,
+Tillage,UTRN,,,,
+Tillage,WATR,92,92,92,92
+Tillage,WETL,,,,
+Tillage,WWHT,,67.5,74.7,78.3
+Tillage,SUNF,,78,85,89
+Tillage,OELK,,78,85,89
+Plant,AGRC,31.2,48.8,59.2,64
+Plant,AGRL,31.2,48.8,59.2,64
+Plant,AGRR,52,60.8,66.4,69.6
+Plant,ALFA,,61.6,68,71.2
+Plant,CANA,,67.5,74.7,79.2
+Plant,CORN,52,60.8,66.4,69.6
+Plant,CRRT,52,60.8,66.4,69.6
+Plant,CSIL,52,60.8,66.4,69.6
+Plant,FRST,24,44,56,61.6
+Plant,FRSE,20,44,56,61.6
+Plant,FRSD,36,52.8,61.6,66.4
+Plant,HAY,39.2,55.2,63.2,67.2
+Plant,OATS,48.8,58.4,64.8,68
+Plant,ORCD,36,46.4,61.6,66.4
+Plant,PAST,39.2,55.2,63.2,67.2
+Plant,POTA,42,50,58,64
+Plant,RNGB,31.2,48.8,59.2,64
+Plant,RNGE,,,59.2,64
+Plant,SOYB,52,60.8,66.4,69.6
+Plant,SGBT,,62.4,68,71.2
+Plant,SWHT,48.8,58.4,64.8,68
+Plant,SWCH,39.2,55.2,63.2,67.2
+Plant,STRW,36,48,56,60
+Plant,UCOM,66.4,71.2,73.6,74.4
+Plant,URML,66.4,71.2,73.6,74.4
+Plant,URMD,66.4,71.2,73.6,74.4
+Plant,UTRN,66.4,71.2,73.6,74.4
+Plant,WATR,92,92,92,92
+Plant,WETL,49,69,79,84
+Plant,WWHT,,67.5,74.7,78.3
+Plant,SUNF,52,60.8,66.4,69.6
+Plant,OELK,,62.4,68,71.2
+Harvest & Kill,AGRC,31.2,48.8,59.2,64
+Harvest & Kill,AGRL,31.2,48.8,59.2,64
+Harvest & Kill,AGRR,53.6,62.4,68,71.2
+Harvest & Kill,ALFA,,61.6,68,71.2
+Harvest & Kill,CANA,,69,76,81
+Harvest & Kill,CORN,53.6,62.4,68,71.2
+Harvest & Kill,CRRT,53.6,62.4,68,71.2
+Harvest & Kill,CSIL,53.6,62.4,68,71.2
+Harvest & Kill,FRST,24,44,56,61.6
+Harvest & Kill,FRSE,20,44,56,61.6
+Harvest & Kill,FRSD,36,52.8,61.6,66.4
+Harvest & Kill,HAY,39.2,55.2,63.2,67.2
+Harvest & Kill,OATS,50.4,60,66.4,69.6
+Harvest & Kill,ORCD,36,46.4,61.6,66.4
+Harvest & Kill,PAST,39.2,55.2,63.2,67.2
+Harvest & Kill,POTA,43,51,59,65
+Harvest & Kill,RNGB,31.2,48.8,59.2,64
+Harvest & Kill,RNGE,,,59.2,64
+Harvest & Kill,SOYB,53.6,62.4,68,71.2
+Harvest & Kill,SGBT,,62.4,68,71.2
+Harvest & Kill,SWHT,50.4,60,66.4,69.6
+Harvest & Kill,SWCH,39.2,55.2,63.2,67.2
+Harvest & Kill,STRW,36,48,56,60
+Harvest & Kill,UCOM,66.4,71.2,73.6,74.4
+Harvest & Kill,URML,66.4,71.2,73.6,74.4
+Harvest & Kill,URMD,66.4,71.2,73.6,74.4
+Harvest & Kill,UTRN,66.4,71.2,73.6,74.4
+Harvest & Kill,WATR,92,92,92,92
+Harvest & Kill,WETL,49,69,79,84
+Harvest & Kill,WWHT,,69,76,79
+Harvest & Kill,SUNF,53.6,62.4,68,71.2
+Harvest & Kill,OELK,,62.4,68,71.2
+Harvest only,AGRC,31.2,48.8,59.2,64
+Harvest only,AGRL,31.2,48.8,59.2,64
+Harvest only,AGRR,53.6,62.4,68,71.2
+Harvest only,ALFA,,61.6,68,71.2
+Harvest only,CANA,,69,76,81
+Harvest only,CORN,53.6,62.4,68,71.2
+Harvest only,CRRT,53.6,62.4,68,71.2
+Harvest only,CSIL,53.6,62.4,68,71.2
+Harvest only,FRST,24,44,56,61.6
+Harvest only,FRSE,20,44,56,61.6
+Harvest only,FRSD,36,52.8,61.6,66.4
+Harvest only,HAY,39.2,55.2,63.2,67.2
+Harvest only,OATS,50.4,60,66.4,69.6
+Harvest only,ORCD,36,46.4,61.6,66.4
+Harvest only,PAST,39.2,55.2,63.2,67.2
+Harvest only,POTA,43,51,59,65
+Harvest only,RNGB,31.2,48.8,59.2,64
+Harvest only,RNGE,,,59.2,64
+Harvest only,SOYB,53.6,62.4,68,71.2
+Harvest only,SGBT,,62.4,68,71.2
+Harvest only,SWHT,50.4,60,66.4,69.6
+Harvest only,SWCH,39.2,55.2,63.2,67.2
+Harvest only,STRW,36,48,56,60
+Harvest only,UCOM,66.4,71.2,73.6,74.4
+Harvest only,URML,66.4,71.2,73.6,74.4
+Harvest only,URMD,66.4,71.2,73.6,74.4
+Harvest only,UTRN,66.4,71.2,73.6,74.4
+Harvest only,WATR,92,92,92,92
+Harvest only,WETL,49,69,79,84
+Harvest only,WWHT,,69,76,79
+Harvest only,SUNF,53.6,62.4,68,71.2
+Harvest only,OELK,,62.4,68,71.2
