@@ -3,7 +3,6 @@
 #' @rdname farmr_project
 #'
 #' @import R6
-#' @import pasta
 #'
 #' @export
 farmr_project <- R6::R6Class(
@@ -41,7 +40,7 @@ farmr_project <- R6::R6Class(
       saveRDS(object = obj_save,
               file = self$.data$meta$project_path%//%
                      self$.data$meta$project_name%.%
-                     "rds")
+                     "farm")
     }
 
 

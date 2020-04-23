@@ -3,7 +3,6 @@
 export(farmr_project)
 export(load_farmr)
 export(new_farmr)
-export(new_soil_project)
 import(R6)
 import(pasta)
 importFrom(dplyr,everything)

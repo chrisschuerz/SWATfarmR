@@ -33,7 +33,7 @@ load_farmr <- function(file) {
   project_name <- strsplit(basename(file), "\\.")[[1]][1]
   file_ext     <- strsplit(basename(file), "\\.")[[1]][2]
 
-  if(tolower(file_ext) != "rds") stop("farmr object must be a *.rds file!")
+  if(tolower(file_ext) != "farm") stop("farmr object must be a *.farm file!")
 
   farmr_obj <- readRDS(file)
   farmr_obj$.data$meta$project_path <- project_path
