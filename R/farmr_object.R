@@ -3,6 +3,7 @@
 #' @rdname farmr_project
 #'
 #' @import R6
+#' @importFrom dplyr as_tibble select starts_with
 #'
 #' @export
 farmr_project <- R6::R6Class(
@@ -13,7 +14,7 @@ farmr_project <- R6::R6Class(
     .data = list(),
 
     initialize = function(project_name, project_path) {
-      if(file.exists(project_path%//%project_name%.%"rds")){
+      if(file.exists(project_path%//%project_name%.%"farm")){
         stop("FarmR project allready exists in"%&&%project_path)
       }
 
@@ -22,18 +23,29 @@ farmr_project <- R6::R6Class(
 
       weather_file <- list.files(project_path)
       weather_file <- weather_file[tolower(weather_file) %in% c("pcp1.pcp", "tmp1.tmp")]
-      self$.data$weather$pcp <- read_weather(file = project_path%//%weather_file[1],
-                                             var = "pcp",
-                                             skip = 4,
-                                             digit_var = 5,
-                                             digit_date = c(4,3))
-      self$.data$weather$tmp <- read_weather(file = project_path%//%weather_file[2],
-                                             var = c("tmax", "tmin"),
-                                             skip = 4,
-                                             digit_var = 5,
-                                             digit_date = c(4,3))
-    },
+      self$.data$variables$pcp <- read_weather(file = project_path%//%weather_file[1],
+                                               var = "pcp",
+                                               skip = 4,
+                                               digit_var = 5,
+                                               digit_date = c(4,3))
+      tmp_data <- read_weather(file = project_path%//%weather_file[2],
+                               var = c("tmax", "tmin"),
+                               skip = 4,
+                               digit_var = 5,
+                               digit_date = c(4,3))
+      self$.data$variables$tmin <- tmp_data %>%
+        select(year, month, day, jdn, starts_with("tmin_"))
+      self$.data$variables$tmax <- tmp_data %>%
+        select(year, month, day, jdn, starts_with("tmax_"))
+      self$.data$variables$tav <- ((self$.data$variables$tmax +
+                                    self$.data$variables$tmin) / 2) %>%
+                                    as_tibble()
 
+    },
+    add_variable = function(data, name) {
+
+
+    },
     save = function(){
       obj_save <- get(x = self$.data$meta$project_name,
                       envir = sys.frame(-1))
