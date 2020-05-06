@@ -26,7 +26,7 @@ farmr_project <- R6::R6Class(
       self$.data$variables$pcp <- read_weather(file = project_path%//%weather_file[1],
                                                var = "pcp",
                                                skip = 4,
-                                               digit_var = 5,
+                                                 digit_var = 5,
                                                digit_date = c(4,3))
       tmp_data <- read_weather(file = project_path%//%weather_file[2],
                                var = c("tmax", "tmin"),
@@ -43,6 +43,11 @@ farmr_project <- R6::R6Class(
 
     },
     add_variable = function(data, name) {
+      self$.data$variables[[name]] <- add_variable(data, name,
+        n_var = (ncol(self$.data$variables$pcp) - 4),
+        n_obs = nrow(self$.data$variables$pcp),
+        date = select(self$.data$variables$pcp, year, month, day, jdn))
+
 
 
     },

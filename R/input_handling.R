@@ -31,3 +31,25 @@ read_weather <- function(file, var, skip, digit_var, digit_date) {
     select(-date) %>%
     select(year, month, day, jdn, everything())
 }
+
+add_variable <- function(data, name, n_var, n_obs, date) {
+  if(is.null(dim(data))) {
+    if (length(data) != n_obs) {
+      stop("Length of added variable vector is different to the length of the weather data.")
+    }
+    tbl <- map_dfc(1:n_var, ~tibble(data)) %>%
+      set_names(c(paste(name, 1:n_var, sep = "_")))
+    tbl <- bind_cols(date, tbl)
+  } else {
+    if (nrow(data) != n_obs) {
+      stop("The number of rows in 'data' is different to the number of rows of the weather data.")
+    }
+    if (ncol(data) != n_obs) {
+      stop("The number of columns in 'data' is different to the number of subbasins.")
+    }
+    tbl <- tibble(data) %>%
+      set_names(c(paste(name, 1:n_var, sep = "_")))
+    tbl <- bind_cols(date, tbl)
+  }
+  return(tbl)
+}
