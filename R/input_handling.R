@@ -13,7 +13,7 @@
 #'
 #' @return Generates a new farmr_project in the working environment (as an R6
 #'   object) and saves the project the TxtInOut folder.
-
+#'
 read_weather <- function(file, var, skip, digit_var, digit_date) {
   n_var <-  (nchar(readLines(file, n = (skip + 1))[(skip + 1)]) -
                sum(digit_date)) / digit_var
@@ -32,6 +32,24 @@ read_weather <- function(file, var, skip, digit_var, digit_date) {
     select(year, month, day, jdn, everything())
 }
 
+#' Add additional variables that can be used to define rules for
+#'
+#' @param data The table that should be added as a variable. TH number of columns
+#'   must be 1 or the number of subbasins. the row number must be the same as the
+#'   number of weather records.
+#' @param name Character string to define the name of the added variable (this
+#'   name must be used in the rule set)
+#' @param n_var Internal variable. Not defined by user. Required number of variables.
+#' @param n_obs Internal variable. Not defined by user. Required number of variables.
+#' @param date  Internal variable. Not defined by user. Date vector that is added.
+#'
+#' @importFrom dplyr bind_cols %>%
+#' @importFrom purrr map_dfc set_names
+#' @importFrom tibble tibble
+#'
+#' @return Generates a new farmr_project in the working environment (as an R6
+#'   object) and saves the project the TxtInOut folder.
+#'
 add_variable <- function(data, name, n_var, n_obs, date) {
   if(is.null(dim(data))) {
     if (length(data) != n_obs) {
