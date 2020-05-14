@@ -39,7 +39,8 @@ farmr_project <- R6::R6Class(
         select(year, month, day, jdn, starts_with("tmax_"))
       self$.data$variables$tav <- ((self$.data$variables$tmax +
                                     self$.data$variables$tmin) / 2) %>%
-                                    as_tibble()
+                                    as_tibble() %>%
+        set_names(., str_replace(colnames(.), "max", "av"))
 
     },
     add_variable = function(data, name) {
