@@ -176,12 +176,42 @@ read_lookup <- function(project_path) {
   return(lookup)
 }
 
-read_cnop <- function(file, ) {
-
-}
-
 check_mgt_table <- function(mgt_tbl, lookup, hru_attribute) {
-
+  plant_mgt <-  filter(mgt_tbl, operation == "plant") %>% .$mgt1 %>% unique(.)
+  plant_lkp <- unique(lookup$plant$label)
+  plant_miss <- plant_mgt[!(plant_mgt %in% plant_lkp)]
+  if(length(plant_miss) > 0) {
+    stop("The following plants are not defined in the SWAT data base" %&%
+         ", but were found in the management table:\n" %&%
+         paste(plant_miss, collapse = ", ") %&%
+         "\nPlease check the inputs in the management table!")
+  }
+  fert_mgt <-  filter(mgt_tbl, operation == "fertilizer") %>% .$mgt1 %>% unique(.)
+  fert_lkp <- unique(lookup$fertilizer$label)
+  fert_miss <- fert_mgt[!(fert_mgt %in% fert_lkp)]
+  if(length(fert_miss) > 0) {
+    stop("The following fertilizers are not defined in the SWAT data base" %&%
+           ", but were found in the management table:\n" %&%
+           paste(fert_miss, collapse = ", ") %&%
+           "\nPlease check the inputs in the management table!")
+  }
+  till_mgt <-  filter(mgt_tbl, operation == "tillage") %>% .$mgt1 %>% unique(.)
+  till_lkp <- unique(lookup$tillage$label)
+  till_miss <- till_mgt[!(till_mgt %in% till_lkp)]
+  if(length(till_miss) > 0) {
+    stop("The following tillage types are not defined in the SWAT data base" %&%
+           ", but were found in the management table:\n" %&%
+           paste(fert_miss, collapse = ", ") %&%
+           "\nPlease check the inputs in the management table!")
+  }
+  luse_hru <- unique(hru_attribute$luse)
+  luse_miss <- luse_hru[!(luse_hru %in% unique(mgt_tbl$land_use))]
+  if(length(luse_miss) > 0) {
+    warning("No management schedules were found for the following SWAT land uses: \n" %&%
+            paste(luse_miss, collapse = ", ") %&%
+            "\nIf managements should be written for any of these land uses\n"%&%
+            "please add them to the management table and read the table again.")
+  }
 }
 
 translate_mgt_table <- function(mgt_tbl, lookup) {

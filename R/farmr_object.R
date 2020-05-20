@@ -21,6 +21,8 @@ farmr_project <- R6::R6Class(
       self$.data$meta$project_name <- project_name
       self$.data$meta$project_path <- project_path
 
+      self$.data$meta$hru_attributes <- read_hru_attributes(project_path )
+
       weather_file <- list.files(project_path)
       weather_file <- weather_file[tolower(weather_file) %in% c("pcp1.pcp", "tmp1.tmp")]
       self$.data$variables$pcp <- read_weather(file = project_path%//%weather_file[1],
@@ -52,7 +54,9 @@ farmr_project <- R6::R6Class(
     read_management = function(file) {
       self$.data$management$mgt_full <- read_management(file)
       lookup <- read_lookup(self$.data$meta$project_path)
-
+      check_mgt_table(self$.data$management$mgt_full,
+                      lookup,
+                      self$.data$meta$hru_attributes)
       self$.data$management$mgt_codes <-
         translate_mgt_table(self$.data$management$mgt_full, lookup)
     },
