@@ -1,13 +1,13 @@
 management,share,land_use,crop,rules,operation,mgt1,mgt2,mgt3,mgt4,mgt5,mgt6,mgt7,mgt8,mgt9,,
-conv,1,SWHT,SWHT,mmdd > 0312 & mmdd < 0321 +   ,Fertilizer,Elem-N,,,50,0,,,,,,month
-conv,1,SWHT,SWHT,p,Fertilizer,Elem-P,,,22,0,,,,,,mmdd
-conv,1,SWHT,SWHT,<,Tillage,Sprgplow,,,,,,,,,,pcp
-conv,1,SWHT,SWHT,<,Plant,SWHT,,,1536,0,0,0,0,,,pcpcum
-conv,1,SWHT,SWHT,n,Fertilizer,Elem-N,,,50,0,,,,,,phu
-conv,1,SWHT,SWHT,>,Harvest & Kill,,,,,,,,,,,phuplnt
-conv,1,SWHT,SWHT,>,Tillage,Fallplow,,,,,,,,,,api
-conv,1,SWHT,SWHT,,End of year,,,,,,,,,,,
-conv,1,WWHT,WWHT,,Initial crop,WWHT,1,200,1892,,,,,,,
+conv,1,SWHT,SWHT,mmdd > 0312 & mmdd < 0321 +   ,Fertilizer,Elem-N,,,50,0,,,,,,jdn
+conv,1,SWHT,SWHT,p,Fertilizer,Elem-P,,,22,0,,,,,,day
+conv,1,SWHT,SWHT,<,Tillage,Sprgplow,,,,,,,,,,month
+conv,1,SWHT,SWHT,<,Plant,SWHT,,,1536,0,0,0,0,,,mmdd
+conv,1,SWHT,SWHT,n,Fertilizer,Elem-N,,,50,0,,,,,,pcp
+conv,1,SWHT,SWHT,>,Harvest & Kill,,,,,,,,,,,pcpcum
+conv,1,SWHT,SWHT,>,Tillage,Fallplow,,,,,,,,,,phu
+conv,1,SWHT,SWHT,,End of year,,,,,,,,,,,phuplnt
+conv,1,WWHT,WWHT,,Initial crop,WWHT,1,200,1892,,,,,,,prev_op
 conv,1,WWHT,WWHT,<,Fertilizer,Elem-N,,,50,0,,,,,,
 conv,1,WWHT,WWHT,p,Fertilizer,Elem-P,,,22,0,,,,,,
 conv,1,WWHT,WWHT,n,Fertilizer,Elem-N,,,40,0,,,,,,

@@ -48,10 +48,15 @@ farmr_project <- R6::R6Class(
         n_var = (ncol(self$.data$variables$pcp) - 4),
         n_obs = nrow(self$.data$variables$pcp),
         date = select(self$.data$variables$pcp, year, month, day, jdn))
-
-
-
     },
+    read_management = function(file) {
+      self$.data$management$mgt_full <- read_management(file)
+      lookup <- read_lookup(self$.data$meta$project_path)
+
+      self$.data$management$mgt_codes <-
+        translate_mgt_table(self$.data$management$mgt_full, lookup)
+    },
+
     save = function(){
       obj_save <- get(x = self$.data$meta$project_name,
                       envir = sys.frame(-1))

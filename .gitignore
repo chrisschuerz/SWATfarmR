@@ -73,3 +73,5 @@ $RECYCLE.BIN/
 *.zip
 
 data/TxtInOut/
+
+data/mgt_input/
