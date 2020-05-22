@@ -52,12 +52,14 @@ farmr_project <- R6::R6Class(
 
       finish_progress(NULL, t0, "", "Finished")
     },
+
     add_variable = function(data, name) {
       self$.data$variables[[name]] <- add_variable(data, name,
         n_var = (ncol(self$.data$variables$pcp) - 4),
         n_obs = nrow(self$.data$variables$pcp),
         date = select(self$.data$variables$pcp, year, month, day, jdn))
     },
+
     read_management = function(file) {
       self$.data$management$mgt_full <- read_mgt_table(file)
       lookup <- read_lookup(self$.data$meta$project_path)
@@ -66,6 +68,8 @@ farmr_project <- R6::R6Class(
                       self$.data$meta$hru_attributes)
       self$.data$management$mgt_codes <-
         translate_mgt_table(self$.data$management$mgt_full, lookup)
+
+      self$check_rules <- check_rules()
     },
 
     save = function(){
