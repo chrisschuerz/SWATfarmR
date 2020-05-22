@@ -4,17 +4,24 @@
 #'
 #' @importFrom dplyr bind_cols %>%
 #' @importFrom purrr map map_df
+#' @importFrom readr read_lines
 #'
-read_hru_attributes <- function(project_path) {
+read_hru_attributes <- function(project_path, t0) {
   hru_list <- list.files(path = project_path, pattern = "[:0-9:].hru")
   sol_list <- list.files(path = project_path, pattern = "[:0-9:].sol")
 
   hru_files <- map(project_path%//%hru_list, read_lines)
   sol_files <- map(project_path%//%sol_list, read_lines)
-
-  hru_attr <- map_df(hru_files, extract_hru_attr) %>%
-    bind_cols(., map_df(sol_files, extract_sol_attr))
-
+  attr_list <- list()
+  n_hru <- length(hru_list)
+  cat("Initializing farmR:\n")
+  for (i in 1:n_hru) {
+    attr_list[[i]] <-
+      bind_cols(extract_hru_attr(hru_files[[i]]), extract_sol_attr(sol_files[[i]]))
+    display_progress_pct(i, n_hru, t0)
+  }
+  attr_tbl <- map_df(attr_list, ~.x)
+  return(attr_tbl)
 }
 
 #' Extract HRU attributes from the .hru files
@@ -22,6 +29,7 @@ read_hru_attributes <- function(project_path) {
 #' @param str_lines read lines of a .hru file
 #'
 #' @importFrom dplyr %>%
+#' @importFrom readr read_lines
 #' @importFrom stringr str_split str_sub
 #' @importFrom tibble as_tibble
 #'
@@ -86,6 +94,19 @@ read_weather <- function(file, var, skip, digit_var, digit_date) {
     select(year, month, day, jdn, everything())
 }
 
+#' Read SWAT mgt input files
+#'
+#' @param project_path String. Path to the TxtInOut folder of the SWAT project
+#'
+#' @importFrom purrr map
+#' @importFrom readr read_lines
+#'
+read_mgt <- function(project_path) {
+  mgt_list <- list.files(path = project_path, pattern = "[:0-9:].mgt")
+  mgt_files <- map(project_path%//%mgt_list, read_lines)
+  return(mgt_files)
+}
+
 #' Add additional variables that can be used to define rules for
 #'
 #' @param data The table that should be added as a variable. TH number of columns
@@ -126,7 +147,7 @@ add_variable <- function(data, name, n_var, n_obs, date) {
   return(tbl)
 }
 
-read_management <- function(file) {
+read_mgt_table <- function(file) {
   tbl <- read_csv(file, col_types = cols(management = "c",
                                          weight = "d",
                                          land_use = "c",

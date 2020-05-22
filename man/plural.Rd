@@ -7,7 +7,7 @@
 plural(n)
 }
 \arguments{
-\item{n}{INterger number of operations}
+\item{n}{Interger number of operations}
 }
 \description{
 Add plural 's' to the written message if multiple operations done

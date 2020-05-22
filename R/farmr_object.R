@@ -4,6 +4,9 @@
 #'
 #' @import R6
 #' @importFrom dplyr as_tibble select starts_with
+#' @importFrom lubridate now
+#' @importFrom purrr set_names
+#' @importFrom stringr str_replace
 #'
 #' @export
 farmr_project <- R6::R6Class(
@@ -18,10 +21,11 @@ farmr_project <- R6::R6Class(
         stop("FarmR project allready exists in"%&&%project_path)
       }
 
+      t0 <- now()
       self$.data$meta$project_name <- project_name
       self$.data$meta$project_path <- project_path
 
-      self$.data$meta$hru_attributes <- read_hru_attributes(project_path )
+      self$.data$meta$hru_attributes <- read_hru_attributes(project_path, t0)
 
       weather_file <- list.files(project_path)
       weather_file <- weather_file[tolower(weather_file) %in% c("pcp1.pcp", "tmp1.tmp")]
@@ -44,6 +48,9 @@ farmr_project <- R6::R6Class(
                                     as_tibble() %>%
         set_names(., str_replace(colnames(.), "max", "av"))
 
+      self$.data$meta$mgt_raw <- read_mgt(project_path)
+
+      finish_progress(NULL, t0, "", "Finished")
     },
     add_variable = function(data, name) {
       self$.data$variables[[name]] <- add_variable(data, name,
@@ -52,7 +59,7 @@ farmr_project <- R6::R6Class(
         date = select(self$.data$variables$pcp, year, month, day, jdn))
     },
     read_management = function(file) {
-      self$.data$management$mgt_full <- read_management(file)
+      self$.data$management$mgt_full <- read_mgt_table(file)
       lookup <- read_lookup(self$.data$meta$project_path)
       check_mgt_table(self$.data$management$mgt_full,
                       lookup,

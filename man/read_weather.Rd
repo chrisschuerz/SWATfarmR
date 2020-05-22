@@ -17,10 +17,6 @@ read_weather(file, var, skip, digit_var, digit_date)
 
 \item{digit_date}{Vector of length 2 Integers give digits of year and jdn}
 }
-\value{
-Generates a new farmr_project in the working environment (as an R6
-  object) and saves the project the TxtInOut folder.
-}
 \description{
 Read a weather input file
 }
