@@ -7,7 +7,7 @@ read_mgt_table <- function(file) {
                                          operation = "c",
                                          mgt1 = "c",
                                          .default = "d")) %>%
-    select(land_use, weight, management, rules_static, rules_dynamic, operation, starts_with("mgt"))
+    select(land_use, management, weight, rules_static, rules_dynamic, operation, starts_with("mgt"))
   return(tbl)
 }
 
@@ -33,11 +33,13 @@ read_lookup <- function(project_path) {
                                                 "skip",
                                                 "initial_crop")))
 
-  lookup$fertilizer <- read_table(file = project_path%//%"fert.dat", col_names = FALSE) %>%
+  lookup$fertilizer <- read_table(file = project_path%//%"fert.dat",
+                                  col_names = FALSE, col_types = cols()) %>%
     .[,1:2] %>%
     set_names(c("value", "label"))
 
-  lookup$tillage <- read_table(file = project_path%//%"till.dat", col_names = FALSE) %>%
+  lookup$tillage <- read_table(file = project_path%//%"till.dat",
+                               col_names = FALSE, col_types = cols()) %>%
     .[,1:2] %>%
     set_names(c("value", "label"))
 

@@ -69,7 +69,7 @@ farmr_project <- R6::R6Class(
       self$.data$management$mgt_codes <-
         translate_mgt_table(self$.data$management$mgt_full, lookup)
 
-      self$check_rules <- check_rules()
+      # self$check_rules <- check_rules()
     },
 
     save = function(){

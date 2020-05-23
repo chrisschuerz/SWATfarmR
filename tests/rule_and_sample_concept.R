@@ -39,7 +39,7 @@ logit_wgt <- function(x, lwr, upr) {
 }
 
 x <- seq(0,12,0.01)
-lg <- 1 - logit_rng(x, 2,10)
+lg <- 1 - logit_wgt(x, 2, 10)
 lin <- 1 - lin_wgt(x, 2, 10)
 
 
