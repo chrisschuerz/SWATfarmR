@@ -24,7 +24,7 @@ fun <- function(tbls_lst, eval_str, yr, sb) {
     reduce(., left_join, by = c("year","month", "day", "jdn")) %>%
     set_names(., str_remove(colnames(.), "_[:digit:]+$")) %>%
     mutate(mmdd = 100*month + day) %>%
-    mutate(new_col = !!parse_quosure(rule_str)) %>%
+    mutate(new_col = !!parse_expr(rule_str)) %>%
     sample_n(., 1, weight = new_col)
 }
 

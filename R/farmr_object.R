@@ -62,9 +62,9 @@ farmr_project <- R6::R6Class(
 
     read_management = function(file) {
       self$.data$management$mgt_full <- read_mgt_table(file)
-      lookup <- read_lookup(self$.data$meta$project_path)
+      self$.data$meta$parameter_lookup <- read_lookup(self$.data$meta$project_path)
       check_mgt_table(self$.data$management$mgt_full,
-                      lookup,
+                      self$.data$meta$parameter_lookup,
                       self$.data$meta$hru_attributes)
       self$.data$management$mgt_codes <-
         translate_mgt_table(self$.data$management$mgt_full, lookup)

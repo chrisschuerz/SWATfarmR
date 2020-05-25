@@ -46,7 +46,15 @@ read_lookup <- function(project_path) {
   lookup$plant <- read_lines(project_path%//%"plant.dat") %>%
     .[nchar(.) <=14] %>%
     str_split(string = ., pattern = "\\s+") %>%
-    map_df(., ~tibble(value = .x[2], label = .x[3]))
+    map(., ~.x[nchar(.x) > 0]) %>%
+    map_df(., ~tibble(value = .x[1], label = .x[2]))
+
+  lookup$plant$t_base <- read_lines(project_path%//%"plant.dat") %>%
+    .[which(nchar(.) <=14) + 2]%>%
+    str_split(string = ., pattern = "\\s+") %>%
+    map(., ~.x[nchar(.x) > 0]) %>%
+    map_dbl(., ~as.numeric(.x[2]))
+
   return(lookup)
 }
 
@@ -95,7 +103,7 @@ translate_mgt_table <- function(mgt_tbl, lookup) {
     select(-value) %>%
     left_join(., lookup$plant, by = c("mgt1" = "label")) %>%
     mutate(mgt1 = ifelse(operation %in% c(1,99), value, mgt1)) %>%
-    select(-value) %>%
+    select(-value, -t_base) %>%
     left_join(., lookup$fertilizer, by = c("mgt1" = "label")) %>%
     mutate(mgt1 = ifelse(operation == 3, value, mgt1)) %>%
     select(-value) %>%
