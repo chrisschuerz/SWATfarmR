@@ -38,7 +38,7 @@ extract_hru_attr <- function(str_lines) {
     unlist() %>%
     .[nchar(.) > 0] %>%
     list(subbasin  = as.numeric(.[grep("Subbasin", .)+1]),
-         hru  = as.numeric(.[grep("HRU", .)[2]+1]),
+         hru  = as.numeric(.[grep("HRU", .)[1]+1]),
          luse = .[grep("Luse", .)+1],
          soil = .[grep("Soil", .)+1],
          slope_class = .[grep("Slope", .)+1]) %>%
