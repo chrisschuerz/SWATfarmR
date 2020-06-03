@@ -3,10 +3,11 @@
 #' @rdname farmr_project
 #'
 #' @import R6
-#' @importFrom dplyr as_tibble select starts_with
+#' @importFrom dplyr as_tibble select
 #' @importFrom lubridate now
 #' @importFrom purrr set_names
 #' @importFrom stringr str_replace
+#' @importFrom tidyselect starts_with
 #'
 #' @export
 farmr_project <- R6::R6Class(

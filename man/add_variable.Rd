@@ -22,7 +22,7 @@ name must be used in the rule set)}
 }
 \value{
 Generates a new farmr_project in the working environment (as an R6
-  object) and saves the project the TxtInOut folder.
+object) and saves the project the TxtInOut folder.
 }
 \description{
 Add additional variables that can be used to define rules for

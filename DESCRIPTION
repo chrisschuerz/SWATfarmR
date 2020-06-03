@@ -1,21 +1,30 @@
 Package: SWATfarmR
 Type: Package
 Title: Simple rule based scheduling of management operations in SWAT2012
-Version: 0.2.2
-Author: person("Christoph", "Schuerz", 
-                email = "christoph.schuerz@boku.ac.at",
-                role = c("aut", "cre"))
+Version: 1.0.9000
+Authors@R: person("Christoph", "Schuerz",
+                email = "c.schuerz@posteo.org",
+                role = c("aut", "cre"),
+                comment = c(ORCID = '0000-0002-7204-5828'))
+Maintainer: Christoph Schuerz <c.schuerz@posteo.org>
 Description: Simple rule based scheduling of management operations based on 
              climate data and operation schedules for the specific landuses 
-             in a SWAT model
-Depends: R (>= 3.1.0)
-License: MIT
-LazyData: TRUE
+             in a SWAT2012 model
+URL: https://github.com/chrisschuerz/SWATfarmR
+BugReports: https://github.com/chrisschuerz/SWATfarmR/issues
+Depends: R (>= 3.6.0)
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
 Imports:
-    R6, 
-    magrittr,
-    pasta,
-    dplyr,
-    tibble
+    dplyr (>= 0.8.5),
+    lubridate (>= 1.7.8),
+    purrr (>= 0.3.4),
+    R6 (>= 2.4.1),
+    readr (>= 1.3.1),
+    rlang (>= 0.4.6),
+    stringr (>= 1.4.0),
+    tibble (>= 3.0.1)
 RoxygenNote: 7.1.0
-ByteCompile: TRUE
+Roxygen: list(markdown = TRUE)
+VignetteBuilder: knitr

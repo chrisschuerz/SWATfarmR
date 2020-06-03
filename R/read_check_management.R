@@ -1,3 +1,11 @@
+#' Read the management schedule table from a csv file
+#'
+#' @param file Text string path to the csv file
+#'
+#' @importFrom dplyr select %>%
+#' @importFrom readr cols read_csv
+#' @importFrom tidyselect starts_with
+#'
 read_mgt_table <- function(file) {
   tbl <- read_csv(file, col_types = cols(management = "c",
                                          weight = "d",
@@ -11,6 +19,18 @@ read_mgt_table <- function(file) {
   return(tbl)
 }
 
+#' Read the lookup tables for plant, fertilizer, and tillage codes from the SWAT
+#' project
+#'
+#' @param project_path Text string path SWAT TxtInOut folder
+#'
+#' @importFrom dplyr select %>%
+#' @importFrom purrr map map_dbl map_df set_names
+#' @importFrom readr cols read_lines read_table
+#' @importFrom stringr str_split
+#' @importFrom tibble tibble
+#' @importFrom tidyselect starts_with
+#'
 read_lookup <- function(project_path) {
   lookup  <- list(management = tibble(value = c(seq(0,17),99),
                                       label = c("end_year",
@@ -96,6 +116,13 @@ check_mgt_table <- function(mgt_tbl, lookup, hru_attribute) {
   }
 }
 
+#' Translate the operation and management labels into SWAT codes
+#'
+#' @param mgt_tbl Loaded tibble with the management operation schedules
+#' @param lookup  List of lookup tables
+#'
+#' @importFrom dplyr left_join mutate select %>%
+#'
 translate_mgt_table <- function(mgt_tbl, lookup) {
   mgt_tbl %>%
     left_join(., lookup$management, by = c("operation" = "label")) %>%

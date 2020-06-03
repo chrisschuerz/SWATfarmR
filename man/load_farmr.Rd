@@ -11,7 +11,7 @@ load_farmr(file)
 }
 \value{
 Generates a new farmr_project in the working environment (as an R6
-  object) and saves the project the TxtInOut folder.
+object) and saves the project the TxtInOut folder.
 }
 \description{
 Load an existing SWATfarmR project
