@@ -90,7 +90,7 @@ schedule_operation <- function(mgt_schedule, hru_attribute, variables, lookup) {
     schedule[[i_hru]] <- schedule_i
     display_progress(i_hru, nrow(hru_attribute), t0, "HRU")
   }
-
+  SWATfarmR:::finish_progress(nrow(hru_attribute), t0, "Finished scheduling for", "HRU")
   return(list(scheduled_operations = schedule,
               skipped_operations   = op_skip))
 }
