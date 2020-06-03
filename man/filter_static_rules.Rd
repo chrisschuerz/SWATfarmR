@@ -4,12 +4,12 @@
 \alias{filter_static_rules}
 \title{Filter the operations based on the defined static rules}
 \usage{
-filter_static_rules(mgt_tbl, hru_attribute_i)
+filter_static_rules(mgt_tbl, attribute_hru_i)
 }
 \arguments{
 \item{mgt_tbl}{Tibble that provides mgt parameters and rules}
 
-\item{hru_attribute_i}{Tibble with one line that provides the static HRU
+\item{attribute_hru_i}{Tibble with one line that provides the static HRU
 attributes}
 }
 \description{

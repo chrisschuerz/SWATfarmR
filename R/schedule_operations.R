@@ -34,7 +34,7 @@ schedule_operation <- function(mgt_schedule, hru_attribute, variables, lookup) {
   #                       .packages = c("dplyr", "lubridate", "purrr", "pasta", "SWATfarmR", "tibble", "stringr", "rlang"),
   #                       .export=ls.str(envir=globalenv()),
   #                       .options.snow = opts) %dopar% {
-  cat("Scheduling operations:")
+  cat("Scheduling operations:\n")
   for(i_hru in hru_attribute$hru) {
     attribute_hru_i <- hru_attribute[i_hru,]
 
@@ -89,7 +89,7 @@ schedule_operation <- function(mgt_schedule, hru_attribute, variables, lookup) {
     schedule[[attribute_hru_i$file]] <- schedule_i
     display_progress(i_hru, nrow(hru_attribute), t0, "HRU")
   }
-  finish_progress(nrow(hru_attribute), t0, "Finished scheduling for", "HRU")
+  finish_progress(nrow(hru_attribute), t0, "Finished scheduling", "HRU")
 
   return(list(scheduled_operations = schedule,
               skipped_operations   = op_skip))
@@ -100,7 +100,7 @@ schedule_operation <- function(mgt_schedule, hru_attribute, variables, lookup) {
 #'
 #' @param mgt_tbl Tibble that provides mgt parameters and rules
 #'
-#' @importFrom dplyr filter group_by sample_n summarize  %>%
+#' @importFrom dplyr filter group_by sample_n summarise %>%
 #'
 sample_management <- function(mgt_tbl) {
   mgt_sel <- mgt_tbl %>%
@@ -243,7 +243,7 @@ schedule_op_j <- function(schedule_i, mgt_j, date_j) {
 #' @importFrom tibble tibble
 #'
 document_op_skip <- function(op_skip, attribute_hru_i, mgt_j, prev_op, j_op) {
-  skip_i <- tibble(file         = attribute_hru_i$file
+  skip_i <- tibble(file         = attribute_hru_i$file,
                    subbasin     = attribute_hru_i$subbasin,
                    hru          = attribute_hru_i$hru,
                    landuse      = attribute_hru_i$luse,

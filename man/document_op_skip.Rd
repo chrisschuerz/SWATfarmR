@@ -4,12 +4,12 @@
 \alias{document_op_skip}
 \title{Document if an operation scheduling did not result in an operation date}
 \usage{
-document_op_skip(op_skip, hru_attribute_i, mgt_j, prev_op, j_op)
+document_op_skip(op_skip, attribute_hru_i, mgt_j, prev_op, j_op)
 }
 \arguments{
 \item{op_skip}{Tibble that documents the skipped operations}
 
-\item{hru_attribute_i}{Tibble with one line that provides the static HRU}
+\item{attribute_hru_i}{Tibble with one line that provides the static HRU}
 
 \item{mgt_j}{j_th line of the mgt table that should be scheduled}
 

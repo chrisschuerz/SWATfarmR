@@ -15,7 +15,7 @@ read_hru_attributes <- function(project_path, t0) {
   hru_files <- map(project_path%//%file_list%.%"hru", read_lines)
   sol_files <- map(project_path%//%file_list%.%"sol", read_lines)
   attr_list <- list()
-  n_hru <- length(hru_list)
+  n_hru <- length(file_list)
   cat("Initializing farmR:\n")
   for (i in 1:n_hru) {
     attr_list[[i]] <-

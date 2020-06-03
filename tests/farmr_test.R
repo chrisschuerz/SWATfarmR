@@ -1,5 +1,6 @@
 library(SWATfarmR)
 
+raab_farmr <- "/home/christoph/Documents/projects/SWATfarmR/data/TxtInOut/raab.farm"
 pth <- "/home/christoph/Documents/projects/SWATfarmR/data/TxtInOut"
 mgt_file <- "/home/christoph/Documents/projects/SWATfarmR/data/mgt_input/mgt_conv_neu.csv"
 new_farmr("raab", pth)
@@ -7,3 +8,5 @@ new_farmr("raab", pth)
 raab$read_management(file = mgt_file)
 raab$schedule_management_operations()
 raab$save()
+
+load_farmr(file = raab_farmr)
