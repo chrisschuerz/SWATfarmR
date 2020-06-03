@@ -5,13 +5,15 @@
 #' @importFrom dplyr bind_cols %>%
 #' @importFrom purrr map map_df
 #' @importFrom readr read_lines
+#' @importFrom stringr str_remove
+#' @importFrom tibble add_column
 #'
 read_hru_attributes <- function(project_path, t0) {
-  hru_list <- list.files(path = project_path, pattern = "[:0-9:].hru")
-  sol_list <- list.files(path = project_path, pattern = "[:0-9:].sol")
+  file_list <- list.files(path = pth, pattern = "[:0-9:].mgt") %>%
+    str_remove(., ".mgt")
 
-  hru_files <- map(project_path%//%hru_list, read_lines)
-  sol_files <- map(project_path%//%sol_list, read_lines)
+  hru_files <- map(project_path%//%file_list%.%"hru", read_lines)
+  sol_files <- map(project_path%//%file_list%.%"sol", read_lines)
   attr_list <- list()
   n_hru <- length(hru_list)
   cat("Initializing farmR:\n")
@@ -20,7 +22,8 @@ read_hru_attributes <- function(project_path, t0) {
       bind_cols(extract_hru_attr(hru_files[[i]]), extract_sol_attr(sol_files[[i]]))
     display_progress_pct(i, n_hru, t0)
   }
-  attr_tbl <- map_df(attr_list, ~.x)
+  attr_tbl <- map_df(attr_list, ~.x) %>%
+    add_column(., file = file_list, .before = 1)
   return(attr_tbl)
 }
 
@@ -98,12 +101,14 @@ read_weather <- function(file, var, skip, digit_var, digit_date) {
 #'
 #' @param project_path String. Path to the TxtInOut folder of the SWAT project
 #'
-#' @importFrom purrr map
+#' @importFrom purrr map set_names
 #' @importFrom readr read_lines
+#' @importFrom stringr str_remove
 #'
 read_mgt <- function(project_path) {
   mgt_list <- list.files(path = project_path, pattern = "[:0-9:].mgt")
-  mgt_files <- map(project_path%//%mgt_list, read_lines)
+  mgt_files <- map(project_path%//%mgt_list, read_lines) %>%
+    set_names(str_remove(mgt_list, ".mgt"))
   return(mgt_files)
 }
 

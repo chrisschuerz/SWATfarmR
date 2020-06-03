@@ -5,4 +5,5 @@ mgt_file <- "/home/christoph/Documents/projects/SWATfarmR/data/mgt_input/mgt_con
 new_farmr("raab", pth)
 
 raab$read_management(file = mgt_file)
+raab$schedule_management_operations()
 raab$save()

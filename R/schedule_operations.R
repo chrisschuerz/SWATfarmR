@@ -65,8 +65,7 @@ schedule_operation <- function(mgt_schedule, hru_attribute, variables, lookup) {
           if(nchar(mgt_j$rules_dynamic) > 0 &
              !is.na(mgt_j$rules_dynamic) &
              mgt_j$operation != 99) {
-            date_j <- schedule_date_j(var_tbl, mgt_j$rules_dynamic, prev_op,
-                                      attribute_hru_i, j_op)
+            date_j <- schedule_date_j(var_tbl, mgt_j$rules_dynamic, prev_op)
 
             if(is.null(date_j)){
               op_skip <- document_op_skip(op_skip, attribute_hru_i, mgt_j, prev_op, j_op)
@@ -82,15 +81,16 @@ schedule_operation <- function(mgt_schedule, hru_attribute, variables, lookup) {
           j_op <- ifelse(j_op < n_op, j_op + 1, 1)
         }
 
-        schedule_i$schedule <- add_end_year_flag(schedule_i$schedule, attribute_hru_i)
+        schedule_i$schedule <- add_end_year_flag(schedule_i$schedule)
         schedule_i$schedule <- add_skip_year_flag(schedule_i$schedule, variables[[1]])
         schedule_i$schedule$date[schedule_i$schedule$operation == 0] <- NA
       }
     }
-    schedule[[i_hru]] <- schedule_i
+    schedule[[attribute_hru_i$file]] <- schedule_i
     display_progress(i_hru, nrow(hru_attribute), t0, "HRU")
   }
-  SWATfarmR:::finish_progress(nrow(hru_attribute), t0, "Finished scheduling for", "HRU")
+  finish_progress(nrow(hru_attribute), t0, "Finished scheduling for", "HRU")
+
   return(list(scheduled_operations = schedule,
               skipped_operations   = op_skip))
 }
@@ -116,18 +116,18 @@ sample_management <- function(mgt_tbl) {
 #' Filter the operations based on the defined static rules
 #'
 #' @param mgt_tbl Tibble that provides mgt parameters and rules
-#' @param hru_attribute_i Tibble with one line that provides the static HRU
+#' @param attribute_hru_i Tibble with one line that provides the static HRU
 #'   attributes
 #'
 #' @importFrom dplyr transmute %>%
 #' @importFrom purrr map_df
 #' @importFrom rlang parse_expr
 #'
-filter_static_rules <- function(mgt_tbl, hru_attribute_i) {
+filter_static_rules <- function(mgt_tbl, attribute_hru_i) {
   mgt_tbl$rules_static[is.na(mgt_tbl$rules_static)] <- TRUE
 
   sel_rule <- map_df(mgt_tbl$rules_static,
-         ~transmute(hru_attribute_i, sel = !!parse_expr(.x))) %>%
+         ~transmute(attribute_hru_i, sel = !!parse_expr(.x))) %>%
     unlist()
 
   mgt_tbl[sel_rule,]
@@ -234,7 +234,7 @@ schedule_op_j <- function(schedule_i, mgt_j, date_j) {
 #' Document if an operation scheduling did not result in an operation date
 #'
 #' @param op_skip Tibble that documents the skipped operations
-#' @param hru_attribute_i Tibble with one line that provides the static HRU
+#' @param attribute_hru_i Tibble with one line that provides the static HRU
 #' @param mgt_j j_th line of the mgt table that should be scheduled
 #' @param prev_op Date of the previous opeation in ymd() format.
 #' @param j_op index of the operation in the mgt schedule table.
@@ -242,10 +242,11 @@ schedule_op_j <- function(schedule_i, mgt_j, date_j) {
 #' @importFrom dplyr bind_rows filter mutate select %>%
 #' @importFrom tibble tibble
 #'
-document_op_skip <- function(op_skip, hru_attribute_i, mgt_j, prev_op, j_op) {
-  skip_i <- tibble(subbasin     = hru_attribute_i$subbasin,
-                   hru          = hru_attribute_i$hru,
-                   landuse      = hru_attribute_i$luse,
+document_op_skip <- function(op_skip, attribute_hru_i, mgt_j, prev_op, j_op) {
+  skip_i <- tibble(file         = attribute_hru_i$file
+                   subbasin     = attribute_hru_i$subbasin,
+                   hru          = attribute_hru_i$hru,
+                   landuse      = attribute_hru_i$luse,
                    op_number    = j_op,
                    date_prev_op = prev_op,
                    rule         = mgt_j$rules_dynamic,

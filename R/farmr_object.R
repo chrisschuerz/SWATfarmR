@@ -61,7 +61,12 @@ farmr_project <- R6::R6Class(
         date = select(self$.data$variables$pcp, year, month, day, jdn))
     },
 
-    read_management = function(file) {
+    read_management = function(file, discard_schedule = FALSE) {
+      if(!discard_schedule & !is.null(self$.data$scheduled_operations)) {
+        stop("Management operations were already scheduled based on an other ",
+             "management table! If you want to discard the scheduled operations",
+             "and start from scratch, please set 'discard_schedule = TRUE.")
+      }
       self$.data$management$mgt_full <- read_mgt_table(file)
       self$.data$meta$parameter_lookup <- read_lookup(self$.data$meta$project_path)
       check_mgt_table(self$.data$management$mgt_full,
@@ -72,6 +77,13 @@ farmr_project <- R6::R6Class(
                             self$.data$meta$parameter_lookup)
 
       # self$check_rules <- check_rules()
+      self$schedule_management_operations <- function() {
+        self$.data$scheduled_operations <-
+          schedule_operation(mgt_schedule = self$.data$management$mgt_codes,
+                             hru_attribute = self$.data$meta$hru_attributes,
+                             variables = self$.data$variables,
+                             lookup = self$.data$meta$parameter_lookup)
+      }
     },
 
     save = function(){
