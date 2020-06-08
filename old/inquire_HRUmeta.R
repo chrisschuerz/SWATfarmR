@@ -25,3 +25,25 @@ inquire_HRUmeta <- function(mgt_file, soil_file, input_lst, mgtcnop_sel) {
   }
   return(hru_meta)
 }
+
+hru_list <- list.files(path = project_path, pattern = "[:0-9:].hru")
+sol_list <- list.files(path = project_path, pattern = "[:0-9:].sol")
+
+hru_files <- map(project_path%//%hru_list, read_lines)
+sol_files <- map(project_path%//%sol_list, read_lines)
+a <- map_df(hru_files, extract_hru_attr)
+
+extract_hru_attr <- function(str_lines) {
+  hru_attr <- str_split(str_lines[1], "\\ |\\:|\\: ") %>%
+    unlist() %>%
+    .[nchar(.) > 0] %>%
+    list(subbasin  = as.numeric(.[grep("Subbasin", .)+1]),
+         hru  = as.numeric(.[grep("HRU", .)[2]+1]),
+         luse = .[grep("Luse", .)+1],
+         soil = .[grep("Soil", .)+1],
+         slope_class = .[grep("Slope", .)+1]) %>%
+    .[2:length(.)]
+  hru_attr$slope <- as.numeric(str_sub(str_lines[4], 1, 16))
+  hru_attr$slope_length <- as.numeric(str_sub(str_lines[3], 1, 16))
+  return(as_tibble(hru_attr))
+}
