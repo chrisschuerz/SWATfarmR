@@ -15,3 +15,4 @@ all subbasins that can be implemented in dynamic rules.}
 \description{
 Prepare the variable table for the respective HRU
 }
+\keyword{internal}

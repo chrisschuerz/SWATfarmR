@@ -83,7 +83,25 @@ farmr_project <- R6::R6Class(
                              hru_attribute = self$.data$meta$hru_attributes,
                              variables = self$.data$variables,
                              lookup = self$.data$meta$parameter_lookup)
+
+        self$write_mgt_files <- function(start_year = NULL, end_year = NULL, write_all = TRUE) {
+          write_operation(path = self$.data$meta$project_path,
+                          mgt_raw = self$.data$meta$mgt_raw,
+                          schedule = self$.data$scheduled_operations$scheduled_operations,
+                          variable = raab$.data$variables[[1]],
+                          write_all = write_all,
+                          start_year = start_year,
+                          end_year = end_year)
+          self$save()
+        }
+        self$reset_mgt_files <- function() {
+          reset_mgt(path = self$.data$meta$project_path,
+                    mgt_raw = self$.data$meta$mgt_raw)
+          self$save()
+        }
+        self$save()
       }
+      self$save()
     },
 
     save = function(){

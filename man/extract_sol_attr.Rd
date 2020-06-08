@@ -12,3 +12,4 @@ extract_sol_attr(str_lines)
 \description{
 Extract HRU attributes from the .sol files
 }
+\keyword{internal}

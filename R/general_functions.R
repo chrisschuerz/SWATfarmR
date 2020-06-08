@@ -24,7 +24,7 @@ display_progress <- function(n, nmax, t0, word){
       "   ")
 }
 
-#' Display the progress if iterative processes
+#' Display the progress if iterative processes as percentage value
 #'
 #' @param n Iteration step
 #' @param nmax Number of iterations
@@ -67,27 +67,6 @@ finish_progress <- function(nmax, t0, word1, word2) {
     as.character(.) %>%
     cat("\r",word1, nmax, word2%&%plural(nmax), "in", ., "\n")
 }
-
-#' Evaluate the expression defined for a variable in 'output'
-#'
-#' @param table Table to which dplyr expression should be applied
-#' @param expression Expression to be applied to table
-#'
-#' @importFrom dplyr %>%
-#' @keywords internal
-#'
-evaluate_expression <- function(table, expression){
-  paste("table", expression, sep = " %>% ") %>%
-    parse(text = .) %>%
-    eval(.)
-}
-
-#' Convert character string to numeric without displaying warnings
-#'
-#' @param chr Character string
-#' @keywords internal
-#'
-as_num <- function(chr) {suppressWarnings(as.numeric(chr))}
 
 #' Add plural 's' to the written message if multiple operations done
 #'

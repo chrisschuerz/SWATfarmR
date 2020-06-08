@@ -20,3 +20,4 @@ read_weather(file, var, skip, digit_var, digit_date)
 \description{
 Read a weather input file
 }
+\keyword{internal}

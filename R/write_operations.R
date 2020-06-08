@@ -1,4 +1,20 @@
-
+#' Write the mgt files in the TxtInOut folder
+#'
+#' @param path Path to the TxtInOut folder
+#' @param mgt_raw List of original mgt files
+#' @param schedule List of tibbles with the shceduled operations.
+#' @param write_all Logical. If TRUE mgt files are written for all HRUs. If FALSE
+#'   only mgt files are written where operations were scheduled, or an initial
+#'   crop was defined.
+#' @param start_year Numeric. Defines the start year for which to write operations.
+#' @param end_year Numeric. Defines the last year for which to write operations.
+#'
+#' @importFrom dplyr filter  %>%
+#' @importFrom lubridate now year
+#' @importFrom readr write_lines
+#'
+#' @keywords internal
+#'
 write_operation <- function(path, mgt_raw, schedule, variable, write_all, start_year, end_year) {
   year_range <- sort(unique(variable$year))
   if(is.null(start_year)) {
@@ -42,11 +58,19 @@ write_operation <- function(path, mgt_raw, schedule, variable, write_all, start_
       mgt_i <- c(mgt_i, "                17")
     }
     write_lines(mgt_i, path%//%hru_file_i%.%"mgt")
-    SWATfarmR:::display_progress_pct(i_hru, n_hru, t0)
+    display_progress_pct(i_hru, n_hru, t0)
   }
-  SWATfarmR:::finish_progress(nrow(hru_attribute), t0, "Finished writing", "'.mgt' file")
+  write_file_cio(path, start_year, end_year)
+  finish_progress(n_hru, t0, "Finished writing", "'.mgt' file")
 }
 
+#' Write values for any initial crop
+#'
+#' @param mgt_file Lines of the respective mgt file
+#' @param schedule_init tibble with crop_init parameters for the respective HRU
+#'
+#' @keywords internal
+#'
 initialize_crop <- function(mgt_file, schedule_init) {
   mgt_file[4] <- paste(sprintf("%16i", 1),
                        "   | IGRO: Land cover status: 0-none growing; 1-growing")
@@ -61,6 +85,19 @@ initialize_crop <- function(mgt_file, schedule_init) {
   return(mgt_file)
 }
 
+#' Add the scheduled management operations in thve mgt file
+#'
+#' @param mgt_file Lines of the respective mgt file
+#' @param schedule_tbl Tibble with the scheduled operations for the respective HRU
+#'
+#' @importFrom dplyr select  %>%
+#' @importFrom lubridate day month year
+#' @importFrom tibble add_column
+#' @importFrom purrr map2_df
+#' @importFrom stringr str_replace_all
+#'
+#' @keywords internal
+#'
 add_management_schedule <- function(mgt_file, schedule_tbl) {
   nrot <- length(unique(year(schedule_tbl$date)))
   mgt_file[29] <- paste(sprintf("%16i", nrot),
@@ -86,4 +123,50 @@ add_management_schedule <- function(mgt_file, schedule_tbl) {
 
   return(mgt_file)
 
+}
+
+#' Write the start and end dates into the file.cio
+#'
+#' @param path Path to the TxtInOut folder
+#' @param start_year Numeric. Defines the start year for which to write operations.
+#' @param end_year Numeric. Defines the last year for which to write operations.
+#'
+#' @importFrom lubridate leap_year
+#' @importFrom readr read_lines write_lines
+#'
+#' @keywords internal
+#'
+write_file_cio <- function(path, start_year, end_year) {
+  file_cio <- read_lines(path%//%"file.cio")
+  file_cio[8]  <- paste(sprintf("%16i", (end_year - start_year + 1)),
+                        "   | NBYR : Number of years simulated")
+  file_cio[9]  <- paste(sprintf("%16i", start_year),
+                        "   | IYR : Beginning year of simulation")
+  file_cio[10] <- paste(sprintf("%16i", 1),
+                        "   | IDAF : Beginning julian day of simulation")
+  file_cio[11] <- paste(sprintf("%16i", ifelse(leap_year(end_year), 366, 365)),
+                        "   | IDAL : Ending julian day of simulation")
+  write_lines(file_cio, path%//%"file.cio")
+}
+
+#' Reset all management files back to the original files
+#'
+#' @param path Tibble Path to the TxtInOut folder
+#' @param mgt_raw List of original mgt files
+#'
+#' @importFrom lubridate now
+#' @importFrom readr write_lines
+#'
+#' @keywords internal
+#'
+reset_mgt <- function(path, mgt_raw) {
+  cat("Resetting all management files:\n")
+  n_hru <- length(mgt_raw)
+  t0 <- now()
+  for (i_hru in 1:n_hru) {
+    file_i <- names(mgt_raw)[i_hru]
+    write_lines(mgt_raw[[file_i]], path%//%file_i%.%"mgt")
+    SWATfarmR:::display_progress_pct(i_hru, n_hru, t0)
+  }
+  SWATfarmR:::finish_progress(n_hru, t0, "Finished resetting", "'.mgt' file")
 }

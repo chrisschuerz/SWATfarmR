@@ -14,3 +14,4 @@ translate_mgt_table(mgt_tbl, lookup)
 \description{
 Translate the operation and management labels into SWAT codes
 }
+\keyword{internal}

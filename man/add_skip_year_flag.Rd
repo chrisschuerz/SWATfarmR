@@ -16,3 +16,4 @@ add_skip_year_flag(schedule_tbl, variable)
 Add the skip year flag for years in the scheduled mgt table where no
 operations were set.
 }
+\keyword{internal}

@@ -7,6 +7,16 @@ new_farmr("raab", pth)
 
 raab$read_management(file = mgt_file)
 raab$schedule_management_operations()
-raab$save()
+raab$write_mgt_files()
+# raab$reset_mgt_files()
 
-load_farmr(file = raab_farmr)
+# path = raab$.data$meta$project_path
+# mgt_raw = raab$.data$meta$mgt_raw
+# schedule = raab$.data$scheduled_operations$scheduled_operations
+# variable = raab$.data$variables[[1]]
+# write_all = TRUE
+# start_year = 2005
+# end_year = 2010
+
+
+# load_farmr(file = raab_farmr)

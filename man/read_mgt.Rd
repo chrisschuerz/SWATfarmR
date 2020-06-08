@@ -12,3 +12,4 @@ read_mgt(project_path)
 \description{
 Read SWAT mgt input files
 }
+\keyword{internal}

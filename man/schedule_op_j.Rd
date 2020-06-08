@@ -16,3 +16,4 @@ schedule_op_j(schedule_i, mgt_j, date_j)
 \description{
 Add the operation j in the opeation schedule for HRU i
 }
+\keyword{internal}

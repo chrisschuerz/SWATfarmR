@@ -2,7 +2,7 @@
 % Please edit documentation in R/general_functions.R
 \name{display_progress_pct}
 \alias{display_progress_pct}
-\title{Display the progress if iterative processes}
+\title{Display the progress if iterative processes as percentage value}
 \usage{
 display_progress_pct(n, nmax, t0)
 }
@@ -14,6 +14,6 @@ display_progress_pct(n, nmax, t0)
 \item{t0}{initial time step}
 }
 \description{
-Display the progress if iterative processes
+Display the progress if iterative processes as percentage value
 }
 \keyword{internal}

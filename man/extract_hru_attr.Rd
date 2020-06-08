@@ -12,3 +12,4 @@ extract_hru_attr(str_lines)
 \description{
 Extract HRU attributes from the .hru files
 }
+\keyword{internal}

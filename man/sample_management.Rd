@@ -14,3 +14,4 @@ sample_management(mgt_tbl)
 Sample management type if different management types are provided for the
 same land use
 }
+\keyword{internal}

@@ -20,3 +20,4 @@ document_op_skip(op_skip, attribute_hru_i, mgt_j, prev_op, j_op)
 \description{
 Document if an operation scheduling did not result in an operation date
 }
+\keyword{internal}

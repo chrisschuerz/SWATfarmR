@@ -6,6 +6,8 @@
 #' @importFrom readr cols read_csv
 #' @importFrom tidyselect starts_with
 #'
+#' @keywords internal
+#'
 read_mgt_table <- function(file) {
   tbl <- read_csv(file, col_types = cols(management = "c",
                                          weight = "d",
@@ -30,6 +32,8 @@ read_mgt_table <- function(file) {
 #' @importFrom stringr str_split
 #' @importFrom tibble tibble
 #' @importFrom tidyselect starts_with
+#'
+#' @keywords internal
 #'
 read_lookup <- function(project_path) {
   lookup  <- list(management = tibble(value = c(seq(0,17),99),
@@ -122,6 +126,8 @@ check_mgt_table <- function(mgt_tbl, lookup, hru_attribute) {
 #' @param lookup  List of lookup tables
 #'
 #' @importFrom dplyr left_join mutate select %>%
+#'
+#' @keywords internal
 #'
 translate_mgt_table <- function(mgt_tbl, lookup) {
   mgt_tbl %>%

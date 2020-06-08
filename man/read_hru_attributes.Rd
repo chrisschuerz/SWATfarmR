@@ -12,3 +12,4 @@ read_hru_attributes(project_path, t0)
 \description{
 Read HRU attributes from the .hru and .sol files
 }
+\keyword{internal}

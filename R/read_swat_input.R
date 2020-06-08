@@ -8,6 +8,8 @@
 #' @importFrom stringr str_remove
 #' @importFrom tibble add_column
 #'
+#' @keywords internal
+#'
 read_hru_attributes <- function(project_path, t0) {
   file_list <- list.files(path = pth, pattern = "[:0-9:].mgt") %>%
     str_remove(., ".mgt")
@@ -36,6 +38,8 @@ read_hru_attributes <- function(project_path, t0) {
 #' @importFrom stringr str_split str_sub
 #' @importFrom tibble as_tibble
 #'
+#' @keywords internal
+#'
 extract_hru_attr <- function(str_lines) {
   hru_attr <- str_split(str_lines[1], "\\ |\\:|\\: ") %>%
     unlist() %>%
@@ -59,6 +63,8 @@ extract_hru_attr <- function(str_lines) {
 #' @importFrom stringr str_split
 #' @importFrom tibble tibble
 #'
+#' @keywords internal
+#'
 extract_sol_attr <- function(str_lines) {
   tibble(soil_hydr_group = str_split(str_lines[3], "\\:", simplify = TRUE)[2] %>%
            trimws(.),
@@ -78,6 +84,8 @@ extract_sol_attr <- function(str_lines) {
 #' @importFrom dplyr mutate select everything
 #' @importFrom lubridate month day
 #' @importFrom magrittr %>%
+#'
+#' @keywords internal
 #'
 read_weather <- function(file, var, skip, digit_var, digit_date) {
   n_var <-  (nchar(readLines(file, n = (skip + 1))[(skip + 1)]) -
@@ -105,6 +113,8 @@ read_weather <- function(file, var, skip, digit_var, digit_date) {
 #' @importFrom readr read_lines
 #' @importFrom stringr str_remove
 #'
+#' @keywords internal
+#'
 read_mgt <- function(project_path) {
   mgt_list <- list.files(path = project_path, pattern = "[:0-9:].mgt")
   mgt_files <- map(project_path%//%mgt_list, read_lines) %>%
@@ -129,6 +139,8 @@ read_mgt <- function(project_path) {
 #'
 #' @return Generates a new farmr_project in the working environment (as an R6
 #'   object) and saves the project the TxtInOut folder.
+#'
+#' @keywords internal
 #'
 add_variable <- function(data, name, n_var, n_obs, date) {
   if(is.null(dim(data))) {

@@ -11,6 +11,8 @@
 #' @importFrom lubridate now
 #' @importFrom purrr set_names
 #'
+#' @keywords internal
+#'
 schedule_operation <- function(mgt_schedule, hru_attribute, variables, lookup) {
   schedule <- list()
   op_skip <- NULL
@@ -102,6 +104,8 @@ schedule_operation <- function(mgt_schedule, hru_attribute, variables, lookup) {
 #'
 #' @importFrom dplyr filter group_by sample_n summarise %>%
 #'
+#' @keywords internal
+#'
 sample_management <- function(mgt_tbl) {
   mgt_sel <- mgt_tbl %>%
     group_by(management) %>%
@@ -122,6 +126,8 @@ sample_management <- function(mgt_tbl) {
 #' @importFrom dplyr transmute %>%
 #' @importFrom purrr map_df
 #' @importFrom rlang parse_expr
+#'
+#' @keywords internal
 #'
 filter_static_rules <- function(mgt_tbl, attribute_hru_i) {
   mgt_tbl$rules_static[is.na(mgt_tbl$rules_static)] <- TRUE
@@ -144,6 +150,8 @@ filter_static_rules <- function(mgt_tbl, attribute_hru_i) {
 #' @importFrom purrr map map_chr reduce set_names
 #' @importFrom stringr str_remove
 #' @importFrom tidyselect any_of
+#'
+#' @keywords internal
 #'
 prepare_variables <- function(var_list, subbasin) {
   var_names <- map_chr(var_list, ~colnames(.x)[5]) %>%
@@ -174,6 +182,8 @@ prepare_variables <- function(var_list, subbasin) {
 #' @importFrom dplyr filter mutate sample_n %>%
 #' @importFrom lubridate year ymd
 #' @importFrom rlang parse_expr
+#'
+#' @keywords internal
 #'
 schedule_date_j <- function(var_tbl, eval_str, prev_op) {
   wgt_tbl <- var_tbl %>%
@@ -213,6 +223,8 @@ schedule_date_j <- function(var_tbl, eval_str, prev_op) {
 #' @importFrom purrr set_names
 #' @importFrom tibble add_column
 #'
+#' @keywords internal
+#'
 schedule_op_j <- function(schedule_i, mgt_j, date_j) {
   if(mgt_j$operation == 99 & is.null(schedule_i$init_crop)) {
     schedule_i$init_crop <- mgt_j[,3:6] %>%
@@ -241,6 +253,8 @@ schedule_op_j <- function(schedule_i, mgt_j, date_j) {
 #'
 #' @importFrom dplyr bind_rows filter mutate select %>%
 #' @importFrom tibble tibble
+#'
+#' @keywords internal
 #'
 document_op_skip <- function(op_skip, attribute_hru_i, mgt_j, prev_op, j_op) {
   skip_i <- tibble(file         = attribute_hru_i$file,
@@ -278,6 +292,12 @@ compute_hu <- function(var_tbl, mgt_j, plant_dat, date_j) {
              hu_fr = NA)
   }
 
+  if(op_i == 7 & !is.null(date_j) & !is.na(mgt_j$mgt5)) {
+    var_tbl <- var_tbl %>%
+      mutate(hu = hu*(1 - mgt_j$mgt5),
+             hu_fr = hu_fr*(1 - mgt_j$mgt5))
+  }
+
   return(var_tbl)
 }
 
@@ -289,6 +309,8 @@ compute_hu <- function(var_tbl, mgt_j, plant_dat, date_j) {
 #' @importFrom lubridate year ymd
 #' @importFrom purrr map
 #' @importFrom tibble add_row
+#'
+#' @keywords internal
 #'
 add_end_year_flag <- function(schedule_tbl) {
   schedule_tbl <- schedule_tbl %>%
@@ -322,6 +344,8 @@ add_end_year_flag <- function(schedule_tbl) {
 #' @importFrom purrr map_df
 #' @importFrom tibble tibble
 #'
+#' @keywords internal
+#'
 add_skip_year_flag <- function(schedule_tbl, variable) {
   year_tbl <- tibble(yr = unique(variable$year))
 
@@ -340,24 +364,11 @@ add_skip_year_flag <- function(schedule_tbl, variable) {
 #'
 #' @param tbl Tibble in the list of tibbles grouped by years
 #'
+#' @keywords internal
+#'
 set_skip_flag <- function(tbl) {
   if(nrow(tbl) == 1 & any(is.na(tbl$operation))) {
     tbl$operation <- 17
   }
   return(tbl)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

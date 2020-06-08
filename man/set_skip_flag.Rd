@@ -14,3 +14,4 @@ set_skip_flag(tbl)
 Set the skip flag for entries in the list of tibbles with only one row and
 all NA values for operation
 }
+\keyword{internal}
