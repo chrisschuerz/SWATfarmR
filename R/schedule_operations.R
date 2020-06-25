@@ -110,11 +110,16 @@ sample_management <- function(mgt_tbl) {
   mgt_sel <- mgt_tbl %>%
     group_by(management) %>%
     summarise(weight = max(weight, na.rm = TRUE)) %>%
-    sample_n(., 1, weight = weight) %>%
-    .$management
+    filter(., !is.na(management))
 
-  mgt_tbl %>%
-    filter(management == mgt_sel)
+  if (nrow(mgt_sel) > 0) {
+    mgt_sel <- sample_n(mgt_sel, 1, weight = weight) %>%
+    .$management
+    mgt_tbl <- mgt_tbl %>%
+      filter(., is.na(management) | management == mgt_sel)
+  }
+
+  return(mgt_tbl)
 }
 
 #' Filter the operations based on the defined static rules
