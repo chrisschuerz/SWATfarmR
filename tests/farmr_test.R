@@ -1,14 +1,14 @@
-library(SWATfarmR)
-library(tidyverse)
-raab_farmr <- "/home/christoph/Documents/projects/SWATfarmR/data/TxtInOut/raab.farm"
-pth <- "/home/christoph/Documents/projects/SWATfarmR/data/TxtInOut"
-mgt_file <- "/home/christoph/Documents/projects/SWATfarmR/data/mgt_input/mgt_conv_neu.csv"
-new_farmr("raab", pth)
+  library(SWATfarmR)
+  library(tidyverse)
+  raab_farmr <- "/home/christoph/Documents/projects/SWATfarmR/data/TxtInOut/raab.farm"
+  pth <- "/home/christoph/Documents/projects/SWATfarmR/data/TxtInOut"
+  mgt_file <- "/home/christoph/Documents/projects/SWATfarmR/data/mgt_input/mgt_conv_neu.csv"
+  new_farmr("raab", pth)
 
-raab$read_management(file = mgt_file)
-raab$schedule_management_operations()
-raab$write_mgt_files()
-raab$reset_mgt_files()
+  raab$read_management(file = mgt_file)
+  raab$schedule_management_operations()
+  raab$write_mgt_files()
+  raab$reset_mgt_files()
 
 # path = raab$.data$meta$project_path
 # mgt_raw = raab$.data$meta$mgt_raw
