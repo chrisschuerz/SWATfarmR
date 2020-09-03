@@ -11,8 +11,13 @@
 #' @keywords internal
 #'
 read_hru_attributes <- function(project_path, t0) {
-  file_list <- list.files(path = pth, pattern = "[:0-9:].mgt") %>%
+
+  file_list <- list.files(path = project_path, pattern = "[:0-9:].mgt") %>%
     str_remove(., ".mgt")
+
+  if(length(file_list) == 0) {
+    stop("No input files found. Please check the path to the SWAT2012 project.")
+  }
 
   hru_files <- map(project_path%//%file_list%.%"hru", read_lines)
   sol_files <- map(project_path%//%file_list%.%"sol", read_lines)

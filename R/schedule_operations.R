@@ -41,10 +41,13 @@ schedule_operation <- function(mgt_schedule, hru_attribute, variables, lookup) {
     attribute_hru_i <- hru_attribute[i_hru,]
 
     mgt_hru_i <- mgt_schedule %>%
-      filter(land_use == attribute_hru_i$luse) %>%
-      sample_management(.) %>%
-      filter_static_rules(., attribute_hru_i) %>%
-      select(-land_use, -management, -weight, -rules_static)
+      filter(land_use == attribute_hru_i$luse)
+
+    if(attribute_hru_i$luse %in% mgt_schedule$land_use) {
+      mgt_hru_i <- sample_management(mgt_hru_i) %>%
+        filter_static_rules(., attribute_hru_i) %>%
+        select(-land_use, -management, -weight, -rules_static)
+    }
 
     schedule_i <- list(init_crop = NULL, schedule = NULL)
 
@@ -107,16 +110,30 @@ schedule_operation <- function(mgt_schedule, hru_attribute, variables, lookup) {
 #' @keywords internal
 #'
 sample_management <- function(mgt_tbl) {
-  mgt_sel <- mgt_tbl %>%
-    group_by(management) %>%
-    summarise(weight = max(weight, na.rm = TRUE)) %>%
-    filter(., !is.na(management))
 
-  if (nrow(mgt_sel) > 0) {
-    mgt_sel <- sample_n(mgt_sel, 1, weight = weight) %>%
-    .$management
-    mgt_tbl <- mgt_tbl %>%
-      filter(., is.na(management) | management == mgt_sel)
+  # unique_mgt <- unique(mgt_tbl$management)
+  # unique_wgt <- unique(mgt_tbl$weight)
+  # mgt_check <- (all(is.na(unique_mgt)) | all(!is.na(unique_mgt))) &
+  #              (all(is.na(unique_wgt)) | all(!is.na(unique_wgt)))
+  #
+  # if(!mgt_check){
+  #   stop("Issues found in the 'management' and 'weight' definition of '",
+  #        mgt_tbl$land_use[1], "'.\n  Either all ar NA or all managements are named",
+  #        " and do have weights.")
+  # }
+
+  if(!all(is.na(mgt_tbl$management))) {
+    mgt_sel <- mgt_tbl %>%
+      filter(., !is.na(management)) %>%
+      group_by(management) %>%
+      summarise(weight = max(weight, na.rm = TRUE))
+
+    if (nrow(mgt_sel) > 0) {
+      mgt_sel <- sample_n(mgt_sel, 1, weight = weight) %>%
+      .$management
+      mgt_tbl <- mgt_tbl %>%
+        filter(., is.na(management) | management == mgt_sel)
+    }
   }
 
   return(mgt_tbl)

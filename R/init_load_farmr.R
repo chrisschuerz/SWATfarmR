@@ -3,8 +3,6 @@
 #' @param project_name the name of the farmr project.
 #' @param project_path Path to the SWAT TxtInOut folder to which the farmr
 #'   should be applied.
-
-#' @importFrom pasta %//%
 #'
 #' @return Generates a new farmr_project in the working environment (as an R6
 #'   object) and saves the project the TxtInOut folder.
@@ -21,8 +19,6 @@ new_farmr <- function(project_name, project_path) {
 #' Load an existing SWATfarmR project
 #'
 #' @param file File path of a swatfarmr project located in a TxtInOut folder.
-
-#' @importFrom pasta %//%
 #'
 #' @return Generates a new farmr_project in the working environment (as an R6
 #'   object) and saves the project the TxtInOut folder.
