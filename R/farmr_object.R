@@ -88,7 +88,7 @@ farmr_project <- R6::R6Class(
           write_operation(path = self$.data$meta$project_path,
                           mgt_raw = self$.data$meta$mgt_raw,
                           schedule = self$.data$scheduled_operations$scheduled_operations,
-                          variable = raab$.data$variables[[1]],
+                          variable = self$.data$variables[[1]],
                           write_all = write_all,
                           start_year = start_year,
                           end_year = end_year)

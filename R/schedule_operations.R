@@ -50,7 +50,7 @@ schedule_operation <- function(mgt_schedule, hru_attribute, variables, lookup) {
 
     if(nrow(mgt_hru_i) > 0) {
       if(all(mgt_hru_i$operation == 99)){
-        schedule_i$init_crop <- mgt_j[,3:6] %>%
+        schedule_i$init_crop <- mgt_hru_i[,3:6] %>%
           set_names(c("plant_id", "lai_init", "bio_init", "phu_plant"))
       } else {
         j_op <- 1
@@ -282,7 +282,7 @@ compute_hu <- function(var_tbl, mgt_j, plant_dat, date_j) {
   op_i <- mgt_j$operation
   if(op_i %in% c(1, 99) & !is.null(date_j)) {
     plant_i <- mgt_j$mgt1
-    t_base <- filter(plant_dat, value == plant_i) %>% .$t_base
+    t_base <- filter(plant_dat, value == plant_i) %>% .$t_base %>% .[1]
     phu <- mgt_j$mgt4
     var_tbl <- var_tbl %>%
       mutate(hu = ifelse(date >= date_j, tav - t_base, 0),

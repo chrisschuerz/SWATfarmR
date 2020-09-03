@@ -53,7 +53,7 @@ write_operation <- function(path, mgt_raw, schedule, variable, write_all, start_
       mgt_i <- add_management_schedule(mgt_i, schedule_tbl)
     } else if(write_all) {
       mgt_i <- mgt_i[1:30]
-      mgt_file[29] <- paste(sprintf("%16i", 1),
+      mgt_i[29] <- paste(sprintf("%16i", 1),
                             "   | NROT: number of years of rotation")
       mgt_i <- c(mgt_i, "                17")
     }
