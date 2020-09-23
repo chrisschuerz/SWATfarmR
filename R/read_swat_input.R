@@ -219,11 +219,11 @@ add_variable <- function(data, name, n_var, n_obs, date) {
     if (nrow(data) != n_obs) {
       stop("The number of rows in 'data' is different to the number of rows of the weather data.")
     }
-    if (ncol(data) != n_obs) {
+    if (ncol(data) != n_var) {
       stop("The number of columns in 'data' is different to the number of subbasins.")
     }
-    tbl <- tibble(data) %>%
-      set_names(c(paste(name, 1:n_var, sep = "_")))
+    tbl <- as_tibble(data) %>%
+      set_names(paste(name, 1:n_var, sep = "_"))
     tbl <- bind_cols(date, tbl)
   }
   return(tbl)
