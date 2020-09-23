@@ -49,6 +49,8 @@ farmr_project <- R6::R6Class(
                                     as_tibble() %>%
         set_names(., str_replace(colnames(.), "max", "av"))
 
+      self$.data$variables <- assign_subbasin_weather(project_path, self$.data$variables)
+
       self$.data$meta$mgt_raw <- read_mgt(project_path)
 
       finish_progress(NULL, t0, "", "Finished")

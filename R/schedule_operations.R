@@ -38,6 +38,7 @@ schedule_operation <- function(mgt_schedule, hru_attribute, variables, lookup) {
   #                       .options.snow = opts) %dopar% {
   cat("Scheduling operations:\n")
   for(i_hru in hru_attribute$hru) {
+
     attribute_hru_i <- hru_attribute[i_hru,]
 
     mgt_hru_i <- mgt_schedule %>%

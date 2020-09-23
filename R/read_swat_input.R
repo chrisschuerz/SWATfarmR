@@ -85,15 +85,14 @@ extract_sol_attr <- function(str_lines) {
 #' @param digit_var Integer, number of digits per variable
 #' @param digit_date Vector of length 2 Integers give digits of year and jdn
 
-#' @importFrom readr cols fwf_widths read_fwf
-#' @importFrom dplyr mutate select everything
+#' @importFrom dplyr mutate select everything %>%
+#' @importFrom readr cols fwf_widths read_fwf read_lines
 #' @importFrom lubridate month day
-#' @importFrom magrittr %>%
 #'
 #' @keywords internal
 #'
 read_weather <- function(file, var, skip, digit_var, digit_date) {
-  n_var <-  (nchar(readLines(file, n = (skip + 1))[(skip + 1)]) -
+  n_var <-  (nchar(read_lines(file, n_max = (skip + 1))[(skip + 1)]) -
                sum(digit_date)) / digit_var
 
   cols <- fwf_widths(c(digit_date[1],digit_date[2], rep(digit_var,n_var)),
@@ -108,6 +107,67 @@ read_weather <- function(file, var, skip, digit_var, digit_date) {
            day   = day(date)) %>%
     select(-date) %>%
     select(year, month, day, jdn, everything())
+}
+
+#' Assign the correct weather stations to the subbasins and return updated variables
+#'
+#' @param project_path Path string to SWAT project folder.
+#' @param variables List of tibbles with read weather station data
+#'
+#' @importFrom dplyr mutate %>%
+#' @importFrom purrr map map_df set_names
+#' @importFrom readr read_lines
+#' @importFrom stringr str_remove
+#' @importFrom tibble tibble
+#'
+#' @keywords internal
+#'
+assign_subbasin_weather <- function(project_path, variables) {
+  sub_list <- list.files(path = project_path, pattern = "[:0-9:].sub")
+  sub_files <- map(project_path%//%sub_list, read_lines)
+
+  sub_tbl <- sub_files %>%
+    map_df(., ~ tibble(pcp  = get_value(.x[7]),
+                       tmin = get_value(.x[8]),
+                       tmax = get_value(.x[8]),
+                       tav  = get_value(.x[8]),
+#                       slr = get_value(.x[9]), # can be added in future if other weather data relevant
+#                       hmd = get_value(.x[10]),
+#                       wnd = get_value(.x[11])
+           )) %>%
+    mutate(subbasin = str_remove(sub_list, "0000.sub") %>% as.numeric())
+
+  variables <- map(names(variables), ~assign_var_i(variables, sub_tbl, .x)) %>%
+    set_names(names(variables))
+
+  return(variables)
+}
+
+#' Get numeric value from line in input file
+#'
+#' @param x The text string line.
+#'
+#' @keywords internal
+#'
+get_value <- function(x) {
+  as.numeric(substr(x, 1,16))
+}
+
+#' Assign the correct weather stations to the subbasins for the variable i
+#'
+#' @param var List of weather variables tables.
+#' @param sub Table that links weather stations to subbasins
+#' @param var_i String label for the variable i
+#'
+#' @importFrom dplyr %>%
+#' @importFrom purrr set_names
+#'
+#' @keywords internal
+#'
+assign_var_i <- function(var, sub, var_i) {
+  var[[var_i]] <- var[[var_i]][,c(1:4, unlist(sub[var_i]) + 4)] %>%
+    set_names(c("year", "month", "day", "jdn", var_i%_%sub$subbasin))
+  return(var[[var_i]])
 }
 
 #' Read SWAT mgt input files
