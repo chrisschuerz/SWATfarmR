@@ -89,7 +89,7 @@ schedule_operation <- function(mgt_schedule, hru_attribute, variables, lookup) {
 
         schedule_i$schedule <- add_end_year_flag(schedule_i$schedule)
         schedule_i$schedule <- add_skip_year_flag(schedule_i$schedule, variables[[1]])
-        schedule_i$schedule$date[schedule_i$schedule$operation == 0] <- NA
+        # schedule_i$schedule$date[schedule_i$schedule$operation == 0] <- NA
       }
     }
     schedule[[attribute_hru_i$file]] <- schedule_i

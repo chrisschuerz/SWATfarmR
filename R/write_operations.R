@@ -48,7 +48,8 @@ write_operation <- function(path, mgt_raw, schedule, variable, write_all, start_
     if(!is.null(schedule_i$schedule)) {
       schedule_tbl <- schedule_i$schedule %>%
         filter(year(date) >= start_year) %>%
-        filter(year(date) <= end_year)
+        filter(year(date) <= end_year) %>%
+        mutate(date = ifelse(operation %in% c(0, 17), NA, date))
 
       mgt_i <- add_management_schedule(mgt_i, schedule_tbl)
     } else if(write_all) {
