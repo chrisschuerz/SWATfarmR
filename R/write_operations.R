@@ -9,8 +9,8 @@
 #' @param start_year Numeric. Defines the start year for which to write operations.
 #' @param end_year Numeric. Defines the last year for which to write operations.
 #'
-#' @importFrom dplyr filter  %>%
-#' @importFrom lubridate now year
+#' @importFrom dplyr filter if_else %>%
+#' @importFrom lubridate now year ymd
 #' @importFrom readr write_lines
 #'
 #' @keywords internal
@@ -49,7 +49,7 @@ write_operation <- function(path, mgt_raw, schedule, variable, write_all, start_
       schedule_tbl <- schedule_i$schedule %>%
         filter(year(date) >= start_year) %>%
         filter(year(date) <= end_year) %>%
-        mutate(date = ifelse(operation %in% c(0, 17), NA, date))
+        mutate(date = if_else(operation %in% c(0, 17), ymd(NA) , date))
 
       mgt_i <- add_management_schedule(mgt_i, schedule_tbl)
     } else if(write_all) {
