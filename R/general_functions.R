@@ -1,3 +1,54 @@
+#' Identify the SWAT version of the project path
+#'
+#' @param project_path Text string path to the project TxtInOut folder
+#'
+#' @importFrom readr read_lines
+#' @importFrom stringr str_detect
+#' @keywords internal
+#'
+check_version <- function(project_path) {
+  file_cio <- read_lines(project_path%//%'file.cio')
+  swat_version <- c(0,0)
+  if (length(file_cio > 70)) {
+    swat_version[1] <- swat_version[1] + 1
+  } else {
+    swat_version[2] <- swat_version[2] + 1
+  }
+  if (any(str_detect(file_cio, 'General Information/Watershed Configuration'))) {
+    swat_version[1] <- swat_version[1] + 1
+  } else {
+    swat_version[2] <- swat_version[2] + 1
+  }
+  if (any(str_detect(file_cio, 'Reach output variables:'))) {
+    swat_version[1] <- swat_version[1] + 1
+  } else {
+    swat_version[2] <- swat_version[2] + 1
+  }
+  if (any(str_detect(file_cio, 'simulation'))) {
+    swat_version[2] <- swat_version[2] + 1
+  } else {
+    swat_version[1] <- swat_version[1] + 1
+  }
+  if (any(str_detect(file_cio, 'connect'))) {
+    swat_version[2] <- swat_version[2] + 1
+  } else {
+    swat_version[1] <- swat_version[1] + 1
+  }
+  if (any(str_detect(file_cio, 'routing_unit'))) {
+    swat_version[2] <- swat_version[2] + 1
+  } else {
+    swat_version[1] <- swat_version[1] + 1
+  }
+  if(swat_version[1] > 4) {
+    return('2012')
+  } else if (swat_version[2] > 4) {
+    return('plus')
+  } else {
+    stop('Cannot identify the SWAT version of the project')
+  }
+}
+
+
 #' Display the progress if iterative processes
 #'
 #' @param n Iteration step

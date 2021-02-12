@@ -25,6 +25,7 @@ farmr_project <- R6::R6Class(
       t0 <- now()
       self$.data$meta$project_name <- project_name
       self$.data$meta$project_path <- project_path
+      self$.data$meta$swat_version <- check_version(project_path)
 
       self$.data$meta$hru_attributes <- read_hru_attributes(project_path, t0)
 
