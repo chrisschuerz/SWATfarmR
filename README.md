@@ -9,10 +9,10 @@
 - routine read in weather inputs
 - routine read HRU properties
 
-### Mit/Long term ideas
+### Mid/Long term ideas
 - comparison of farmR setup to the decision tables
 
 
 ## `SWATfarmR` workflow concept
 
-![](/man/figures/swatfarmr_concept.svg)
+![](/man/figures/farmr_workflow.svg)
