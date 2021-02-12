@@ -109,6 +109,65 @@ read_weather <- function(file, var, skip, digit_var, digit_date) {
     select(year, month, day, jdn, everything())
 }
 
+#' Read a weather input file
+#'
+#' @param file Path string to weather input file.
+#' @param var  Character vector that defines the variables
+#' @param skip Integer to skip the header
+#' @param digit_var Integer, number of digits per variable
+#' @param digit_date Vector of length 2 Integers give digits of year and jdn
+
+#' @importFrom dplyr mutate select everything %>%
+#' @importFrom readr cols fwf_widths read_fwf read_lines
+#' @importFrom lubridate month day
+#'
+#' @keywords internal
+#'
+read_weather_plus <- function(project_path) {
+  weather_sta <- read_table(project_path%//%'weather-sta.cli', skip = 1)
+
+  pcp_files <- unique(weather_sta$pcp)
+  tmp_files <- unique(weather_sta$tmp)
+
+  check_if_daily(pcp_files, project_path)
+  check_if_daily(tmp_files, project_path)
+
+  pcp <- map(pcp_files, ~ read_table(project_path%//%.x,
+                                     col_names = c('year', 'jdn',
+                                                   str_remove(.x, '.pcp')),
+                                     skip = 3)) %>%
+    map(., ~ mutate(.x, date = as.Date(jdn%//%year, "%j/%Y"))) %>%
+    map(., ~ .x[,c(4,3)]) %>%
+    reduce(., full_join, by = 'date')
+
+
+  tmp <- map(tmp_files, ~ read_table(project_path%//%.x,
+                                     col_names = c('year', 'jdn',
+                                                   str_remove(.x, '.tmp')%_%'max',
+                                                   str_remove(.x, '.tmp')%_%'min'),
+                                     skip = 3)) %>%
+    map(., ~ mutate(.x, date = as.Date(jdn%//%year, "%j/%Y"))) %>%
+    map(., ~ .x[,c(5,3,4)]) %>%
+    reduce(., full_join, by = 'date')
+
+  tmax <-  select(tmp, date, ends_with("_max"))
+  tmin <-  select(tmp, date, ends_with("_min"))
+  tav <-  map2_df(select(tmin, -date), select(tmax, -date), ~ (.x + .y)/2) %>%
+    add_column(., date = tmin$date, .before = 1)
+}
+
+check_if_daily <- function(files, project_path) {
+  is_daily <- map(files, ~read_lines(project_path%//%.x , skip = 2, n_max = 1)) %>%
+    map(., ~str_split(.x, "\\s+")) %>%
+    map(., ~.x[[1]][nchar(.x[[1]]) > 0]) %>%
+    map(., as.numeric) %>%
+    map_lgl(., ~.x[2] == 0)
+
+  if(!all(is_daily)) {
+    stop("All 'pcp' and 'tmp' weather inputs must have daily time steps to be used.")
+  }
+}
+
 #' Assign the correct weather stations to the subbasins and return updated variables
 #'
 #' @param project_path Path string to SWAT project folder.
