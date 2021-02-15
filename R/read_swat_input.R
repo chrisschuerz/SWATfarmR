@@ -77,54 +77,86 @@ extract_sol_attr <- function(str_lines) {
            as.numeric(.))
 }
 
-#' Read a weather input file
-#'
-#' @param file Path string to weather input file.
-#' @param var  Character vector that defines the variables
-#' @param skip Integer to skip the header
-#' @param digit_var Integer, number of digits per variable
-#' @param digit_date Vector of length 2 Integers give digits of year and jdn
 
-#' @importFrom dplyr mutate select everything %>%
-#' @importFrom readr cols fwf_widths read_fwf read_lines
-#' @importFrom lubridate month day
+#' Read the weather data
+#'
+#' @param project_path String. Path to the TxtInOut folder of the SWAT project
+#' @param version String that indicates what SWAT version the project is.
 #'
 #' @keywords internal
 #'
-read_weather <- function(file, var, skip, digit_var, digit_date) {
-  n_var <-  (nchar(read_lines(file, n_max = (skip + 1))[(skip + 1)]) -
-               sum(digit_date)) / digit_var
-
-  cols <- fwf_widths(c(digit_date[1],digit_date[2], rep(digit_var,n_var)),
-                     col_names = c("year", "jdn", rep(var, n_var/length(var))%_%
-                                   rep(1:(n_var/length(var)), each = length(var))))
-
-  read_fwf(file = file, col_positions = cols,
-           col_types = cols(.default = "d", year = "i", jdn = "i"),
-           skip = 4) %>%
-    mutate(date  = as.Date(jdn%//%year, "%j/%Y"),
-           month = month(date),
-           day   = day(date)) %>%
-    select(-date) %>%
-    select(year, month, day, jdn, everything())
+#'
+read_weather <- function(project_path, version) {
+  if(version == 'plus') {
+    wth_dat <- read_weather_plus(project_path)
+  } else if(version == '2012') {
+    wth_dat <- read_weather_2012(project_path)
+  }
+  return(wth_dat)
 }
 
-#' Read a weather input file
+#' Read the weather data for a SWAT2012 project
 #'
-#' @param file Path string to weather input file.
-#' @param var  Character vector that defines the variables
-#' @param skip Integer to skip the header
-#' @param digit_var Integer, number of digits per variable
-#' @param digit_date Vector of length 2 Integers give digits of year and jdn
-
+#' @param project_path String. Path to the TxtInOut folder of the SWAT project
+#'
 #' @importFrom dplyr mutate select everything %>%
-#' @importFrom readr cols fwf_widths read_fwf read_lines
 #' @importFrom lubridate month day
+#' @importFrom purrr map2_df set_names
+#' @importFrom readr cols fwf_widths read_fwf read_lines
+#' @importFrom tidyselect starts_with
 #'
 #' @keywords internal
 #'
+#'
+#testing
+# project_path <- "C:/swat_testing/Kinzig/TxtInOut"
+# library(tidyverse)
+
+read_weather_2012 <- function(project_path) {
+
+  weather_file <- list.files(project_path)
+  weather_file <- weather_file[tolower(weather_file) %in% c("pcp1.pcp", "tmp1.tmp")]
+  pcp_names <- get_station_names(project_path%//%weather_file[1])
+  tmp_names <- get_station_names(project_path%//%weather_file[2])
+
+  pcp <- read_weather_file(file = project_path%//%weather_file[1],
+                      var = "pcp", skip = 4, digit_var = 5,  digit_date = c(4,3)) %>%
+    set_names(c('year','month', 'day', 'jdn', pcp_names))
+
+  tmp <- read_weather_file(file = project_path%//%weather_file[2],
+                      var = c("tmax", "tmin"), skip = 4, digit_var = 5,
+                      digit_date = c(4,3))
+
+  tmin <- select(tmp, year, month, day, jdn, starts_with("tmin_")) %>%
+    set_names(c('year','month', 'day', 'jdn', tmp_names))
+  tmax <- select(tmp, year, month, day, jdn, starts_with("tmax_")) %>%
+    set_names(c('year','month', 'day', 'jdn', tmp_names))
+  tav <- map2_df(tmax, tmin, ~ (.x + .y)/2)
+
+  return(list(pcp = pcp, tmax = tmax, tmin = tmin, tav = tav))
+}
+
+#' Read the weather data for a SWAT+ project
+#'
+#' @param project_path String. Path to the TxtInOut folder of the SWAT project
+#'
+#' @importFrom dplyr mutate select everything %>%
+#' @importFrom lubridate month day
+#' @importFrom purrr map map2_df reduce set_names
+#' @importFrom readr cols col_character col_double col_integer read_table
+#' @importFrom stringr str_remove
+#' @importFrom tidyselect ends_with
+#'
+#' @keywords internal
+#'
+#testing
+# project_path <- "C:/swat_testing/Kinzig/TxtInOut"
+# library(tidyverse)
+
 read_weather_plus <- function(project_path) {
-  weather_sta <- read_table(project_path%//%'weather-sta.cli', skip = 1)
+  weather_sta <- read_table(project_path%//%'weather-sta.cli',
+                            col_types = cols(.default = col_character()),
+                            skip = 1)
 
   pcp_files <- unique(weather_sta$pcp)
   tmp_files <- unique(weather_sta$tmp)
@@ -135,27 +167,72 @@ read_weather_plus <- function(project_path) {
   pcp <- map(pcp_files, ~ read_table(project_path%//%.x,
                                      col_names = c('year', 'jdn',
                                                    str_remove(.x, '.pcp')),
-                                     skip = 3)) %>%
-    map(., ~ mutate(.x, date = as.Date(jdn%//%year, "%j/%Y"))) %>%
-    map(., ~ .x[,c(4,3)]) %>%
-    reduce(., full_join, by = 'date')
-
+                                     col_types = cols(year = col_integer(),
+                                                      jdn  = col_integer(),
+                                                      .default = col_double()),
+                                     skip = 3, progress = FALSE)) %>%
+    map(., ~ jdnyr_to_ymdjdn(.x)) %>%
+    reduce(., full_join, by = c('year','month', 'day', 'jdn'))
 
   tmp <- map(tmp_files, ~ read_table(project_path%//%.x,
                                      col_names = c('year', 'jdn',
                                                    str_remove(.x, '.tmp')%_%'max',
                                                    str_remove(.x, '.tmp')%_%'min'),
-                                     skip = 3)) %>%
-    map(., ~ mutate(.x, date = as.Date(jdn%//%year, "%j/%Y"))) %>%
-    map(., ~ .x[,c(5,3,4)]) %>%
-    reduce(., full_join, by = 'date')
+                                     col_types = cols(year = col_integer(),
+                                                      jdn  = col_integer(),
+                                                      .default = col_double()),
+                                     skip = 3, progress = FALSE)) %>%
+    map(., ~ jdnyr_to_ymdjdn(.x)) %>%
+    reduce(., full_join, by = c('year','month', 'day', 'jdn'))
 
-  tmax <-  select(tmp, date, ends_with("_max"))
-  tmin <-  select(tmp, date, ends_with("_min"))
-  tav <-  map2_df(select(tmin, -date), select(tmax, -date), ~ (.x + .y)/2) %>%
-    add_column(., date = tmin$date, .before = 1)
+  tmax <-  select(tmp, year, month, day, jdn, ends_with("_max")) %>%
+    set_names(., str_remove(names(.), "_max"))
+  tmin <-  select(tmp, year, month, day, jdn, ends_with("_min"))%>%
+    set_names(., str_remove(names(.), "_min"))
+  tav <-  map2_df(tmin, tmax, ~ (.x + .y)/2)
+
+  return(list(pcp = pcp, tmax = tmax, tmin = tmin, tav = tav))
 }
 
+#' Read a weather input file
+#'
+#' @param file Path string to weather input file.
+#' @param var  Character vector that defines the variables
+#' @param skip Integer to skip the header
+#' @param digit_var Integer, number of digits per variable
+#' @param digit_date Vector of length 2 Integers give digits of year and jdn
+
+#' @importFrom dplyr %>%
+#' @importFrom readr cols fwf_widths read_fwf read_lines
+#'
+#' @keywords internal
+#'
+read_weather_file <- function(file, var, skip, digit_var, digit_date) {
+  n_var <-  (nchar(read_lines(file, n_max = (skip + 1))[(skip + 1)]) -
+               sum(digit_date)) / digit_var
+
+  cols <- fwf_widths(c(digit_date[1],digit_date[2], rep(digit_var,n_var)),
+                     col_names = c("year", "jdn", rep(var, n_var/length(var))%_%
+                                     rep(1:(n_var/length(var)), each = length(var))))
+
+  read_fwf(file = file, col_positions = cols,
+           col_types = cols(.default = "d", year = "i", jdn = "i"),
+           skip = 4) %>%
+    jdnyr_to_ymdjdn(.)
+}
+
+#' Check if all weather inputs are in a daily time interval
+#'
+#' @param files String vector of weather input files
+#' @param project_path String. Path to the TxtInOut folder of the SWAT project
+#'
+#' @importFrom dplyr %>%
+#' @importFrom readr read_lines
+#' @importFrom stringr str_split
+#' @importFrom purrr map map_lgl
+#'
+#' @keywords internal
+#'
 check_if_daily <- function(files, project_path) {
   is_daily <- map(files, ~read_lines(project_path%//%.x , skip = 2, n_max = 1)) %>%
     map(., ~str_split(.x, "\\s+")) %>%
@@ -286,4 +363,41 @@ add_variable <- function(data, name, n_var, n_obs, date) {
     tbl <- bind_cols(date, tbl)
   }
   return(tbl)
+}
+
+#' Convert jdn and year column to year, month, day, and jdn columns
+#'
+#' @param tbl Tibble containing the year and the jdn columns
+#'
+#' @importFrom dplyr mutate select %>%
+#' @importFrom lubridate month day
+#' @importFrom tidyselect everything
+#'
+#' @keywords internal
+#'
+jdnyr_to_ymdjdn <- function(tbl) {
+  tbl %>%
+  mutate(date  = as.Date(jdn%//%year, "%j/%Y"),
+         month = month(date),
+         day   = day(date)) %>%
+    select(-date) %>%
+    select(year, month, day, jdn, everything())
+}
+
+#' Retrieve the weather station names from SWAT2012 weather input file
+#'
+#' @param file_path String path to weather file
+#'
+#' @importFrom dplyr %>%
+#' @importFrom readr read_lines
+#' @importFrom stringr str_remove str_split
+#'
+#' @keywords internal
+#'
+get_station_names <- function(file_path) {
+  read_lines(file_path, n_max = 1) %>%
+    str_remove(., 'Station ') %>%
+    str_split(., ',', simplify = TRUE) %>%
+    trimws() %>%
+    .[nchar(.)>0]
 }

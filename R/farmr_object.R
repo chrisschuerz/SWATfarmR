@@ -28,27 +28,8 @@ farmr_project <- R6::R6Class(
       self$.data$meta$swat_version <- check_version(project_path)
 
       self$.data$meta$hru_attributes <- read_hru_attributes(project_path, t0)
-
-      weather_file <- list.files(project_path)
-      weather_file <- weather_file[tolower(weather_file) %in% c("pcp1.pcp", "tmp1.tmp")]
-      self$.data$variables$pcp <- read_weather(file = project_path%//%weather_file[1],
-                                               var = "pcp",
-                                               skip = 4,
-                                                 digit_var = 5,
-                                               digit_date = c(4,3))
-      tmp_data <- read_weather(file = project_path%//%weather_file[2],
-                               var = c("tmax", "tmin"),
-                               skip = 4,
-                               digit_var = 5,
-                               digit_date = c(4,3))
-      self$.data$variables$tmin <- tmp_data %>%
-        select(year, month, day, jdn, starts_with("tmin_"))
-      self$.data$variables$tmax <- tmp_data %>%
-        select(year, month, day, jdn, starts_with("tmax_"))
-      self$.data$variables$tav <- ((self$.data$variables$tmax +
-                                    self$.data$variables$tmin) / 2) %>%
-                                    as_tibble() %>%
-        set_names(., str_replace(colnames(.), "max", "av"))
+      self$.data$variables <- read_weather(project_path,
+                                           self$.data$meta$swat_version)
 
       self$.data$variables <- assign_subbasin_weather(project_path, self$.data$variables)
 
