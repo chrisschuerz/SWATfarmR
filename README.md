@@ -5,9 +5,10 @@
 ## SWAT+ implementation 
 
 ### Next actions
-- routine SWAT version identification
-- routine read in weather inputs
+- routine hru to variable connect
 - routine read HRU properties
+- extend read_mgt to SWAT+
+- modify add_variable to allow adding variables on HRU scale (col names indicate which spatial objects to assign) 
 
 ### Mid/Long term ideas
 - comparison of farmR setup to the decision tables
