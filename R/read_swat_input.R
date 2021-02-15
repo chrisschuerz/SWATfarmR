@@ -1,3 +1,24 @@
+
+read_attributes_plus <- function(project_path) {
+  rtu_def <- read_table(project_path%//%'rout_unit.def', skip = 2, col_names = FALSE) %>%
+    set_names(., c('id', 'name', 'elem',
+                   rep(c('strt', 'end'), (ncol(.) - 3) / 2)%_%
+                   rep(1:((ncol(.) - 3) / 2), each = 2))) %>%
+    mutate_at(., vars(starts_with('end_')), ~-.x)
+  idx <- 1: ((ncol(rtu_def) - 3) / 2)
+
+  map(idx, ~ select(rtu_def,  ends_with(paste0('_', .x)))) %>%
+    map(., ~apply(.x, 1, rowwise_range))
+}
+
+rowwise_range <- function(x) {
+  x[1]:x[2]
+}
+
+# read_con_file <- function(con_path) {
+#   con <- read_table(con_path, skip = 2, col_names = FALSE)
+# }
+
 #' Read HRU attributes from the .hru and .sol files
 #'
 #' @param project_path String. Path to the TxtInOut folder of the SWAT project
@@ -49,7 +70,7 @@ extract_hru_attr <- function(str_lines) {
   hru_attr <- str_split(str_lines[1], "\\ |\\:|\\: ") %>%
     unlist() %>%
     .[nchar(.) > 0] %>%
-    list(subbasin  = as.numeric(.[grep("Subbasin", .)+1]),
+    list(sub  = as.numeric(.[grep("Subbasin", .)+1]),
          hru  = as.numeric(.[grep("HRU", .)[1]+1]),
          luse = .[grep("Luse", .)+1],
          soil = .[grep("Soil", .)+1],
@@ -245,12 +266,13 @@ check_if_daily <- function(files, project_path) {
   }
 }
 
-#' Assign the correct weather stations to the subbasins and return updated variables
+#' Connect the HRUs to the read weather stations
 #'
 #' @param project_path Path string to SWAT project folder.
 #' @param variables List of tibbles with read weather station data
+#' @param hru_attributes tibble for attributes of the HRUs
 #'
-#' @importFrom dplyr mutate %>%
+#' @importFrom dplyr full_join mutate select %>%
 #' @importFrom purrr map map_df set_names
 #' @importFrom readr read_lines
 #' @importFrom stringr str_remove
@@ -258,11 +280,34 @@ check_if_daily <- function(files, project_path) {
 #'
 #' @keywords internal
 #'
-assign_subbasin_weather <- function(project_path, variables) {
+connect_unit_weather <- function(project_path, version) {
+  if(version == 'plus') {
+    wth_con <- connect_weather_plus(project_path)
+  } else if(version == '2012') {
+    wth_con <- connect_weather_2012(project_path)
+  }
+  return(wth_dat)
+}
+
+#' Connect the HRUs to the read weather stations for SWAT2012
+#'
+#' @param project_path Path string to SWAT project folder.
+#' @param variables List of tibbles with read weather station data
+#' @param hru_attributes tibble for attributes of the HRUs
+#'
+#' @importFrom dplyr full_join mutate select %>%
+#' @importFrom purrr map map_df set_names
+#' @importFrom readr read_lines
+#' @importFrom stringr str_remove
+#' @importFrom tibble tibble
+#'
+#' @keywords internal
+#'
+connect_weather_2012 <- function(project_path, variables, hru_attributes) {
   sub_list <- list.files(path = project_path, pattern = "[:0-9:].sub")
   sub_files <- map(project_path%//%sub_list, read_lines)
 
-  sub_tbl <- sub_files %>%
+  var_tbl <- sub_files %>%
     map_df(., ~ tibble(pcp  = get_value(.x[7]),
                        tmin = get_value(.x[8]),
                        tmax = get_value(.x[8]),
@@ -271,12 +316,17 @@ assign_subbasin_weather <- function(project_path, variables) {
 #                       hmd = get_value(.x[10]),
 #                       wnd = get_value(.x[11])
            )) %>%
-    mutate(subbasin = str_remove(sub_list, "0000.sub") %>% as.numeric())
+    mutate(sub = str_remove(sub_list, "0000.sub") %>% as.numeric()) %>%
+    full_join(., hru_attributes, by = 'sub') %>%
+    select(hru, pcp, tmin, tmax, tav)
 
-  variables <- map(names(variables), ~assign_var_i(variables, sub_tbl, .x)) %>%
-    set_names(names(variables))
+  var_names <- map(variables, ~select(.x, -year, -month, -day, -jdn) %>% names(.))
 
-  return(variables)
+  for(i_var in names(var_names)) {
+    var_tbl[[i_var]] <- var_names[[i_var]][var_tbl[[i_var]]]
+  }
+
+  return(var_tbl)
 }
 
 #' Get numeric value from line in input file
