@@ -1,23 +1,134 @@
+project_path <- 'C:/Users/maria/Documents/swat_de/swatplus/Kinzig/TxtInOut'
+#' Read the weather data
+#'
+#' @param project_path String. Path to the TxtInOut folder of the SWAT project
+#' @param version String that indicates what SWAT version the project is.
+#'
+#' @keywords internal
+#'
+#'
+read_hru_attributes <- function(project_path, version) {
+  if(version == 'plus') {
+    hru_attr <- read_attributes_plus(project_path)
+  } else if(version == '2012') {
+    hru_attr <- read_attributes_2012(project_path)
+  }
+  return(hru_attr)
+}
 
 read_attributes_plus <- function(project_path) {
-  rtu_def <- read_table(project_path%//%'rout_unit.def', skip = 2, col_names = FALSE) %>%
-    set_names(., c('id', 'name', 'elem',
-                   rep(c('strt', 'end'), (ncol(.) - 3) / 2)%_%
-                   rep(1:((ncol(.) - 3) / 2), each = 2))) %>%
-    mutate_at(., vars(starts_with('end_')), ~-.x)
-  idx <- 1: ((ncol(rtu_def) - 3) / 2)
+  rtu_def <- read_rtu_def(project_path)
 
-  map(idx, ~ select(rtu_def,  ends_with(paste0('_', .x)))) %>%
-    map(., ~apply(.x, 1, rowwise_range))
+  hru_data <- read_table(project_path%//%'hru-data.hru', skip = 1,
+                         col_types = cols(id = col_double(),
+                                          .default = col_character())) %>%
+    rename(hru = id, hru_name = name)
+
+  soils <- read_table(project_path%//%'soils.sol', skip = 1,
+                      col_types = cols(
+                        .default = col_double(),
+                        name = col_character(),
+                        hyd_grp = col_character(),
+                        texture = col_character()
+                      )) %>%
+    select(name, hyd_grp) %>%
+    filter(nchar(name)>0)
+
+  topo <- read_table(project_path%//%'topography.hyd', skip = 1,
+                     col_types = cols(
+                       name = col_character(),
+                       .default = col_double()
+                       )) %>%
+    select(name, slp, slp_len)
+
+  hru_attr <- rtu_def %>%
+    left_join(., hru_data, by = c('hru', 'hru_name')) %>%
+    left_join(., soils, by = c('soil' = 'name')) %>%
+    left_join(., topo, by = c('topo' = 'name')) %>%
+    select(rtu, rtu_name, hru, hru_name, lu_mgt, soil, slp, slp_len, hyd_grp)
+
+  return(hru_attr)
 }
 
-rowwise_range <- function(x) {
-  x[1]:x[2]
+read_line_file <- function(file_path) {
+  line_file <- read_lines(file_path, skip = 1)
+
+  file_data <- line_file[2:length(line_file)] %>%
+    str_split(. , "\\s+") %>%
+    map(., ~.x[nchar(.x) > 0])
+
+  n_max  <- max(map_dbl(file_data, length))
+  id_max <- which.max(map_dbl(file_data, length))
+  col_numeric <- !is.na(suppressWarnings((as.numeric(file_data[[n_max]]))))
+
+  file_head <-line_file[1] %>%
+    str_split(. , "\\s+", simplify = TRUE) %>%
+    .[nchar(.) > 0]
+
+  return(list(data = file_data, header = file_head,
+              n_max = n_max, id_max = id_max, col_numeric = col_numeric))
 }
 
-# read_con_file <- function(con_path) {
-#   con <- read_table(con_path, skip = 2, col_names = FALSE)
-# }
+read_rtu_def <- function(project_path) {
+
+  rtu_def <- read_line_file(project_path%//%'rout_unit.def')
+  rtu_ele <- read_table(project_path%//%'rout_unit.ele', skip = 1,
+                        col_types = cols(name = col_character(),
+                                         obj_typ = col_character(),
+                                         .default = col_double())) %>%
+    filter(obj_typ == 'hru') %>%
+    select(id, obj_id, name) %>%
+    set_names(c('ele_id', 'hru', 'hru_name'))
+
+  rtu_id <- rtu_def$data %>%
+    map(., ~.x[1:2]) %>%
+    map(., ~set_names(.x, c('rtu', 'rtu_name'))) %>%
+    bind_rows()
+
+  rtu_tbl <- rtu_def$data %>%
+    map(., ~.x[4:rtu_def$n_max]) %>%
+    map(., as.numeric) %>%
+    map(., c_idx) %>%
+    set_names(rtu_id$rtu_name) %>%
+    map2(., names(.), ~tibble(rtu_name = .y, ele_id = .x)) %>%
+    reduce(., bind_rows) %>%
+    left_join(., rtu_id, by = 'rtu_name') %>%
+    select(rtu, rtu_name, ele_id) %>%
+    left_join(., rtu_ele, by = 'ele_id') %>%
+    select(-ele_id)
+
+  return(rtu_tbl)
+}
+
+c_idx <- function(x) {
+  is_rng <- which(x < 0)
+  map(is_rng, ~ (x[.x-1] + 1):(-x[.x])) %>%
+    reduce(., c) %>%
+    c(.,x[-is_rng]) %>%
+    sort(.)
+}
+
+read_con_file <- function(con_path) {
+
+  con <- read_line_file(con_path)
+
+  out_pos <- which(con$header == 'out_tot')
+  if(length(con$header) > out_pos) {
+    n_rep <- (con$n_max - out_pos) / (length(con$header) - out_pos)
+    head_rep <- con$header[(out_pos + 1):length(con$header)]
+
+    con$header <- c(con$header[1:out_pos],
+      paste(rep(head_rep, n_rep), rep(1:n_rep, each = length(head_rep)), sep = '_'))
+  }
+
+  con_tbl <- con$data %>%
+    map(., ~.x[1:con$n_max]) %>%
+    map(., ~set_names(.x, con$header)) %>%
+    bind_rows() %>%
+    mutate_if(., con$col_numeric, .funs = as.numeric)
+
+  return(con_tbl)
+}
 
 #' Read HRU attributes from the .hru and .sol files
 #'
@@ -31,7 +142,7 @@ rowwise_range <- function(x) {
 #'
 #' @keywords internal
 #'
-read_hru_attributes <- function(project_path, t0) {
+read_attributes_2012 <- function(project_path, t0) {
 
   file_list <- list.files(path = project_path, pattern = "[:0-9:].mgt") %>%
     str_remove(., ".mgt")
@@ -47,7 +158,7 @@ read_hru_attributes <- function(project_path, t0) {
   cat("Initializing farmR:\n")
   for (i in 1:n_hru) {
     attr_list[[i]] <-
-      bind_cols(extract_hru_attr(hru_files[[i]]), extract_sol_attr(sol_files[[i]]))
+      bind_cols(extract_hru_2012(hru_files[[i]]), extract_sol_2012(sol_files[[i]]))
     display_progress_pct(i, n_hru, t0)
   }
   attr_tbl <- map_df(attr_list, ~.x) %>%
@@ -66,7 +177,7 @@ read_hru_attributes <- function(project_path, t0) {
 #'
 #' @keywords internal
 #'
-extract_hru_attr <- function(str_lines) {
+extract_hru_2012 <- function(str_lines) {
   hru_attr <- str_split(str_lines[1], "\\ |\\:|\\: ") %>%
     unlist() %>%
     .[nchar(.) > 0] %>%
@@ -74,10 +185,10 @@ extract_hru_attr <- function(str_lines) {
          hru  = as.numeric(.[grep("HRU", .)[1]+1]),
          luse = .[grep("Luse", .)+1],
          soil = .[grep("Soil", .)+1],
-         slope_class = .[grep("Slope", .)+1]) %>%
+         slp = .[grep("Slope", .)+1]) %>%
     .[2:length(.)]
-  hru_attr$slope <- as.numeric(str_sub(str_lines[4], 1, 16))
-  hru_attr$slope_length <- as.numeric(str_sub(str_lines[3], 1, 16))
+  hru_attr$slp_val <- as.numeric(str_sub(str_lines[4], 1, 16))
+  hru_attr$slp_len <- as.numeric(str_sub(str_lines[3], 1, 16))
   return(as_tibble(hru_attr))
 }
 
@@ -91,10 +202,10 @@ extract_hru_attr <- function(str_lines) {
 #'
 #' @keywords internal
 #'
-extract_sol_attr <- function(str_lines) {
-  tibble(soil_hydr_group = str_split(str_lines[3], "\\:", simplify = TRUE)[2] %>%
+extract_sol_2012 <- function(str_lines) {
+  tibble(hyd_grp = str_split(str_lines[3], "\\:", simplify = TRUE)[2] %>%
            trimws(.),
-         root_depth = str_split(str_lines[4], "\\:", simplify = TRUE)[2] %>%
+         root_dep = str_split(str_lines[4], "\\:", simplify = TRUE)[2] %>%
            as.numeric(.))
 }
 
@@ -287,6 +398,39 @@ connect_unit_weather <- function(project_path, version) {
     wth_con <- connect_weather_2012(project_path)
   }
   return(wth_dat)
+}
+
+#' Connect the HRUs to the read weather stations for SWAT+
+#'
+#' @param project_path Path string to SWAT project folder.
+#' @param variables List of tibbles with read weather station data
+#' @param hru_attributes tibble for attributes of the HRUs
+#'
+#' @importFrom dplyr full_join mutate select %>%
+#' @importFrom purrr map map_df set_names
+#' @importFrom readr read_lines
+#' @importFrom stringr str_remove
+#' @importFrom tibble tibble
+#'
+#' @keywords internal
+#'
+connect_weather_plus <- function(project_path, hru_attributes) {
+  weather_sta <- read_table(project_path%//%'weather-sta.cli',
+                            col_types = cols(.default = col_character()),
+                            skip = 1)
+
+  hru_con <- read_con_file(project_path%//%'hru.con') %>%
+    select(id, name, wst) %>%
+    left_join(., weather_sta, by = c('wst' = 'name')) %>%
+    select(id, name, pcp, tmp) %>%
+    mutate(pcp = str_remove(pcp, '.pcp'),
+           tmp = str_remove(tmp, '.tmp'),
+           tmax = tmp,
+           tmin = tmp,
+           tav  = tmp) %>%
+    rename(hru = id, hru_name = name)
+
+  return(var_tbl)
 }
 
 #' Connect the HRUs to the read weather stations for SWAT2012
