@@ -5,9 +5,8 @@
 ## SWAT+ implementation 
 
 ### Next actions
-- routine hru to variable connect
-- routine read HRU properties
 - extend read_mgt to SWAT+
+- test initialization of farmR object
 - modify add_variable to allow adding variables on HRU scale (col names indicate which spatial objects to assign) 
 
 ### Mid/Long term ideas
