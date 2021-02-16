@@ -27,13 +27,16 @@ farmr_project <- R6::R6Class(
       self$.data$meta$project_path <- project_path
       self$.data$meta$swat_version <- check_version(project_path)
 
-      self$.data$meta$hru_attributes <- read_hru_attributes(project_path, t0)
+      self$.data$meta$hru_attributes <- read_hru_attributes(project_path,
+                                                            self$.data$meta$swat_version,
+                                                            t0)
       self$.data$variables <- read_weather(project_path,
                                            self$.data$meta$swat_version)
 
-      self$.data$variables <- assign_subbasin_weather(project_path, self$.data$variables)
+      self$.data$meta$hru_var_connect <- connect_unit_weather(project_path,
+                                                              self$.data$meta$swat_version)
 
-      self$.data$meta$mgt_raw <- read_mgt(project_path)
+      # self$.data$meta$mgt_raw <- read_mgt(project_path)
 
       finish_progress(NULL, t0, "", "Finished")
     },

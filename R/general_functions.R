@@ -4,6 +4,7 @@
 #'
 #' @importFrom readr read_lines
 #' @importFrom stringr str_detect
+#'
 #' @keywords internal
 #'
 check_version <- function(project_path) {
