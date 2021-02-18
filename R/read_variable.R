@@ -179,9 +179,9 @@ check_if_daily <- function(files, project_path) {
 #'
 #' @keywords internal
 #'
-connect_unit_weather <- function(project_path, version) {
+connect_unit_weather <- function(project_path, hru_attributes, variables, version) {
   if(version == 'plus') {
-    wth_con <- connect_weather_plus(project_path)
+    wth_con <- connect_weather_plus(project_path, hru_attributes)
   } else if(version == '2012') {
     wth_con <- connect_weather_2012(project_path)
   }
@@ -217,6 +217,10 @@ connect_weather_plus <- function(project_path, hru_attributes) {
            tmin = tmp,
            tav  = tmp) %>%
     rename(hru = id, hru_name = name)
+
+  hru_con <- hru_attributes %>%
+    select(rtu, rtu_name, hru) %>%
+    left_join(., hru_con, by = 'hru')
 
   return(hru_con)
 }
@@ -267,7 +271,7 @@ read_con_file <- function(con_path) {
 #'
 #' @keywords internal
 #'
-connect_weather_2012 <- function(project_path, variables, hru_attributes) {
+connect_weather_2012 <- function(project_path, hru_attributes, variables) {
   sub_list <- list.files(path = project_path, pattern = "[:0-9:].sub")
   sub_files <- map(project_path%//%sub_list, read_lines)
 
@@ -303,40 +307,6 @@ get_value <- function(x) {
   as.numeric(substr(x, 1,16))
 }
 
-#' Assign the correct weather stations to the subbasins for the variable i
-#'
-#' @param var List of weather variables tables.
-#' @param sub Table that links weather stations to subbasins
-#' @param var_i String label for the variable i
-#'
-#' @importFrom dplyr %>%
-#' @importFrom purrr set_names
-#'
-#' @keywords internal
-#'
-assign_var_i <- function(var, sub, var_i) {
-  var[[var_i]] <- var[[var_i]][,c(1:4, unlist(sub[var_i]) + 4)] %>%
-    set_names(c("year", "month", "day", "jdn", var_i%_%sub$subbasin))
-  return(var[[var_i]])
-}
-
-#' Read SWAT mgt input files
-#'
-#' @param project_path String. Path to the TxtInOut folder of the SWAT project
-#'
-#' @importFrom purrr map set_names
-#' @importFrom readr read_lines
-#' @importFrom stringr str_remove
-#'
-#' @keywords internal
-#'
-read_mgt <- function(project_path) {
-  mgt_list <- list.files(path = project_path, pattern = "[:0-9:].mgt")
-  mgt_files <- map(project_path%//%mgt_list, read_lines) %>%
-    set_names(str_remove(mgt_list, ".mgt"))
-  return(mgt_files)
-}
-
 #' Add additional variables that can be used to define rules for
 #'
 #' @param data The table that should be added as a variable. TH number of columns
@@ -357,21 +327,38 @@ read_mgt <- function(project_path) {
 #'
 #' @keywords internal
 #'
-add_variable <- function(data, name, n_var, n_obs, date) {
+add_variable <- function(data, name, assign_unit, con, n_obs, date) {
   if(is.null(dim(data))) {
     if (length(data) != n_obs) {
       stop("Length of added variable vector is different to the length of the weather data.")
     }
-    tbl <- map_dfc(1:n_var, ~tibble(data)) %>%
-      set_names(c(paste(name, 1:n_var, sep = "_")))
-    tbl <- bind_cols(date, tbl)
+    tbl <- tibble(var = data) %>% set_names(name)
+    if (!is.null(assign_unit)) {
+      warning("'data' is a single vector. 'assign_unit' overwritten and 'data' assigned to all HRUs.")
+    }
+    con[[name]] <- name
   } else {
+    if(is.null(assign_unit)) {
+      stop("Providing a 'data' tibble requires assigning the data to units (e.g. 'sub', 'rtu', 'hru').")
+    }
     if (nrow(data) != n_obs) {
       stop("The number of rows in 'data' is different to the number of rows of the weather data.")
     }
-    if (ncol(data) != n_var) {
-      stop("The number of columns in 'data' is different to the number of subbasins.")
+    if (is.Date(data[[1]])) {
+      date <- mutate(date, date = ymd(year%-%month%-%day))
+      if(any(date$date != data[[1]])) {
+        stop("A date column was provided in 'data'. The dates differ from the dates of the existing variables.")
+      }
     }
+    var_name <- unique(assign_unit[,2])
+    # var_miss <-
+    if(!all(unique(assign_unit[,2]) %in% names(data))) {
+      stop("Some of the variable names in 'assign_unit' are not a column in 'data'.")
+    }
+    unit_val <- unique(assign_unit[,1])
+    unit_con <- unique(con[[names(assign_unit)[1]]])
+
+
     tbl <- as_tibble(data) %>%
       set_names(paste(name, 1:n_var, sep = "_"))
     tbl <- bind_cols(date, tbl)

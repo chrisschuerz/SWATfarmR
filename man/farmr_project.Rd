@@ -31,7 +31,7 @@ farmr_project
 \if{latex}{\out{\hypertarget{method-add_variable}{}}}
 \subsection{Method \code{add_variable()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{farmr_project$add_variable(data, name)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{farmr_project$add_variable(data, name, assign_unit = NULL)}\if{html}{\out{</div>}}
 }
 
 }

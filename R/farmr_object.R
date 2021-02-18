@@ -34,18 +34,23 @@ farmr_project <- R6::R6Class(
                                            self$.data$meta$swat_version)
 
       self$.data$meta$hru_var_connect <- connect_unit_weather(project_path,
+                                                              self$.data$meta$hru_attributes,
+                                                              self$.data$variables,
                                                               self$.data$meta$swat_version)
 
-      # self$.data$meta$mgt_raw <- read_mgt(project_path)
+      self$.data$meta$mgt_raw <- read_mgt(project_path, self$.data$meta$swat_version)
 
       finish_progress(NULL, t0, "", "Finished")
     },
 
-    add_variable = function(data, name) {
-      self$.data$variables[[name]] <- add_variable(data, name,
-        n_var = (ncol(self$.data$variables$pcp) - 4),
+    add_variable = function(data, name, assign_unit = NULL) {
+      var_list <- add_variable(data, name, assign_unit,
+        con = self$.data$meta$hru_var_connect,
         n_obs = nrow(self$.data$variables$pcp),
         date = select(self$.data$variables$pcp, year, month, day, jdn))
+
+      self$.data$variables[[name]] <- var_list$data
+      self$.data$meta$hru_var_connect
     },
 
     read_management = function(file, discard_schedule = FALSE) {
