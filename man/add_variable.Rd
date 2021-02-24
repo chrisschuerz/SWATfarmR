@@ -4,21 +4,21 @@
 \alias{add_variable}
 \title{Add additional variables that can be used to define rules for}
 \usage{
-add_variable(data, name, assign_unit, con, n_obs, date)
+add_variable(data, name, assign_unit, con, variables)
 }
 \arguments{
-\item{data}{The table that should be added as a variable. TH number of columns
+\item{data}{The table that should be added as a variable. The number of columns
 must be 1 or the number of subbasins. the row number must be the same as the
 number of weather records.}
 
 \item{name}{Character string to define the name of the added variable (this
 name must be used in the rule set)}
 
-\item{n_obs}{Internal variable. Not defined by user. Required number of variables.}
+\item{assign_unit}{tibble to link spatial units to the variables in data}
+
+\item{variables}{Internal variables. Not defined by user. Required number of variables.}
 
 \item{date}{Internal variable. Not defined by user. Date vector that is added.}
-
-\item{n_var}{Internal variable. Not defined by user. Required number of variables.}
 }
 \value{
 Generates a new farmr_project in the working environment (as an R6

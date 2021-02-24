@@ -1,4 +1,4 @@
-#' Read the weather data
+#' Read the raw management data for backup
 #'
 #' @param project_path String. Path to the TxtInOut folder of the SWAT project
 #' @param version String that indicates what SWAT version the project is.

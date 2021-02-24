@@ -141,30 +141,6 @@ read_weather_file <- function(file, var, skip, digit_var, digit_date) {
     jdnyr_to_ymdjdn(.)
 }
 
-#' Check if all weather inputs are in a daily time interval
-#'
-#' @param files String vector of weather input files
-#' @param project_path String. Path to the TxtInOut folder of the SWAT project
-#'
-#' @importFrom dplyr %>%
-#' @importFrom readr read_lines
-#' @importFrom stringr str_split
-#' @importFrom purrr map map_lgl
-#'
-#' @keywords internal
-#'
-check_if_daily <- function(files, project_path) {
-  is_daily <- map(files, ~read_lines(project_path%//%.x , skip = 2, n_max = 1)) %>%
-    map(., ~str_split(.x, "\\s+")) %>%
-    map(., ~.x[[1]][nchar(.x[[1]]) > 0]) %>%
-    map(., as.numeric) %>%
-    map_lgl(., ~.x[2] == 0)
-
-  if(!all(is_daily)) {
-    stop("All 'pcp' and 'tmp' weather inputs must have daily time steps to be used.")
-  }
-}
-
 #' Connect the HRUs to the read weather stations
 #'
 #' @param project_path Path string to SWAT project folder.
@@ -297,6 +273,91 @@ connect_weather_2012 <- function(project_path, hru_attributes, variables) {
   return(var_tbl)
 }
 
+#' Add additional variables that can be used to define rules for
+#'
+#' @param data The table that should be added as a variable. The number of columns
+#'   must be 1 or the number of subbasins. the row number must be the same as the
+#'   number of weather records.
+#' @param name Character string to define the name of the added variable (this
+#'   name must be used in the rule set)
+#' @param assign_unit tibble to link spatial units to the variables in data
+#' @param variables Internal variables. Not defined by user. Required number of variables.
+#' @param date  Internal variable. Not defined by user. Date vector that is added.
+#'
+#' @importFrom dplyr bind_cols left_join mutate select %>%
+#' @importFrom lubridate is.Date ymd
+#' @importFrom purrr set_names
+#' @importFrom tibble add_column tibble
+#'
+#' @return Generates a new farmr_project in the working environment (as an R6
+#'   object) and saves the project the TxtInOut folder.
+#'
+#' @keywords internal
+#'
+add_variable <- function(data, name, assign_unit, con, variables) {
+  if(name %in% names(variables)) {
+    stop("The variable '", name, "' already exists.")
+    }
+
+  if(is.null(dim(data))) {
+    if (length(data) != nrow(variables[[1]])) {
+      stop("Length of added variable vector is different to the length of the weather data.")
+    }
+    variables[[name]] <- variables[[1]] %>%
+      select(year, month, day, jdn) %>%
+      add_column(!!name := data)
+
+    if (!is.null(assign_unit)) {
+      warning("'data' is a single vector. 'assign_unit' overwritten and 'data' assigned to all HRUs.")
+    }
+    con <- mutate(con, !!name := name)
+
+  } else {
+    if(is.null(assign_unit)) {
+      stop("Providing a 'data' tibble requires assigning the data to units (e.g. 'sub', 'rtu', 'hru').")
+    }
+
+    if (nrow(data) != nrow(variables[[1]])) {
+      stop("The number of rows in 'data' is different to the number of rows of the weather data.")
+    }
+
+    if (is.Date(data[[1]])) {
+      date <- ymd(variables[[1]]$year%-%variables[[1]]$month%-%variables[[1]]$day)
+      if(any(date != data[[1]])) {
+        stop("A date column was provided in 'data'. The dates differ from the dates of the existing variables.")
+      }
+      data <- data[, 2:ncol(data)]
+    }
+
+    if(any(c('year', 'month', 'day', 'jdn') %in% names(data))) {
+      stop("The variable names 'year', 'month', 'day', or 'jdn' ar not allowed as variable names in 'data'")
+    }
+
+    var_name <- unique(assign_unit[[2]])
+    var_miss <- var_name[!(var_name %in% names(data))]
+    if(length(var_miss) > 0) {
+      stop(paste0("The variable", plural(length(var_miss)), ": "),  paste(var_miss, collapse = ", "),
+           " are defined in 'assign_unit', but are no variable in 'data'.")
+    }
+
+    unit_val <- unique(assign_unit[[1]])
+    unit_con <- unique(con[[names(assign_unit)[1]]])
+    unit_miss <- unit_con[!(unit_con %in% unit_val)]
+    if(length(unit_miss) > 0) {
+      stop(paste0("The ", names(assign_unit)[1], plural(length(unit_miss)), ": "),
+           paste(unit_miss, collapse = ", "), " are missing in 'assign_unit'.")
+    }
+
+    variables[[name]] <- variables[[1]] %>%
+      select(year, month, day, jdn) %>%
+      bind_cols(data)
+
+    assign_unit <- set_names(assign_unit, c(names(assign_unit)[1], name))
+    con <- left_join(con, assign_unit, by = names(assign_unit)[1])
+  }
+  return(list(variables = variables, con = con))
+}
+
 #' Get numeric value from line in input file
 #'
 #' @param x The text string line.
@@ -307,63 +368,28 @@ get_value <- function(x) {
   as.numeric(substr(x, 1,16))
 }
 
-#' Add additional variables that can be used to define rules for
+#' Check if all weather inputs are in a daily time interval
 #'
-#' @param data The table that should be added as a variable. TH number of columns
-#'   must be 1 or the number of subbasins. the row number must be the same as the
-#'   number of weather records.
-#' @param name Character string to define the name of the added variable (this
-#'   name must be used in the rule set)
-#' @param n_var Internal variable. Not defined by user. Required number of variables.
-#' @param n_obs Internal variable. Not defined by user. Required number of variables.
-#' @param date  Internal variable. Not defined by user. Date vector that is added.
+#' @param files String vector of weather input files
+#' @param project_path String. Path to the TxtInOut folder of the SWAT project
 #'
-#' @importFrom dplyr bind_cols %>%
-#' @importFrom purrr map_dfc set_names
-#' @importFrom tibble tibble
-#'
-#' @return Generates a new farmr_project in the working environment (as an R6
-#'   object) and saves the project the TxtInOut folder.
+#' @importFrom dplyr %>%
+#' @importFrom readr read_lines
+#' @importFrom stringr str_split
+#' @importFrom purrr map map_lgl
 #'
 #' @keywords internal
 #'
-add_variable <- function(data, name, assign_unit, con, n_obs, date) {
-  if(is.null(dim(data))) {
-    if (length(data) != n_obs) {
-      stop("Length of added variable vector is different to the length of the weather data.")
-    }
-    tbl <- tibble(var = data) %>% set_names(name)
-    if (!is.null(assign_unit)) {
-      warning("'data' is a single vector. 'assign_unit' overwritten and 'data' assigned to all HRUs.")
-    }
-    con[[name]] <- name
-  } else {
-    if(is.null(assign_unit)) {
-      stop("Providing a 'data' tibble requires assigning the data to units (e.g. 'sub', 'rtu', 'hru').")
-    }
-    if (nrow(data) != n_obs) {
-      stop("The number of rows in 'data' is different to the number of rows of the weather data.")
-    }
-    if (is.Date(data[[1]])) {
-      date <- mutate(date, date = ymd(year%-%month%-%day))
-      if(any(date$date != data[[1]])) {
-        stop("A date column was provided in 'data'. The dates differ from the dates of the existing variables.")
-      }
-    }
-    var_name <- unique(assign_unit[,2])
-    # var_miss <-
-    if(!all(unique(assign_unit[,2]) %in% names(data))) {
-      stop("Some of the variable names in 'assign_unit' are not a column in 'data'.")
-    }
-    unit_val <- unique(assign_unit[,1])
-    unit_con <- unique(con[[names(assign_unit)[1]]])
+check_if_daily <- function(files, project_path) {
+  is_daily <- map(files, ~read_lines(project_path%//%.x , skip = 2, n_max = 1)) %>%
+    map(., ~str_split(.x, "\\s+")) %>%
+    map(., ~.x[[1]][nchar(.x[[1]]) > 0]) %>%
+    map(., as.numeric) %>%
+    map_lgl(., ~.x[2] == 0)
 
-
-    tbl <- as_tibble(data) %>%
-      set_names(paste(name, 1:n_var, sep = "_"))
-    tbl <- bind_cols(date, tbl)
+  if(!all(is_daily)) {
+    stop("All 'pcp' and 'tmp' weather inputs must have daily time steps to be used.")
   }
-  return(tbl)
 }
 
 #' Convert jdn and year column to year, month, day, and jdn columns

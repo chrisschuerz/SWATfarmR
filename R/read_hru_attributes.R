@@ -115,7 +115,8 @@ read_rtu_def <- function(project_path) {
   rtu_id <- rtu_def$data %>%
     map(., ~.x[1:2]) %>%
     map(., ~set_names(.x, c('rtu', 'rtu_name'))) %>%
-    bind_rows()
+    bind_rows() %>%
+    mutate(rtu = as.numeric(rtu))
 
   rtu_tbl <- rtu_def$data %>%
     map(., ~.x[4:rtu_def$n_max]) %>%

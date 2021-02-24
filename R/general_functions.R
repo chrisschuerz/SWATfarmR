@@ -126,7 +126,7 @@ finish_progress <- function(nmax, t0, word1, word2) {
 #' @keywords internal
 #'
 plural <- function(n) {
-  ifelse(n == 1, "", "s")
+  ifelse(n <= 1, "", "s")
 }
 
 #' Concatenate with an underscore

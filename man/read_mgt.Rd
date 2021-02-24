@@ -2,7 +2,7 @@
 % Please edit documentation in R/read_mgt.R
 \name{read_mgt}
 \alias{read_mgt}
-\title{Read the weather data}
+\title{Read the raw management data for backup}
 \usage{
 read_mgt(project_path, version)
 }
@@ -12,6 +12,6 @@ read_mgt(project_path, version)
 \item{version}{String that indicates what SWAT version the project is.}
 }
 \description{
-Read the weather data
+Read the raw management data for backup
 }
 \keyword{internal}

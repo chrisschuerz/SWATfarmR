@@ -44,13 +44,12 @@ farmr_project <- R6::R6Class(
     },
 
     add_variable = function(data, name, assign_unit = NULL) {
-      var_list <- add_variable(data, name, assign_unit,
+      var_add <- add_variable(data, name, assign_unit,
         con = self$.data$meta$hru_var_connect,
-        n_obs = nrow(self$.data$variables$pcp),
-        date = select(self$.data$variables$pcp, year, month, day, jdn))
+        variables = self$.data$variables)
 
-      self$.data$variables[[name]] <- var_list$data
-      self$.data$meta$hru_var_connect
+      self$.data$variables <- var_add$variables
+      self$.data$meta$hru_var_connect <- var_add$con
     },
 
     read_management = function(file, discard_schedule = FALSE) {
