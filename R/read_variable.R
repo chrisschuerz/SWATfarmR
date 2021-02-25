@@ -299,9 +299,10 @@ connect_weather_2012 <- function(project_path, hru_attributes, variables) {
 #'
 #' @keywords internal
 #'
-add_variable <- function(data, name, assign_unit, con, variables) {
-  if(name %in% names(variables)) {
-    stop("The variable '", name, "' already exists.")
+add_variable <- function(data, name, assign_unit, overwrite, con, variables) {
+  if((name %in% names(variables)) & !overwrite) {
+    stop("The variable '", name, "' already exists. Set 'overwrite' to 'TRUE'",
+         " to replace the variable '", name, "'.")
     }
 
   if(is.null(dim(data))) {
@@ -327,15 +328,15 @@ add_variable <- function(data, name, assign_unit, con, variables) {
     }
 
     if (is.Date(data[[1]])) {
-      date <- ymd(variables[[1]]$year%-%variables[[1]]$month%-%variables[[1]]$day)
+      date <- variables[[1]]$date
       if(any(date != data[[1]])) {
         stop("A date column was provided in 'data'. The dates differ from the dates of the existing variables.")
       }
       data <- data[, 2:ncol(data)]
     }
 
-    if(any(c('year', 'month', 'day', 'jdn') %in% names(data))) {
-      stop("The variable names 'year', 'month', 'day', or 'jdn' ar not allowed as variable names in 'data'")
+    if(any(c('date', 'year', 'month', 'day', 'jdn') %in% names(data))) {
+      stop("The variable names 'date', 'year', 'month', 'day', or 'jdn' ar not allowed as variable names in 'data'")
     }
 
     var_name <- unique(assign_unit[[2]])
@@ -353,9 +354,7 @@ add_variable <- function(data, name, assign_unit, con, variables) {
            paste(unit_miss, collapse = ", "), " are missing in 'assign_unit'.")
     }
 
-    variables[[name]] <- variables[[1]] %>%
-      select(year, month, day, jdn) %>%
-      bind_cols(data)
+    variables[[name]] <- bind_cols(variables[[1]]['date'], data)
 
     assign_unit <- set_names(assign_unit, c(names(assign_unit)[1], name))
     con <- left_join(con, assign_unit, by = names(assign_unit)[1])

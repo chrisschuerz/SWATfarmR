@@ -4,7 +4,7 @@
 \alias{add_variable}
 \title{Add additional variables that can be used to define rules for}
 \usage{
-add_variable(data, name, assign_unit, con, variables)
+add_variable(data, name, assign_unit, overwrite, con, variables)
 }
 \arguments{
 \item{data}{The table that should be added as a variable. The number of columns

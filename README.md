@@ -10,8 +10,7 @@
 - adapt raw and clear text mgt schedules for SWAT+
 
 ### Potential ideas for later consideration
-- switch from year month day jdn columns to date
-- allow different date ranges for the variables
+- allow different date ranges for the variables (dont know if this is necessary, so far all variables same time period!)
 - allow generation of farm schedules for defined date range (and check if all input variables provide this range)
 
 ### Mid/Long term ideas

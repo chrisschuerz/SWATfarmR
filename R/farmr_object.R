@@ -43,10 +43,10 @@ farmr_project <- R6::R6Class(
       finish_progress(NULL, t0, "", "Finished")
     },
 
-    add_variable = function(data, name, assign_unit = NULL) {
-      var_add <- add_variable(data, name, assign_unit,
-        con = self$.data$meta$hru_var_connect,
-        variables = self$.data$variables)
+    add_variable = function(data, name, assign_unit = NULL, overwrite = FALSE) {
+      var_add <- add_variable(data, name, assign_unit, overwrite,
+                              con = self$.data$meta$hru_var_connect,
+                              variables = self$.data$variables)
 
       self$.data$variables <- var_add$variables
       self$.data$meta$hru_var_connect <- var_add$con
