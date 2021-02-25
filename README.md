@@ -5,9 +5,14 @@
 ## SWAT+ implementation 
 
 ### Next actions
-- extend read_mgt to SWAT+
-- test initialization of farmR object
-- modify add_variable to allow adding variables on HRU scale (col names indicate which spatial objects to assign) 
+- restructure mgt input tables for SWAT+ 
+- check which inputs are required for SWAT+ mgt scheduling
+- adapt raw and clear text mgt schedules for SWAT+
+
+### Potential ideas for later consideration
+- switch from year month day jdn columns to date
+- allow different date ranges for the variables
+- allow generation of farm schedules for defined date range (and check if all input variables provide this range)
 
 ### Mid/Long term ideas
 - comparison of farmR setup to the decision tables
