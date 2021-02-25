@@ -24,6 +24,7 @@ read_weather <- function(project_path, version) {
 #' @importFrom purrr map map2_df reduce set_names
 #' @importFrom readr cols col_character col_double col_integer read_table
 #' @importFrom stringr str_remove
+#' @importFrom tibble add_column
 #' @importFrom tidyselect ends_with
 #'
 #' @keywords internal
@@ -50,8 +51,8 @@ read_weather_plus <- function(project_path) {
                                                       jdn  = col_integer(),
                                                       .default = col_double()),
                                      skip = 3, progress = FALSE)) %>%
-    map(., ~ jdnyr_to_ymdjdn(.x)) %>%
-    reduce(., full_join, by = c('year','month', 'day', 'jdn'))
+    map(., ~ jdnyr_to_date(.x)) %>%
+    reduce(., full_join, by = 'date')
 
   tmp <- map(tmp_files, ~ read_table(project_path%//%.x,
                                      col_names = c('year', 'jdn',
@@ -61,14 +62,15 @@ read_weather_plus <- function(project_path) {
                                                       jdn  = col_integer(),
                                                       .default = col_double()),
                                      skip = 3, progress = FALSE)) %>%
-    map(., ~ jdnyr_to_ymdjdn(.x)) %>%
-    reduce(., full_join, by = c('year','month', 'day', 'jdn'))
+    map(., ~ jdnyr_to_date(.x)) %>%
+    reduce(., full_join, by = 'date')
 
-  tmax <-  select(tmp, year, month, day, jdn, ends_with("_max")) %>%
+  tmax <- select(tmp, date, ends_with("_max")) %>%
     set_names(., str_remove(names(.), "_max"))
-  tmin <-  select(tmp, year, month, day, jdn, ends_with("_min"))%>%
+  tmin <- select(tmp, date, ends_with("_min"))%>%
     set_names(., str_remove(names(.), "_min"))
-  tav <-  map2_df(tmin, tmax, ~ (.x + .y)/2)
+  tav  <- map2_df(select(tmax, -date), select(tmin, -date), ~ (.x + .y)/2) %>%
+    add_column(., date = tmin$date, .before = 1)
 
   return(list(pcp = pcp, tmax = tmax, tmin = tmin, tav = tav))
 }
@@ -81,6 +83,7 @@ read_weather_plus <- function(project_path) {
 #' @importFrom lubridate month day
 #' @importFrom purrr map2_df set_names
 #' @importFrom readr cols fwf_widths read_fwf read_lines
+#' @importFrom tibble add_column
 #' @importFrom tidyselect starts_with
 #'
 #' @keywords internal
@@ -99,17 +102,18 @@ read_weather_2012 <- function(project_path) {
 
   pcp <- read_weather_file(file = project_path%//%weather_file[1],
                       var = "pcp", skip = 4, digit_var = 5,  digit_date = c(4,3)) %>%
-    set_names(c('year','month', 'day', 'jdn', pcp_names))
+    set_names(c('date', pcp_names))
 
   tmp <- read_weather_file(file = project_path%//%weather_file[2],
                       var = c("tmax", "tmin"), skip = 4, digit_var = 5,
                       digit_date = c(4,3))
 
-  tmin <- select(tmp, year, month, day, jdn, starts_with("tmin_")) %>%
-    set_names(c('year','month', 'day', 'jdn', tmp_names))
-  tmax <- select(tmp, year, month, day, jdn, starts_with("tmax_")) %>%
-    set_names(c('year','month', 'day', 'jdn', tmp_names))
-  tav <- map2_df(tmax, tmin, ~ (.x + .y)/2)
+  tmin <- select(tmp, date, starts_with("tmin_")) %>%
+    set_names(c('date', tmp_names))
+  tmax <- select(tmp, date, starts_with("tmax_")) %>%
+    set_names(c('date', tmp_names))
+  tav  <- map2_df(select(tmax, -date), select(tmin, -date), ~ (.x + .y)/2) %>%
+    add_column(., date = tmin$date, .before = 1)
 
   return(list(pcp = pcp, tmax = tmax, tmin = tmin, tav = tav))
 }
@@ -138,7 +142,7 @@ read_weather_file <- function(file, var, skip, digit_var, digit_date) {
   read_fwf(file = file, col_positions = cols,
            col_types = cols(.default = "d", year = "i", jdn = "i"),
            skip = 4) %>%
-    jdnyr_to_ymdjdn(.)
+    jdnyr_to_date(.)
 }
 
 #' Connect the HRUs to the read weather stations
@@ -192,6 +196,7 @@ connect_weather_plus <- function(project_path, hru_attributes) {
            tmax = tmp,
            tmin = tmp,
            tav  = tmp) %>%
+    select(-tmp) %>%
     rename(hru = id, hru_name = name)
 
   hru_con <- hru_attributes %>%
@@ -264,7 +269,7 @@ connect_weather_2012 <- function(project_path, hru_attributes, variables) {
     full_join(., hru_attributes, by = 'sub') %>%
     select(hru, pcp, tmin, tmax, tav)
 
-  var_names <- map(variables, ~select(.x, -year, -month, -day, -jdn) %>% names(.))
+  var_names <- map(variables, ~select(.x, -date) %>% names(.))
 
   for(i_var in names(var_names)) {
     var_tbl[[i_var]] <- var_names[[i_var]][var_tbl[[i_var]]]
@@ -392,7 +397,7 @@ check_if_daily <- function(files, project_path) {
   }
 }
 
-#' Convert jdn and year column to year, month, day, and jdn columns
+#' Convert jdn and year columns to year, month, day, and jdn columns
 #'
 #' @param tbl Tibble containing the year and the jdn columns
 #'
@@ -409,6 +414,22 @@ jdnyr_to_ymdjdn <- function(tbl) {
          day   = day(date)) %>%
     select(-date) %>%
     select(year, month, day, jdn, everything())
+}
+
+#' Convert jdn and year columns to a date column
+#'
+#' @param tbl Tibble containing the year and the jdn columns
+#'
+#' @importFrom dplyr mutate select %>%
+#' @importFrom tidyselect everything
+#'
+#' @keywords internal
+#'
+jdnyr_to_date <- function(tbl) {
+  tbl %>%
+    mutate(date  = as.Date(jdn%//%year, "%j/%Y")) %>%
+    select(-year, -jdn) %>%
+    select(date, everything())
 }
 
 #' Retrieve the weather station names from SWAT2012 weather input file
