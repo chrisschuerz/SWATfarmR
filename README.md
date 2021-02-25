@@ -6,7 +6,8 @@
 
 ### Next actions
 - restructure mgt input tables for SWAT+ 
-- check which inputs are required for SWAT+ mgt scheduling
+- read lookups for fert, till, plant, etc.
+- variable table preparation
 - adapt raw and clear text mgt schedules for SWAT+
 
 ### Potential ideas for later consideration

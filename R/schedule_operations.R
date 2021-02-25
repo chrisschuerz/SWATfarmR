@@ -176,9 +176,26 @@ filter_static_rules <- function(mgt_tbl, attribute_hru_i) {
 #'
 #' @keywords internal
 #'
-prepare_variables <- function(var_list, subbasin) {
-  var_names <- map_chr(var_list, ~colnames(.x)[5]) %>%
-    str_remove(., "_[:digit:]+$")
+prepare_variables <- function(var_list, hru_var_con, i_hru) {
+  con_i <- filter(hru_var_con, hru == i_hru) %>%
+    .[,5:ncol(.)]
+
+  var_tbl <- map2(con_i, names(con_i), ~ select(variables[[.y]], date, matches(.x))) %>%
+    map2(., names(.), ~ set_names(.x, c('date', .y))) %>%
+    reduce(., left_join, by = 'date') %>%
+    add_column( year = year(date),
+                month = month(date),
+                day = day(date),
+                jdn = yday(date),
+                md = 100*month + day,
+                ymd = year*1e4 + md,
+                .after = 1)
+
+           hu = NA,
+           hu_fr = NA)
+
+  # var_names <- map_chr(var_list, ~colnames(.x)[5]) %>%
+  #   str_remove(., "_[:digit:]+$")
 
   var_col_sel <- var_names%_%subbasin
 
