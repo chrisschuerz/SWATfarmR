@@ -183,30 +183,14 @@ prepare_variables <- function(var_list, hru_var_con, i_hru) {
   var_tbl <- map2(con_i, names(con_i), ~ select(variables[[.y]], date, matches(.x))) %>%
     map2(., names(.), ~ set_names(.x, c('date', .y))) %>%
     reduce(., left_join, by = 'date') %>%
-    add_column( year = year(date),
-                month = month(date),
-                day = day(date),
-                jdn = yday(date),
-                md = 100*month + day,
-                ymd = year*1e4 + md,
-                .after = 1)
-
-           hu = NA,
-           hu_fr = NA)
-
-  # var_names <- map_chr(var_list, ~colnames(.x)[5]) %>%
-  #   str_remove(., "_[:digit:]+$")
-
-  var_col_sel <- var_names%_%subbasin
-
-  var_tbl <- var_list %>%
-    map(., ~select(.x, year, month, day, jdn, any_of(var_col_sel))) %>%
-    reduce(., left_join, by = c("year","month", "day", "jdn")) %>%
-    set_names(., str_remove(colnames(.), "_[:digit:]+$")) %>%
-    mutate(md = 100*month + day,
+    mutate(year = year(date),
+           month = month(date),
+           day = day(date),
+           jdn = yday(date),
+           md = 100*month + day,
            ymd = year*1e4 + md,
-           date = ymd(ymd),
-           hu = NA,
+           .after = 1) %>%
+    mutate(hu = NA,
            hu_fr = NA)
 
   return(var_tbl)

@@ -335,8 +335,9 @@ add_variable <- function(data, name, assign_unit, overwrite, con, variables) {
       data <- data[, 2:ncol(data)]
     }
 
-    if(any(c('date', 'year', 'month', 'day', 'jdn') %in% names(data))) {
-      stop("The variable names 'date', 'year', 'month', 'day', or 'jdn' ar not allowed as variable names in 'data'")
+    if(any(c('date', 'year', 'month', 'day', 'jdn', 'md', 'ymd', 'hu', 'hu_fr') %in% names(data))) {
+      stop("The variable names 'date', 'year', 'month', 'day', 'jdn', 'md', 'ymd'",
+           ", 'hu', or 'hu_fr' are not allowed as variable names in 'data'.")
     }
 
     var_name <- unique(assign_unit[[2]])
