@@ -1,14 +1,47 @@
 #' Read the management schedule table from a csv file
 #'
 #' @param file Text string path to the csv file
-#'
-#' @importFrom dplyr select %>%
-#' @importFrom readr cols read_csv
-#' @importFrom tidyselect starts_with
+#' @param version String that indicates what SWAT version the project is.
 #'
 #' @keywords internal
 #'
-read_mgt_table <- function(file) {
+#'
+read_mgt_table <- function(file, version) {
+  if(version == 'plus') {
+    mgt_dat <- read_mgt_table_plus(file)
+  } else if(version == '2012') {
+    mgt_dat <- read_mgt_table_2012(file)
+  }
+  return(mgt_dat)
+}
+
+#' Read the management schedule table from a csv file for SWAT+
+#'
+#' @param file Text string path to the csv file
+#'
+#' @importFrom dplyr select %>%
+#' @importFrom readr cols read_csv
+#'
+#' @keywords internal
+#'
+read_mgt_table_plus <- function(file) {
+  tbl <- read_csv(file, col_types = cols(weight = 'd',
+                                         op_data3 = 'd',
+                                         .default = 'c')) %>%
+    select(land_use, management, weight, rules_static, rules_dynamic, operation, 'op_data'%&%1:3)
+  return(tbl)
+}
+
+#' Read the management schedule table from a csv file for SWAT2012
+#'
+#' @param file Text string path to the csv file
+#'
+#' @importFrom dplyr select %>%
+#' @importFrom readr cols read_csv
+#'
+#' @keywords internal
+#'
+read_mgt_table_2012 <- function(file) {
   tbl <- read_csv(file, col_types = cols(management = "c",
                                          weight = "d",
                                          land_use = "c",
@@ -17,8 +50,26 @@ read_mgt_table <- function(file) {
                                          operation = "c",
                                          mgt1 = "c",
                                          .default = "d")) %>%
-    select(land_use, management, weight, rules_static, rules_dynamic, operation, starts_with("mgt"))
+    select(land_use, management, weight, rules_static, rules_dynamic, operation, 'mgt'%&%1:9)
   return(tbl)
+}
+
+#' Read the lookup tables for plant, fertilizer, and tillage codes from the SWAT
+#' project
+#'
+#' @param project_path Text string path SWAT TxtInOut folder
+#' @param version String that indicates what SWAT version the project is.
+#'
+#' @keywords internal
+#'
+#'
+read_lookup <- function(project_path, version) {
+  if(version == 'plus') {
+    mgt_dat <- read_lookup_plus(project_path)
+  } else if(version == '2012') {
+    mgt_dat <- read_lookup_2012(project_path)
+  }
+  return(mgt_dat)
 }
 
 #' Read the lookup tables for plant, fertilizer, and tillage codes from the SWAT
@@ -35,7 +86,52 @@ read_mgt_table <- function(file) {
 #'
 #' @keywords internal
 #'
-read_lookup <- function(project_path) {
+read_lookup_plus <- function(project_path) {
+  lookup  <- list(management = tribble(
+                                       ~value,    ~label,
+                                        "plnt",   "plant",
+                                        "irrm",   "irrigation",
+                                        "fert",   "fertilizer",
+                                        "pest",   "pesticide",
+                                        "hvkl",   "harvest_kill",
+                                        "till",   "tillage",
+                                        "harv",   "harvest_only",
+                                        "kill",   "kill_only",
+                                        "graz",   "grazing",
+                                        "swep",   "street_sweeping",
+                                        "burn",   "burn",
+                                        "skip",   "skip",
+                                        "pini",   "plant_ini"))
+
+  lookup$fertilizer <- read_table(file = project_path%//%"fertilizer.frt",
+                                  col_names = TRUE, col_types = cols(), skip = 1)
+
+  lookup$tillage <- read_table(file = project_path%//%"tillage.til",
+                               col_names = TRUE, col_types = cols(), skip = 1)
+
+  lookup$plant <- read_table(file = project_path%//%"plants.plt",
+                             col_names = TRUE, col_types = cols(), skip = 1) %>%
+    rename(t_base = tmp_base)
+
+  return(lookup)
+}
+
+
+#' Read the lookup tables for plant, fertilizer, and tillage codes from the SWAT
+#' project
+#'
+#' @param project_path Text string path SWAT TxtInOut folder
+#'
+#' @importFrom dplyr select %>%
+#' @importFrom purrr map map_dbl map_df set_names
+#' @importFrom readr cols read_lines read_table
+#' @importFrom stringr str_split
+#' @importFrom tibble tibble
+#' @importFrom tidyselect starts_with
+#'
+#' @keywords internal
+#'
+read_lookup_2012 <- function(project_path) {
   lookup  <- list(management = tibble(value = c(seq(0,17),99),
                                       label = c("end_year",
                                                 "plant",
