@@ -10,6 +10,7 @@
 - adapt raw and clear text mgt schedules for SWAT+
 
 ### Potential ideas for later consideration
+- function to generate csv mgt table from SWAT+ project
 - allow different date ranges for the variables (dont know if this is necessary, so far all variables same time period!)
 - allow generation of farm schedules for defined date range (and check if all input variables provide this range)
 - Function add_feature to add static features for static rule filtering
