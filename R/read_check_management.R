@@ -2,17 +2,26 @@
 #'
 #' @param file Text string path to the csv file
 #' @param version String that indicates what SWAT version the project is.
+#' @param version String that indicates the SWAT version.
+#' @param version String that indicates what SWAT version the project is.
 #'
 #' @keywords internal
 #'
 #'
-read_mgt_table <- function(file, version) {
+read_mgt_lkp <- function(file, version, project_path, hru_attribute) {
   if(version == 'plus') {
-    mgt_dat <- read_mgt_table_plus(file)
+    mgt_text <- read_mgt_table_plus(file)
+    lookup  <- read_lookup_plus(project_path)
+    check_mgt_table_plus(mgt_text, lookup, hru_attribute)
+    mgt_code <- translate_mgt_table_plus(mgt_text, lookup)
+    mgt_text <- NULL
   } else if(version == '2012') {
-    mgt_dat <- read_mgt_table_2012(file)
+    mgt_text <- read_mgt_table_2012(file)
+    lookup  <- read_lookup_2012(project_path)
+    check_mgt_table_2012(mgt_text, lookup, hru_attribute)
+    mgt_code <- translate_mgt_table_2012(mgt_text, lookup)
   }
-  return(mgt_dat)
+  return(list(mgt_text = mgt_text, mgt_code = mgt_code, lookup = lookup))
 }
 
 #' Read the management schedule table from a csv file for SWAT+
@@ -58,24 +67,6 @@ read_mgt_table_2012 <- function(file) {
 #' project
 #'
 #' @param project_path Text string path SWAT TxtInOut folder
-#' @param version String that indicates what SWAT version the project is.
-#'
-#' @keywords internal
-#'
-#'
-read_lookup <- function(project_path, version) {
-  if(version == 'plus') {
-    mgt_dat <- read_lookup_plus(project_path)
-  } else if(version == '2012') {
-    mgt_dat <- read_lookup_2012(project_path)
-  }
-  return(mgt_dat)
-}
-
-#' Read the lookup tables for plant, fertilizer, and tillage codes from the SWAT
-#' project
-#'
-#' @param project_path Text string path SWAT TxtInOut folder
 #'
 #' @importFrom dplyr select %>%
 #' @importFrom purrr map map_dbl map_df set_names
@@ -101,7 +92,7 @@ read_lookup_plus <- function(project_path) {
                                         "swep",   "street_sweeping",
                                         "burn",   "burn",
                                         "skip",   "skip",
-                                        "pini",   "plant_ini"))
+                                        "inip",   "initial_plant"))
 
   lookup$fertilizer <- read_table(file = project_path%//%"fertilizer.frt",
                                   col_names = TRUE, col_types = cols(), skip = 1)
@@ -151,7 +142,7 @@ read_lookup_2012 <- function(project_path) {
                                                 "cont_pest",
                                                 "burn",
                                                 "skip",
-                                                "initial_crop")))
+                                                "initial_plant")))
 
   lookup$fertilizer <- read_table(file = project_path%//%"fert.dat",
                                   col_names = FALSE, col_types = cols()) %>%
@@ -178,7 +169,72 @@ read_lookup_2012 <- function(project_path) {
   return(lookup)
 }
 
-check_mgt_table <- function(mgt_tbl, lookup, hru_attribute) {
+#' Check the read SWAT+ management schedule tables
+#'
+#' @param mgt_tbl The read management table in tibble format
+#' @param lookup List with lookup tables for plant, tillage, and fertilizer
+#' @param hru_attribute Tibble providing attributes for the HRUs
+#'
+#' @importFrom dplyr filter %>%
+#'
+#' @keywords internal
+#'
+check_mgt_table_plus <- function(mgt_tbl, lookup, hru_attribute) {
+  plant_mgt <-  filter(mgt_tbl, operation == "plant") %>% .$op_data1 %>% unique(.)
+  plant_lkp <- unique(lookup$plant$name)
+  plant_miss <- plant_mgt[!(plant_mgt %in% plant_lkp)]
+  if(length(plant_miss) > 0) {
+    stop("The following plants are not defined in the SWAT data base" %&%
+           ", but were found in the management table:\n  " %&%
+           paste(plant_miss, collapse = ", ") %&%
+           "\n  Please check the inputs in the management table!")
+  }
+  fert_mgt <-  filter(mgt_tbl, operation == "fertilizer") %>% .$op_data1 %>% unique(.)
+  fert_lkp <- unique(lookup$fertilizer$name)
+  fert_miss <- fert_mgt[!(fert_mgt %in% fert_lkp)]
+  if(length(fert_miss) > 0) {
+    stop("The following fertilizers are not defined in the SWAT data base" %&%
+           ", but were found in the management table:\n  " %&%
+           paste(fert_miss, collapse = ", ") %&%
+           "\n  Please check the inputs in the management table!")
+  }
+  no_fert_amount <- which(mgt_tbl$operation == 'fertilizer' & is.na(mgt_tbl$op_data3))
+  if(length(no_fert_amount) > 0) {
+    stop("In the following lines fertilizer operations are given without a " %&%
+         "fertilizer amount ('op_data3'):\n  " %&%
+           paste(no_fert_amount, collapse = ", ") %&%
+           "\n  Please check the inputs in the management table!")
+  }
+  till_mgt <-  filter(mgt_tbl, operation == "tillage") %>% .$op_data1 %>% unique(.)
+  till_lkp <- unique(lookup$tillage$name)
+  till_miss <- till_mgt[!(till_mgt %in% till_lkp)]
+  if(length(till_miss) > 0) {
+    stop("The following tillage types are not defined in the SWAT data base" %&%
+           ", but were found in the management table:\n  " %&%
+           paste(fert_miss, collapse = ", ") %&%
+           "\n  Please check the inputs in the management table!")
+  }
+  luse_hru <- unique(hru_attribute$lu_mgt)
+  luse_miss <- luse_hru[!(luse_hru %in% unique(mgt_tbl$land_use))]
+  if(length(luse_miss) > 0) {
+    warning("No management schedules were found for the following SWAT land uses: \n  " %&%
+              paste(luse_miss, collapse = ", ") %&%
+              "\n  If managements should be written for any of these land uses\n"%&%
+              "  please add them to the management table and read the table again.")
+  }
+}
+
+#' Check the read SWAT2012 management schedule tables
+#'
+#' @param mgt_tbl The read management table in tibble format
+#' @param lookup List with lookup tables for plant, tillage, and fertilizer
+#' @param hru_attribute Tibble providing attributes for the HRUs
+#'
+#' @importFrom dplyr filter %>%
+#'
+#' @keywords internal
+#'
+check_mgt_table_2012 <- function(mgt_tbl, lookup, hru_attribute) {
   plant_mgt <-  filter(mgt_tbl, operation == "plant") %>% .$mgt1 %>% unique(.)
   plant_lkp <- unique(lookup$plant$label)
   plant_miss <- plant_mgt[!(plant_mgt %in% plant_lkp)]
@@ -216,6 +272,27 @@ check_mgt_table <- function(mgt_tbl, lookup, hru_attribute) {
   }
 }
 
+#' Translate the operation and management labels into SWAT+ labels
+#'
+#' @param mgt_tbl Loaded tibble with the management operation schedules
+#' @param lookup  List of lookup tables
+#'
+#' @importFrom dplyr %>%
+#'
+#' @keywords internal
+#'
+translate_mgt_table_plus <- function(mgt_tbl, lookup) {
+  for (i_op in 1:nrow(mgt_tbl)) {
+    if(mgt_tbl$operation[i_op] %in% lookup$management$label) {
+      mgt_tbl$operation[i_op] <-
+        lookup$management$value[lookup$management$label ==  mgt_tbl$operation[i_op]]
+    } else if(!(mgt_tbl$operation[i_op] %in% lookup$management$label) &
+              !(mgt_tbl$operation[i_op] %in% lookup$management$value))
+    stop("Error in line ", i_op, " of the management table. Unknown 'operation'.")
+  }
+  return(mgt_tbl)
+}
+
 #' Translate the operation and management labels into SWAT codes
 #'
 #' @param mgt_tbl Loaded tibble with the management operation schedules
@@ -225,7 +302,7 @@ check_mgt_table <- function(mgt_tbl, lookup, hru_attribute) {
 #'
 #' @keywords internal
 #'
-translate_mgt_table <- function(mgt_tbl, lookup) {
+translate_mgt_table_2012 <- function(mgt_tbl, lookup) {
   mgt_tbl %>%
     left_join(., lookup$management, by = c("operation" = "label")) %>%
     mutate(operation = value) %>%

@@ -6,7 +6,7 @@
 #' @keywords internal
 #'
 #'
-read_mgt <- function(project_path, version) {
+read_mgt_init <- function(project_path, version) {
   if(version == 'plus') {
     mgt_dat <- read_mgt_plus(project_path)
   } else if(version == '2012') {

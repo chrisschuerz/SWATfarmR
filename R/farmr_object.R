@@ -38,7 +38,7 @@ farmr_project <- R6::R6Class(
                                                               self$.data$variables,
                                                               self$.data$meta$swat_version)
 
-      self$.data$meta$mgt_raw <- read_mgt(project_path, self$.data$meta$swat_version)
+      self$.data$meta$mgt_raw <- read_mgt_init(project_path, self$.data$meta$swat_version)
 
       finish_progress(NULL, t0, "", "Finished")
     },
@@ -58,17 +58,26 @@ farmr_project <- R6::R6Class(
              "management table! If you want to discard the scheduled operations",
              "and start from scratch, please set 'discard_schedule = TRUE.")
       }
-      self$.data$management$mgt_full <- read_mgt_table(file)
-      self$.data$meta$parameter_lookup <- read_lookup(self$.data$meta$project_path)
-      check_mgt_table(self$.data$management$mgt_full,
-                      self$.data$meta$parameter_lookup,
-                      self$.data$meta$hru_attributes)
-      self$.data$management$mgt_codes <-
-        translate_mgt_table(self$.data$management$mgt_full,
-                            self$.data$meta$parameter_lookup)
+
+      mgt_lkp <- read_mgt_lkp(file,
+                              self$.data$meta$swat_version,
+                              self$.data$meta$project_path,
+                              self$.data$meta$hru_attributes)
+      self$.data$management$schedules <- mgt_lkp$mgt_codes
+      self$.data$management$schedules_text <- mgt_lkp$mgt_text
+      self$.data$meta$parameter_lookup <- mgt_lkp$lookup
+
+
+      # self$.data$management$mgt_full <- read_mgt_table(file)
+      # check_mgt_table(self$.data$management$mgt_full,
+      #                 self$.data$meta$parameter_lookup,
+      #                 self$.data$meta$hru_attributes)
+      # self$.data$management$mgt_codes <-
+      #   translate_mgt_table(self$.data$management$mgt_full,
+      #                       self$.data$meta$parameter_lookup)
 
       # self$check_rules <- check_rules()
-      self$schedule_management_operations <- function() {
+      self$schedule_operations <- function() {
         self$.data$scheduled_operations <-
           schedule_operation(mgt_schedule = self$.data$management$mgt_codes,
                              hru_attribute = self$.data$meta$hru_attributes,
