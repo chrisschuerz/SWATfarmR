@@ -25,9 +25,18 @@ read_mgt_init <- function(project_path, version) {
 #'
 read_mgt_plus <- function(project_path) {
   mgt_sch  <- read_lines(project_path%//%'management.sch')
-  luse_lum <- read_lines(project_path%//%'landuse.lum')
+  luse_lum <- read_table(file = project_path%//%"landuse.lum",
+                         col_names = TRUE, col_types = cols(), skip = 1)
+  hru_data <- read_table(file = project_path%//%"hru-data.hru",
+                         col_names = TRUE, col_types = cols(), skip = 1)
+  luse_header <- read_lines(project_path%//%'landuse.lum', n_max = 1)
+  hru_header  <- read_lines(project_path%//%'hru-data.hru', n_max = 1)
+
   return(list(management_sch = mgt_sch,
-              landuse_lum = luse_lum))
+              landuse_lum    = luse_lum,
+              hru_data       = hru_data,
+              luse_header    = luse_header,
+              hru_header     = hru_header))
 }
 
 #' Read SWAT mgt input files for SWAT2012

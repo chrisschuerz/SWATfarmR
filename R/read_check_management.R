@@ -93,7 +93,6 @@ read_lookup_plus <- function(project_path) {
                                         "burn",   "burn",
                                         "skip",   "skip",
                                         "inip",   "initial_plant"))
-
   lookup$fertilizer <- read_table(file = project_path%//%"fertilizer.frt",
                                   col_names = TRUE, col_types = cols(), skip = 1)
 
