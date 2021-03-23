@@ -63,7 +63,7 @@ farmr_project <- R6::R6Class(
                               self$.data$meta$swat_version,
                               self$.data$meta$project_path,
                               self$.data$meta$hru_attributes)
-      self$.data$management$schedules <- mgt_lkp$mgt_codes
+      self$.data$management$schedule <- mgt_lkp$mgt_code
       self$.data$management$schedules_text <- mgt_lkp$mgt_text
       self$.data$meta$parameter_lookup <- mgt_lkp$lookup
 

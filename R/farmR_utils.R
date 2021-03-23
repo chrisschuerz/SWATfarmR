@@ -125,6 +125,9 @@ variable_decay <- function(variable, n_steps, decay_rate) {
   if(all(names(variable)[1:4] == c("year", "month", "day", "jdn"))) {
     variable <- variable[,5:ncol(variable)]
   }
+  if(names(variable)[1] == 'date') {
+    variable <- variable[,2:ncol(variable)]
+  }
   map_df(variable, ~exp_decay(.x, n_steps, decay_rate))
 }
 
