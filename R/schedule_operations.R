@@ -13,9 +13,28 @@
 #'
 #' @keywords internal
 #'
-schedule_operation <- function(mgt_schedule, hru_attribute, variables, lookup) {
+schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
+                               var_con, start_year, end_year, n_schedule, version) {
   schedule <- list()
+  schedule_con <- prepare_schedule_con(hru_attribute, version)
   op_skip <- NULL
+
+
+  if(!is.null(start_year)) {
+    stopifnot(is.numeric(start_year))
+    variables <- map(variables, ~ filter(.x, year(date) >= start_year))
+  }
+
+  if(!is.null(end_year)) {
+    stopifnot(is.numeric(end_year))
+    variables <- map(variables, ~ filter(.x, year(date) <= end_year))
+  }
+
+  if(nrow(variables[[1]]) == 0) {
+    stop("The selection of 'start_year' and 'end_year' resulted in empty",
+         " time series for the 'variables'.")
+  }
+
   t0 <- now()
   #-------------------------------------------------------------------------------
   # Possible parallel computing implementation. Little sketchy workaround with functions
@@ -39,12 +58,14 @@ schedule_operation <- function(mgt_schedule, hru_attribute, variables, lookup) {
   cat("Scheduling operations:\n")
   for(i_hru in hru_attribute$hru) {
 
+    luse_lbl <- ifelse(version == 'plus', 'lu_mgt', 'luse')
+    init_lbl <- lookup$management$value[lookup$management$label == 'initial_plant']
     attribute_hru_i <- hru_attribute[i_hru,]
 
     mgt_hru_i <- mgt_schedule %>%
-      filter(land_use == attribute_hru_i$luse)
+      filter(land_use == attribute_hru_i[[luse_lbl]])
 
-    if(attribute_hru_i$luse %in% mgt_schedule$land_use) {
+    if(attribute_hru_i[[luse_lbl]] %in% unique(mgt_schedule$land_use)) {
       mgt_hru_i <- sample_management(mgt_hru_i) %>%
         filter_static_rules(., attribute_hru_i) %>%
         select(-land_use, -management, -weight, -rules_static)
@@ -53,7 +74,7 @@ schedule_operation <- function(mgt_schedule, hru_attribute, variables, lookup) {
     schedule_i <- list(init_crop = NULL, schedule = NULL)
 
     if(nrow(mgt_hru_i) > 0) {
-      if(all(mgt_hru_i$operation == 99)){
+      if(all(mgt_hru_i$operation == init_lbl)){
         schedule_i$init_crop <- mgt_hru_i[,3:6] %>%
           set_names(c("plant_id", "lai_init", "bio_init", "phu_plant"))
       } else {
@@ -99,6 +120,33 @@ schedule_operation <- function(mgt_schedule, hru_attribute, variables, lookup) {
 
   return(list(scheduled_operations = schedule,
               skipped_operations   = op_skip))
+}
+
+#' Prepare the management schedule connection table
+#'
+#' @param hru_attribute Tibble that provides the HRU attributes
+#' @param version label indicating the SWAT version
+#'
+#' @importFrom dplyr mutate rename select %>%
+#'
+#' @keywords internal
+#'
+prepare_schedule_con <- function(hru_attribute, version) {
+  if (version == 'plus') {
+    schedule_con <- hru_attribute %>%
+      select(rtu, hru, lu_mgt) %>%
+      mutate(luse_upd = NA,
+             mgt = NA,
+             id  = NA) %>%
+      rename(sub = rtu, luse = lu_mgt)
+  } else if (version == '2012') {
+    schedule_con <- hru_attribute %>%
+      select(sub, hru, luse) %>%
+      mutate(luse_upd = NA,
+             mgt = NA,
+             id  = NA)
+  }
+  return(schedule_con)
 }
 
 #' Sample management type if different management types are provided for the
