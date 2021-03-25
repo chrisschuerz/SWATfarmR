@@ -80,6 +80,7 @@ read_mgt_table_2012 <- function(file) {
 read_lookup_plus <- function(project_path) {
   lookup  <- list(management = tribble(
                                        ~value,    ~label,
+                                        "skip",   "end_year",
                                         "plnt",   "plant",
                                         "irrm",   "irrigation",
                                         "fert",   "fertilizer",

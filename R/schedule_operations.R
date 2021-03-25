@@ -408,11 +408,12 @@ compute_hu <- function(var_tbl, mgt_j, lookup, date_j, version) {
 #'
 #' @keywords internal
 #'
-add_end_year_flag <- function(schedule_tbl) {
+add_end_year_flag <- function(schedule_tbl, lookup) {
+  op <- lookup$management$value[lookup$management$label == 'end_year']
   schedule_tbl <- schedule_tbl %>%
   mutate(yr = year(date)) %>%
   group_split(., yr) %>%
-  map(., ~add_row(.x, date = ymd(.x$yr[1]%-%12%-%31), operation = 0)) %>%
+  map(., ~add_row(.x, date = ymd(.x$yr[1]%-%12%-%31), operation = op)) %>%
     bind_rows(.) %>%
     select(-yr)
 
@@ -442,14 +443,15 @@ add_end_year_flag <- function(schedule_tbl) {
 #'
 #' @keywords internal
 #'
-add_skip_year_flag <- function(schedule_tbl, variable) {
-  year_tbl <- tibble(yr = unique(variable$year))
+add_skip_year_flag <- function(schedule_tbl, variable, lookup) {
+  skip_flag <- lookup$management$value[lookup$management$label == 'skip']
+  year_tbl <- tibble(yr = unique(year(variable$date)))
 
   schedule_tbl <- schedule_tbl %>%
     mutate(yr = year(date)) %>%
     full_join(., year_tbl, by = "yr") %>%
     group_split(., yr) %>%
-    map_df(., set_skip_flag) %>%
+    map_df(., ~ set_skip_flag(.x, skip_flag)) %>%
     select(-yr)
 
   return(schedule_tbl)
@@ -462,9 +464,9 @@ add_skip_year_flag <- function(schedule_tbl, variable) {
 #'
 #' @keywords internal
 #'
-set_skip_flag <- function(tbl) {
+set_skip_flag <- function(tbl, skip_flag) {
   if(nrow(tbl) == 1 & any(is.na(tbl$operation))) {
-    tbl$operation <- 17
+    tbl$operation <- skip_flag
   }
   return(tbl)
 }
