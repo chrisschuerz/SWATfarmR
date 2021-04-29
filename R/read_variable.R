@@ -346,7 +346,10 @@ add_variable <- function(data, name, assign_unit, overwrite, con, variables) {
       stop(paste0("The variable", plural(length(var_miss)), ": "),  paste(var_miss, collapse = ", "),
            " are defined in 'assign_unit', but are no variable in 'data'.")
     }
-
+    unit_cnt <- table(assign_unit[[1]])
+    if(!all(unit_cnt == 1)) {
+      stop("The provided values for '", names(assign_unit)[1], "' must be unique.")
+    }
     unit_val <- unique(assign_unit[[1]])
     unit_con <- unique(con[[names(assign_unit)[1]]])
     unit_miss <- unit_con[!(unit_con %in% unit_val)]

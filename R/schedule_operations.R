@@ -60,7 +60,7 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
 
     luse_lbl <- ifelse(version == 'plus', 'lu_mgt', 'luse')
     init_lbl <- lookup$management$value[lookup$management$label == 'initial_plant']
-    attribute_hru_i <- hru_attribute[i_hru,]
+    attribute_hru_i <- filter(hru_attribute, hru ==i_hru)
 
     mgt_hru_i <- mgt_schedule %>%
       filter(land_use == attribute_hru_i[[luse_lbl]])
@@ -80,7 +80,7 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
         j_op <- 1
         n_op <- nrow(mgt_hru_i)
 
-        var_tbl <- prepare_variables(variables, var_con, i_hru)
+        var_tbl <- prepare_variables(variables, var_con, i_hru, version)
         date_j <- var_tbl$date[1]
         prev_op <- date_j
 
@@ -102,8 +102,8 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
             }
           }
 
+          var_tbl <- compute_hu(var_tbl, mgt_j, lookup, date_j, schedule_i, version)
           schedule_i <- schedule_op_j(schedule_i, mgt_j, date_j, init_lbl, version)
-          var_tbl <- compute_hu(var_tbl, mgt_j, lookup, date_j, version)
           j_op <- ifelse(j_op < n_op, j_op + 1, 1)
         }
 
@@ -242,7 +242,7 @@ schedule_init <- function(mgt_op, version) {
 #'
 #' @keywords internal
 #'
-prepare_variables <- function(var_list, hru_var_con, i_hru) {
+prepare_variables <- function(var_list, hru_var_con, i_hru, version) {
   con_i <- filter(hru_var_con, hru == i_hru) %>%
     .[,5:ncol(.)]
 
@@ -255,9 +255,11 @@ prepare_variables <- function(var_list, hru_var_con, i_hru) {
            jdn = yday(date),
            md = 100*month + day,
            ymd = year*1e4 + md,
-           .after = 1) %>%
-    mutate(hu = NA,
-           hu_fr = NA)
+           .after = 1)
+
+  if (version == '2012') {
+    var_tbl <- mutate(var_tbl, hu = NA, hu_fr = NA)
+  }
 
   return(var_tbl)
 }
@@ -362,35 +364,85 @@ document_op_skip <- function(op_skip, attribute_hru_i, mgt_j, prev_op, j_op) {
   return(op_skip)
 }
 
-compute_hu <- function(var_tbl, mgt_j, lookup, date_j, version) {
-  plnt_lbls <- lookup$management$value[lookup$management$label %in% c('plant', 'initial_plant')]
+compute_hu <- function(var_tbl, mgt_j, lookup, date_j, schedule_i, version) {
+
+  init_lbl <- lookup$management$value[lookup$management$label == 'initial_plant']
+  plnt_lbl <- lookup$management$value[lookup$management$label == 'plant']
   kill_lbls <- lookup$management$value[lookup$management$label %in% c('harvest_kill', 'kill_only')]
   harv_lbl  <- lookup$management$value[lookup$management$label == 'harvest_only']
   op_i <- mgt_j$operation
-  if(op_i %in% plnt_lbls & !is.null(date_j)) {
-    if(version == 'plus') {
-      plant_i <- mgt_j$op_data1
-      t_base <- filter(lookup$plant, name == plant_i) %>% .$t_base %>% .[1]
-      phu <- NA # might be updated when figured out where to acquire
-    } else if (version == '2012') {
+
+  if (version == '2012') {
+    if(op_i == init_lbl & !is.null(date_j) & is.null(schedule_i$init_crop)) {
       plant_i <- mgt_j$mgt1
       t_base <- filter(lookup$plant, value == plant_i) %>% .$t_base %>% .[1]
       phu <- mgt_j$mgt4
-    }
-    var_tbl <- var_tbl %>%
-      mutate(hu = ifelse(date >= date_j, tav - t_base, 0),
-             hu = ifelse(hu > 0, hu, 0),
-             hu = cumsum(hu),
-             hu_fr = hu / phu)
-  } else if(op_i %in% kill_lbls & !is.null(date_j)) {
-    var_tbl <- var_tbl %>%
-      mutate(hu = NA,
-             hu_fr = NA)
-  } else if(op_i == harv_lbl & !is.null(date_j) & version == '2012') {
-    if(!is.na(mgt_j$mgt5)) {
+
       var_tbl <- var_tbl %>%
-        mutate(hu = hu*(1 - mgt_j$mgt5),
-               hu_fr = hu_fr*(1 - mgt_j$mgt5))
+        mutate(hu = ifelse(date >= date_j, tav - t_base, 0),
+               hu = ifelse(hu > 0, hu, 0),
+               hu = cumsum(hu),
+               hu_fr = hu / phu)
+    } else if (op_i == plnt_lbl & !is.null(date_j)) {
+      plant_i <- mgt_j$mgt1
+      t_base <- filter(lookup$plant, value == plant_i) %>% .$t_base %>% .[1]
+      phu <- mgt_j$mgt4
+
+      var_tbl <- var_tbl %>%
+        mutate(hu = ifelse(date >= date_j, tav - t_base, 0),
+               hu = ifelse(hu > 0, hu, 0),
+               hu = cumsum(hu),
+               hu_fr = hu / phu)
+    } else if(op_i %in% kill_lbls & !is.null(date_j)) {
+      var_tbl <- var_tbl %>%
+        mutate(hu = NA,
+               hu_fr = NA)
+    } else if(op_i == harv_lbl & !is.null(date_j)) {
+      if(!is.na(mgt_j$mgt5)) {
+        var_tbl <- var_tbl %>%
+          mutate(hu = hu*(1 - mgt_j$mgt5),
+                 hu_fr = hu_fr*(1 - mgt_j$mgt5))
+      }
+    }
+  } else if (version == 'plus') {
+    if(op_i == init_lbl & !is.null(date_j) & is.null(schedule_i$init_crop)) {
+      comm_i <-  filter(lookup$plt_comm, plt_comm == mgt_j$op_data1)
+      plant_i <- comm_i$plt_name
+      hu_i <- comm_i$phu_init
+      t_base <- comm_i %>%
+        left_join(., lookup$plant, by = c('plt_name' = 'name')) %>%
+        .$t_base
+
+      var_tbl <- t_base %>%
+        map(., ~ transmute(var_tbl, hu = ifelse(date >= date_j, tav - ., 0),
+                                    hu = ifelse(hu > 0, hu, 0),
+                                    hu = cumsum(hu),
+                                    grw = ifelse(date >= date_j, 1, 0),
+                                    grw = cumsum(grw))) %>%
+        map2(., hu_i, ~ mutate(.x, hu = hu + .y)) %>%
+        map2(., plant_i, ~set_names(.x, names(.x)%_%.y)) %>%
+        bind_cols(var_tbl, .)
+    } else if (op_i == plnt_lbl & !is.null(date_j)) {
+      plant_i <- mgt_j$op_data1
+
+      if('grw'%_%plant_i %in% names(var_tbl)) {
+        warning('HU for ', plant_i,' in HRU ', i_hru , ' overwritten.')
+        var_tbl <- select(var_tbl, -(c('hu', 'grw')%_%plant_i))
+      }
+
+      t_base <- filter(lookup$plant, name == plant_i) %>% .$t_base
+      var_tbl <- var_tbl %>%
+        transmute(., hu = ifelse(date >= date_j, tav - t_base, 0),
+                     hu = ifelse(hu > 0, hu, 0),
+                     hu = cumsum(hu),
+                     grw = ifelse(date >= date_j, 1, 0),
+                     grw = cumsum(grw)) %>%
+        set_names(., names(.)%_%plant_i) %>%
+        bind_cols(var_tbl, .)
+    } else if(op_i %in% kill_lbls & !is.null(date_j)) {
+      var_tbl <- select(var_tbl, -(c('hu', 'grw')%_%plant_i))
+    } else if(op_i == harv_lbl & !is.null(date_j)) {
+      var_tbl <- var_tbl #maybe other considerations for hrvst only in future
     }
   }
 

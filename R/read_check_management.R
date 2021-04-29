@@ -113,7 +113,7 @@ read_lookup_plus <- function(project_path) {
 #'
 #' @param comm_file Text string path to the plant.ini file
 #'
-#' @importFrom dplyr mutate %>%
+#' @importFrom dplyr filter mutate mutate_at %>%
 #' @importFrom purrr map map_chr map_dbl map2 map2_df set_names
 #' @importFrom readr read_lines
 #' @importFrom stringr str_replace_all str_split str_trim
@@ -143,7 +143,9 @@ read_plt_comm <- function(comm_file) {
     map(., ~ str_split(.x, '[:space:]+', simplify = TRUE)) %>%
     map(., ~ as_tibble(.x, .name_repair = 'minimal')) %>%
     map(., ~ set_names(.x, comm_head[4:length(comm_head)])) %>%
-    map2_df(., comm_name, ~ mutate(.x, plt_comm = .y, .before = 1))
+    map2_df(., comm_name, ~ mutate(.x, plt_comm = .y, .before = 1)) %>%
+    filter(lc_status == 'y') %>%
+    mutate_at(., 4:ncol(.), as.numeric)
 
   return(comm_plt)
 }
