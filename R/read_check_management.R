@@ -100,6 +100,8 @@ read_lookup_plus <- function(project_path) {
   lookup$tillage <- read_table(file = project_path%//%"tillage.til",
                                col_names = TRUE, col_types = cols(), skip = 1)
 
+  lookup$plt_comm <- read_plt_comm(comm_file = project_path%//%"plant.ini")
+
   lookup$plant <- read_table(file = project_path%//%"plants.plt",
                              col_names = TRUE, col_types = cols(), skip = 1) %>%
     rename(t_base = tmp_base)
@@ -107,6 +109,54 @@ read_lookup_plus <- function(project_path) {
   return(lookup)
 }
 
+#' Read the SWAT+ plant.ini file
+#'
+#' @param comm_file Text string path to the plant.ini file
+#'
+#' @importFrom dplyr mutate %>%
+#' @importFrom purrr map map_chr map_dbl map2 map2_df set_names
+#' @importFrom readr read_lines
+#' @importFrom stringr str_replace_all str_split str_trim
+#' @importFrom tibble as_tibble
+#'
+#' @keywords internal
+#'
+read_plt_comm <- function(comm_file) {
+  tbl <- read_lines(file = comm_file, skip = 1) %>%
+    str_replace_all(., '\t', ' ')
+
+  comm_head <- tbl[1] %>%
+    str_trim(.) %>%
+    str_split(., '[:space:]+', simplify = TRUE)
+  tbl <- tbl[2:length(tbl)]
+
+  plt_cnt <- str_split(tbl, '[:space:]+') %>%
+    map_dbl(., ~ as_num(.x[2]))
+
+  comm_pos <-  which(!is.na(plt_cnt))
+
+  comm_name <- str_split(tbl[comm_pos], '[:space:]+') %>%
+    map_chr(., ~ .x[1])
+
+  comm_plt <- map2(comm_pos, plt_cnt[comm_pos], ~ tbl[(.x + 1): (.x+.y)]) %>%
+    map(., ~ str_trim(.x, side = 'both')) %>%
+    map(., ~ str_split(.x, '[:space:]+', simplify = TRUE)) %>%
+    map(., ~ as_tibble(.x, .name_repair = 'minimal')) %>%
+    map(., ~ set_names(.x, comm_head[4:length(comm_head)])) %>%
+    map2_df(., comm_name, ~ mutate(.x, plt_comm = .y, .before = 1))
+
+  return(comm_plt)
+}
+
+#' Convert string to numeric without warning
+#'
+#' @param x Text string
+#'
+#' @keywords internal
+#'
+as_num <- function(x) {
+    suppressWarnings(as.numeric(x))
+}
 
 #' Read the lookup tables for plant, fertilizer, and tillage codes from the SWAT
 #' project
