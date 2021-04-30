@@ -440,6 +440,7 @@ compute_hu <- function(var_tbl, mgt_j, lookup, date_j, schedule_i, version) {
         set_names(., names(.)%_%plant_i) %>%
         bind_cols(var_tbl, .)
     } else if(op_i %in% kill_lbls & !is.null(date_j)) {
+      plant_i <- mgt_j$op_data1
       var_tbl <- select(var_tbl, -(c('hu', 'grw')%_%plant_i))
     } else if(op_i == harv_lbl & !is.null(date_j)) {
       var_tbl <- var_tbl #maybe other considerations for hrvst only in future
