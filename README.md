@@ -5,9 +5,9 @@
 ## SWAT+ implementation 
 
 ### Next actions
-- restructure mgt input tables for SWAT+ 
-- read lookups for fert, till, plant, etc.
-- adapt raw and clear text mgt schedules for SWAT+
+- schedules for date range (keep in mind: check if all input variables provide this range)
+- Test setups for 2012 and plus
+- adapt writing schedules for SWAT+
 
 ### Potential ideas for later consideration
 - function to generate csv mgt table from SWAT+ project
