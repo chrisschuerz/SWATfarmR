@@ -107,8 +107,8 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
           j_op <- ifelse(j_op < n_op, j_op + 1, 1)
         }
 
-        schedule_i$schedule <- add_end_year_flag(schedule_i$schedule)
-        schedule_i$schedule <- add_skip_year_flag(schedule_i$schedule, variables[[1]])
+        schedule_i$schedule <- add_end_year_flag(schedule_i$schedule, lookup)
+        schedule_i$schedule <- add_skip_year_flag(schedule_i$schedule, variables[[1]], lookup)
         # schedule_i$schedule$date[schedule_i$schedule$operation == 0] <- NA
       }
     }
