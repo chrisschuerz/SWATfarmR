@@ -5,7 +5,7 @@
 \title{Set the skip flag for entries in the list of tibbles with only one row and
 all NA values for operation}
 \usage{
-set_skip_flag(tbl)
+set_skip_flag(tbl, skip_flag)
 }
 \arguments{
 \item{tbl}{Tibble in the list of tibbles grouped by years}

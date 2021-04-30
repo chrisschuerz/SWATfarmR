@@ -8,13 +8,15 @@
 #'   fertilizer codes from SWAT data base.
 #'
 #' @importFrom dplyr filter select %>%
-#' @importFrom lubridate now
-#' @importFrom purrr set_names
+#' @importFrom lubridate now year
+#' @importFrom purrr map set_names
 #'
 #' @keywords internal
 #'
 schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
-                               var_con, start_year, end_year, n_schedule, version) {
+                               var_con, start_year, end_year, version) {
+#Add n_schedule option to define how many repetitions per sub/rtu and crop should be done
+
   schedule <- list()
   schedule_con <- prepare_schedule_con(hru_attribute, version)
   op_skip <- NULL
@@ -36,25 +38,8 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
   }
 
   t0 <- now()
-  #-------------------------------------------------------------------------------
-  # Possible parallel computing implementation. Little sketchy workaround with functions
-  # library(parallel)
-  # library(doSNOW)
-  # cl <- makeCluster(4)
-  # registerDoSNOW(cl)
-  # n_hru <- nrow(hru_attribute)
+  i_prg <- 1
 
-  # cat("Scheduling operations:")
-  # t0 <- now()
-  # progress <- function(n){
-  #   SWATfarmR:::display_progress(n, n_hru, t0, "HRU")
-  # }
-  # opts <- list(progress = progress)
-  #
-  # sim_result <- foreach(i_run = 1:n_hru,
-  #                       .packages = c("dplyr", "lubridate", "purrr", "pasta", "SWATfarmR", "tibble", "stringr", "rlang"),
-  #                       .export=ls.str(envir=globalenv()),
-  #                       .options.snow = opts) %dopar% {
   cat("Scheduling operations:\n")
   for(i_hru in hru_attribute$hru) {
 
@@ -112,8 +97,9 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
         # schedule_i$schedule$date[schedule_i$schedule$operation == 0] <- NA
       }
     }
-    schedule[[attribute_hru_i$file]] <- schedule_i
-    display_progress(i_hru, nrow(hru_attribute), t0, "HRU")
+    schedule[[i_hru]] <- schedule_i
+    display_progress(i_prg, nrow(hru_attribute), t0, "HRU")
+    i_prg <- i_prg + 1
   }
   finish_progress(nrow(hru_attribute), t0, "Finished scheduling", "HRU")
 
@@ -235,7 +221,7 @@ schedule_init <- function(mgt_op, version) {
 #' @param subbasin Number of the subbasin in which the HRU is located
 #'
 #' @importFrom dplyr mutate select %>%
-#' @importFrom lubridate ymd
+#' @importFrom lubridate yday ymd
 #' @importFrom purrr map map_chr reduce set_names
 #' @importFrom stringr str_remove
 #' @importFrom tidyselect any_of
@@ -246,7 +232,7 @@ prepare_variables <- function(var_list, hru_var_con, i_hru, version) {
   con_i <- filter(hru_var_con, hru == i_hru) %>%
     .[,5:ncol(.)]
 
-  var_tbl <- map2(con_i, names(con_i), ~ select(variables[[.y]], date, matches(.x))) %>%
+  var_tbl <- map2(con_i, names(con_i), ~ select(var_list[[.y]], date, matches(.x))) %>%
     map2(., names(.), ~ set_names(.x, c('date', .y))) %>%
     reduce(., left_join, by = 'date') %>%
     mutate(year = year(date),

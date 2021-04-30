@@ -4,7 +4,7 @@
 \alias{prepare_variables}
 \title{Prepare the variable table for the respective HRU}
 \usage{
-prepare_variables(var_list, subbasin)
+prepare_variables(var_list, hru_var_con, i_hru, version)
 }
 \arguments{
 \item{var_list}{List of tibbles that provides time series of variables for

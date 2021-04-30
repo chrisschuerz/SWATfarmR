@@ -4,7 +4,7 @@
 \alias{add_end_year_flag}
 \title{Add the end of year flag at the end of each year in the scheduled mgt table}
 \usage{
-add_end_year_flag(schedule_tbl)
+add_end_year_flag(schedule_tbl, lookup)
 }
 \arguments{
 \item{schedule_tbl}{Tibble providing the scheduled operations for HRU i}

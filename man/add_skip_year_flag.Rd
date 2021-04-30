@@ -5,7 +5,7 @@
 \title{Add the skip year flag for years in the scheduled mgt table where no
 operations were set.}
 \usage{
-add_skip_year_flag(schedule_tbl, variable)
+add_skip_year_flag(schedule_tbl, variable, lookup)
 }
 \arguments{
 \item{schedule_tbl}{Tibble providing the scheduled operations for HRU i}

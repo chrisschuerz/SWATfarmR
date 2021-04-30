@@ -72,7 +72,7 @@ read_mgt_table_2012 <- function(file) {
 #' @importFrom purrr map map_dbl map_df set_names
 #' @importFrom readr cols read_lines read_table
 #' @importFrom stringr str_split
-#' @importFrom tibble tibble
+#' @importFrom tibble tribble
 #' @importFrom tidyselect starts_with
 #'
 #' @keywords internal
