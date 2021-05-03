@@ -115,11 +115,16 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
           # schedule_i$schedule$date[schedule_i$schedule$operation == 0] <- NA
         }
       }
-
-      schedule_name <- attribute_hru_i[[luse_lbl]]%_%attribute_hru_i[[unit_lbl]]%_%(n_max + 1)
-      schedule[[schedule_name]] <- schedule_i
-      assigned_hru[assigned_hru$hru == i_hru, 4] <- schedule_name
-      assigned_hru[assigned_hru$hru == i_hru, 5] <- n_max + 1
+      if(is.null(schedule_i$schedule)) {
+        schedule_name <- attribute_hru_i[[luse_lbl]]
+        n_i <- 0
+      } else {
+        schedule_name <- attribute_hru_i[[luse_lbl]]%_%attribute_hru_i[[unit_lbl]]%_%(n_max + 1)
+        n_i <- n_max + 1
+      }
+        schedule[[schedule_name]] <- schedule_i
+        assigned_hru[assigned_hru$hru == i_hru, 4] <- schedule_name
+        assigned_hru[assigned_hru$hru == i_hru, 5] <- n_i
 
     } else {
       assign_i <- assigned_hru_i %>%
@@ -134,7 +139,7 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
   finish_progress(nrow(hru_attribute), t0, "Finished scheduling", "HRU")
 
   return(list(scheduled_operations = schedule,
-              assigned_hrus = select(assigned_hru, -n),
+              assigned_hrus = assigned_hru,
               skipped_operations   = op_skip,
               scheduled_years = schdl_yrs))
 }
