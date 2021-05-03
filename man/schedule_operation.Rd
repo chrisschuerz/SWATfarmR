@@ -12,6 +12,7 @@ schedule_operation(
   var_con,
   start_year,
   end_year,
+  n_schedule,
   version
 )
 }

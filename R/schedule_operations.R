@@ -10,17 +10,28 @@
 #' @importFrom dplyr filter select %>%
 #' @importFrom lubridate now year
 #' @importFrom purrr map set_names
+#' @importFrom rlang sym
+#' @importFrom tidyselect all_of
 #'
 #' @keywords internal
 #'
 schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
-                               var_con, start_year, end_year, version) {
+                               var_con, start_year, end_year, n_schedule, version) {
 #Add n_schedule option to define how many repetitions per sub/rtu and crop should be done
 
   schedule <- list()
   schedule_con <- prepare_schedule_con(hru_attribute, version)
   op_skip <- NULL
 
+  if(is.null(n_schedule)) n_schedule <- Inf
+
+  unit_lbl <- ifelse(version == 'plus', 'rtu', 'sub')
+  luse_lbl <- ifelse(version == 'plus', 'lu_mgt', 'luse')
+  init_lbl <- lookup$management$value[lookup$management$label == 'initial_plant']
+
+  assigned_hru <- hru_attribute %>%
+    select(all_of(unit_lbl), hru, all_of(luse_lbl)) %>%
+    mutate(schedule = NA_character_, n = 0)
 
   if(!is.null(start_year)) {
     stopifnot(is.numeric(start_year))
@@ -43,67 +54,84 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
   cat("Scheduling operations:\n")
   for(i_hru in hru_attribute$hru) {
 
-    luse_lbl <- ifelse(version == 'plus', 'lu_mgt', 'luse')
-    init_lbl <- lookup$management$value[lookup$management$label == 'initial_plant']
     attribute_hru_i <- filter(hru_attribute, hru ==i_hru)
 
-    mgt_hru_i <- mgt_schedule %>%
-      filter(land_use == attribute_hru_i[[luse_lbl]])
+    assigned_hru_i <- assigned_hru %>%
+      filter(!!sym(unit_lbl) == attribute_hru_i[[unit_lbl]]) %>%
+      filter(!!sym(luse_lbl) == attribute_hru_i[[luse_lbl]])
 
-    if(attribute_hru_i[[luse_lbl]] %in% unique(mgt_schedule$land_use)) {
-      mgt_hru_i <- sample_management(mgt_hru_i) %>%
-        filter_static_rules(., attribute_hru_i) %>%
-        select(-land_use, -management, -weight, -rules_static)
-    }
+    n_max <- max(assigned_hru_i$n)
 
-    schedule_i <- list(init_crop = NULL, schedule = NULL)
+    if(n_max >= n_schedule) {
+      assign_i <- assigned_hru_i %>%
+        filter(n > 0) %>%
+        sample_n(., 1)
 
-    if(nrow(mgt_hru_i) > 0) {
-      if(all(mgt_hru_i$operation == init_lbl)){
-        schedule_i$init_crop <- schedule_init(mgt_hru_i, version)
-      } else {
-        j_op <- 1
-        n_op <- nrow(mgt_hru_i)
+      assigned_hru[assigned_hru$hru == i_hru, c(4,5)] <- assign_i[,c(4,5)]
+    } else {
+      mgt_hru_i <- mgt_schedule %>%
+        filter(land_use == attribute_hru_i[[luse_lbl]])
 
-        var_tbl <- prepare_variables(variables, var_con, i_hru, version)
-        date_j <- var_tbl$date[1]
-        prev_op <- date_j
+      if(attribute_hru_i[[luse_lbl]] %in% unique(mgt_schedule$land_use)) {
+        mgt_hru_i <- sample_management(mgt_hru_i) %>%
+          filter_static_rules(., attribute_hru_i) %>%
+          select(-land_use, -management, -weight, -rules_static)
+      }
 
-        repeat{
-          mgt_j <- mgt_hru_i[j_op,]
-          var_tbl <- filter(var_tbl, date >= prev_op)
+      schedule_i <- list(init_crop = NULL, schedule = NULL)
 
-          if(nchar(mgt_j$rules_dynamic) > 0 &
-             !is.na(mgt_j$rules_dynamic) &
-             mgt_j$operation != init_lbl) {
-            date_j <- schedule_date_j(var_tbl, mgt_j$rules_dynamic, prev_op)
+      if(nrow(mgt_hru_i) > 0) {
+        if(all(mgt_hru_i$operation == init_lbl)){
+          schedule_i$init_crop <- schedule_init(mgt_hru_i, version)
+        } else {
+          j_op <- 1
+          n_op <- nrow(mgt_hru_i)
 
-            if(is.null(date_j)){
-              op_skip <- document_op_skip(op_skip, attribute_hru_i, mgt_j, prev_op, j_op)
-            } else if (date_j >= max(var_tbl$date)) {
-              break()
-            } else {
-              prev_op <- date_j
+          var_tbl <- prepare_variables(variables, var_con, i_hru, version)
+          date_j <- var_tbl$date[1]
+          prev_op <- date_j
+
+          repeat{
+            mgt_j <- mgt_hru_i[j_op,]
+            var_tbl <- filter(var_tbl, date >= prev_op)
+
+            if(nchar(mgt_j$rules_dynamic) > 0 &
+               !is.na(mgt_j$rules_dynamic) &
+               mgt_j$operation != init_lbl) {
+              date_j <- schedule_date_j(var_tbl, mgt_j$rules_dynamic, prev_op)
+
+              if(is.null(date_j)){
+                op_skip <- document_op_skip(op_skip, attribute_hru_i, mgt_j, prev_op, j_op)
+              } else if (date_j >= max(var_tbl$date)) {
+                break()
+              } else {
+                prev_op <- date_j
+              }
             }
+
+            var_tbl <- compute_hu(var_tbl, mgt_j, lookup, date_j, schedule_i, version)
+            schedule_i <- schedule_op_j(schedule_i, mgt_j, date_j, init_lbl, version)
+            j_op <- ifelse(j_op < n_op, j_op + 1, 1)
           }
 
-          var_tbl <- compute_hu(var_tbl, mgt_j, lookup, date_j, schedule_i, version)
-          schedule_i <- schedule_op_j(schedule_i, mgt_j, date_j, init_lbl, version)
-          j_op <- ifelse(j_op < n_op, j_op + 1, 1)
+          schedule_i$schedule <- add_end_year_flag(schedule_i$schedule, lookup)
+          schedule_i$schedule <- add_skip_year_flag(schedule_i$schedule, variables[[1]], lookup)
+          # schedule_i$schedule$date[schedule_i$schedule$operation == 0] <- NA
         }
-
-        schedule_i$schedule <- add_end_year_flag(schedule_i$schedule, lookup)
-        schedule_i$schedule <- add_skip_year_flag(schedule_i$schedule, variables[[1]], lookup)
-        # schedule_i$schedule$date[schedule_i$schedule$operation == 0] <- NA
       }
+
+      schedule_name <- attribute_hru_i[[luse_lbl]]%_%attribute_hru_i[[unit_lbl]]%_%(n_max + 1)
+      schedule[[schedule_name]] <- schedule_i
+      assigned_hru[assigned_hru$hru == i_hru, 4] <- schedule_name
+      assigned_hru[assigned_hru$hru == i_hru, 5] <- n_max + 1
     }
-    schedule[[i_hru]] <- schedule_i
     display_progress(i_prg, nrow(hru_attribute), t0, "HRU")
     i_prg <- i_prg + 1
   }
   finish_progress(nrow(hru_attribute), t0, "Finished scheduling", "HRU")
 
   return(list(scheduled_operations = schedule,
+              assigned_hrus = assigned_hru,
               skipped_operations   = op_skip))
 }
 

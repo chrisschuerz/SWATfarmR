@@ -77,7 +77,7 @@ farmr_project <- R6::R6Class(
       #                       self$.data$meta$parameter_lookup)
 
       # self$check_rules <- check_rules()
-      self$schedule_operations <- function(start_year = NULL, end_year = NULL) {
+      self$schedule_operations <- function(start_year = NULL, end_year = NULL, n_schedule = NULL) {
 
         self$.data$scheduled_operations <-
           schedule_operation(mgt_schedule = self$.data$management$schedule,
@@ -87,6 +87,7 @@ farmr_project <- R6::R6Class(
                              var_con = self$.data$meta$hru_var_connect,
                              start_year = start_year,
                              end_year = end_year,
+                             n_schedule = n_schedule,
                              version = self$.data$meta$swat_version)
         self$.data$meta$scheduled_years <- c(start_year, end_year)
 
