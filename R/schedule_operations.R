@@ -48,6 +48,8 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
          " time series for the 'variables'.")
   }
 
+  schdl_yrs <- c(start = min(year(variables[[1]]$date)), end = min(year(variables[[1]]$date)))
+
   t0 <- now()
   i_prg <- 1
 
@@ -133,7 +135,8 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
 
   return(list(scheduled_operations = schedule,
               assigned_hrus = select(assigned_hru, -n),
-              skipped_operations   = op_skip))
+              skipped_operations   = op_skip,
+              scheduled_years = schdl_yrs))
 }
 
 #' Prepare the management schedule connection table

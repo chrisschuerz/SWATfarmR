@@ -89,7 +89,6 @@ farmr_project <- R6::R6Class(
                              end_year = end_year,
                              n_schedule = n_schedule,
                              version = self$.data$meta$swat_version)
-        self$.data$meta$scheduled_years <- c(start_year, end_year)
 
         self$write_mgt_files <- function(start_year = NULL, end_year = NULL, write_all = TRUE) {
           write_operation(path = self$.data$meta$project_path,
