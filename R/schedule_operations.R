@@ -62,13 +62,7 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
 
     n_max <- max(assigned_hru_i$n)
 
-    if(n_max >= n_schedule) {
-      assign_i <- assigned_hru_i %>%
-        filter(n > 0) %>%
-        sample_n(., 1)
-
-      assigned_hru[assigned_hru$hru == i_hru, c(4,5)] <- assign_i[,c(4,5)]
-    } else {
+    if(n_max < n_schedule) {
       mgt_hru_i <- mgt_schedule %>%
         filter(land_use == attribute_hru_i[[luse_lbl]])
 
@@ -124,6 +118,13 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
       schedule[[schedule_name]] <- schedule_i
       assigned_hru[assigned_hru$hru == i_hru, 4] <- schedule_name
       assigned_hru[assigned_hru$hru == i_hru, 5] <- n_max + 1
+
+    } else {
+      assign_i <- assigned_hru_i %>%
+        filter(n > 0) %>%
+        sample_n(., 1)
+
+      assigned_hru[assigned_hru$hru == i_hru, c(4,5)] <- assign_i[,c(4,5)]
     }
     display_progress(i_prg, nrow(hru_attribute), t0, "HRU")
     i_prg <- i_prg + 1
@@ -131,7 +132,7 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
   finish_progress(nrow(hru_attribute), t0, "Finished scheduling", "HRU")
 
   return(list(scheduled_operations = schedule,
-              assigned_hrus = assigned_hru,
+              assigned_hrus = select(assigned_hru, -n),
               skipped_operations   = op_skip))
 }
 
