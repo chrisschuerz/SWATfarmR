@@ -8,10 +8,12 @@ write_operation(
   path,
   mgt_raw,
   schedule,
-  variable,
+  assigned_hrus,
   write_all,
   start_year,
-  end_year
+  end_year,
+  year_range,
+  version
 )
 }
 \arguments{

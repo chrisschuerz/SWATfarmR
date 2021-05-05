@@ -27,10 +27,11 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
 
   unit_lbl <- ifelse(version == 'plus', 'rtu', 'sub')
   luse_lbl <- ifelse(version == 'plus', 'lu_mgt', 'luse')
+  hru_lbl  <- ifelse(version == 'plus', 'hru_name', 'filename') #Check for SWAT2012!
   init_lbl <- lookup$management$value[lookup$management$label == 'initial_plant']
 
   assigned_hru <- hru_attribute %>%
-    select(all_of(unit_lbl), hru, all_of(luse_lbl)) %>%
+    select(all_of(unit_lbl), hru, all_of(hru_lbl) ,all_of(luse_lbl)) %>%
     mutate(schedule = NA_character_, n = 0)
 
   if(!is.null(start_year)) {
@@ -123,15 +124,15 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
         n_i <- n_max + 1
       }
         schedule[[schedule_name]] <- schedule_i
-        assigned_hru[assigned_hru$hru == i_hru, 4] <- schedule_name
-        assigned_hru[assigned_hru$hru == i_hru, 5] <- n_i
+        assigned_hru[assigned_hru$hru == i_hru, 5] <- schedule_name
+        assigned_hru[assigned_hru$hru == i_hru, 6] <- n_i
 
     } else {
       assign_i <- assigned_hru_i %>%
         filter(n > 0) %>%
         sample_n(., 1)
 
-      assigned_hru[assigned_hru$hru == i_hru, c(4,5)] <- assign_i[,c(4,5)]
+      assigned_hru[assigned_hru$hru == i_hru, c(5,6)] <- assign_i[,c(5,6)]
     }
     display_progress(i_prg, nrow(hru_attribute), t0, "HRU")
     i_prg <- i_prg + 1

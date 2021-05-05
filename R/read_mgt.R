@@ -31,6 +31,7 @@ read_mgt_plus <- function(project_path) {
                          col_names = TRUE, col_types = cols(), skip = 1)
   luse_header <- read_lines(project_path%//%'landuse.lum', n_max = 1)
   hru_header  <- read_lines(project_path%//%'hru-data.hru', n_max = 1)
+  time_sim    <- read_lines(project_path%//%'time.sim')
 
   return(list(management_sch = mgt_sch,
               landuse_lum    = luse_lum,

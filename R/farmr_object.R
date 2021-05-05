@@ -97,7 +97,9 @@ farmr_project <- R6::R6Class(
                           variable = self$.data$variables[[1]],
                           write_all = write_all,
                           start_year = start_year,
-                          end_year = end_year)
+                          end_year = end_year,
+                          scheduled_years = self$.data$scheduled_operations$scheduled_years,
+                          version = self$.data$meta$swat_version)
           self$save()
         }
         self$reset_mgt_files <- function() {
