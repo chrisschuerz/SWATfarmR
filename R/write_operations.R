@@ -9,9 +9,6 @@
 #' @param start_year Numeric. Defines the start year for which to write operations.
 #' @param end_year Numeric. Defines the last year for which to write operations.
 #'
-#' @importFrom dplyr filter if_else %>%
-#' @importFrom lubridate now year ymd
-#' @importFrom readr write_lines
 #'
 #' @keywords internal
 #'
@@ -33,41 +30,32 @@ write_operation <- function(path, mgt_raw, schedule, assigned_hrus, write_all,
   }
 
   cat("Writing management files:\n")
-
-  n_hru <- length(schedule)
-  hru_files <- names(schedule)
-  for (i_hru in 1:n_hru) {
-    hru_file_i <- hru_files[i_hru]
-    mgt_i <- mgt_raw[[hru_file_i]]
-    schedule_i <- schedule[[hru_file_i]]
-
-    if(!is.null(schedule_i$init_crop)) {
-      mgt_i <- initialize_crop(mgt_i, schedule_i$init_crop)
-    } else if(write_all) {
-      mgt_i[4] <- paste(sprintf("%16i", 0),
-                        "   | IGRO: Land cover status: 0-none growing; 1-growing")
-    }
-    if(!is.null(schedule_i$schedule)) {
-      schedule_tbl <- schedule_i$schedule %>%
-        filter(year(date) >= start_year) %>%
-        filter(year(date) <= end_year) %>%
-        mutate(date = if_else(operation %in% c(0, 17), ymd(NA) , date))
-
-      mgt_i <- add_management_schedule(mgt_i, schedule_tbl)
-    } else if(write_all) {
-      mgt_i <- mgt_i[1:30]
-      mgt_i[29] <- paste(sprintf("%16i", 1),
-                            "   | NROT: number of years of rotation")
-      mgt_i <- c(mgt_i, "                17")
-    }
-    write_lines(mgt_i, path%//%hru_file_i%.%"mgt")
-    display_progress_pct(i_hru, n_hru, t0)
+  if (version == 'plus') {
+    write_op_plus(mgt_raw, schedule, assigned_hrus, start_year, end_year)
+  } else {
+    write_op_2012(mgt_raw, schedule, assigned_hrus)
   }
-  write_file_cio(path, start_year, end_year)
-  finish_progress(n_hru, t0, "Finished writing", "'.mgt' file")
 }
 
-write_op_plus <- function() {
+#' Write the mgt files in the TxtInOut folder
+#'
+#' @param path Path to the TxtInOut folder
+#' @param mgt_raw List of original mgt files
+#' @param schedule List of tibbles with the shceduled operations.
+#' @param write_all Logical. If TRUE mgt files are written for all HRUs. If FALSE
+#'   only mgt files are written where operations were scheduled, or an initial
+#'   crop was defined.
+#' @param start_year Numeric. Defines the start year for which to write operations.
+#' @param end_year Numeric. Defines the last year for which to write operations.
+#'
+#' @importFrom dplyr %>%
+#' @importFrom lubridate now interval
+#' @importFrom purrr map map2 map2_chr reduce
+#' @importFrom readr write_lines
+#'
+#' @keywords internal
+#'
+write_op_plus <- function(mgt_raw, schedule, assigned_hrus, start_year, end_year) {
   t0 <- now()
   cat("  - Writing 'hru-data.hru'\n")
   hru_data <- prepare_hru(mgt_raw, assigned_hrus)
@@ -106,10 +94,76 @@ write_op_plus <- function() {
     as.period(.) %>%
     as.character(.) %>%
     cat("Finished writing management schedules in", ., "\n")
-  # finish_progress(n_hru, t0, "Finished writing", "'.mgt' file")
 }
 
+#' Write the mgt files in the TxtInOut folder
+#'
+#' @param path Path to the TxtInOut folder
+#' @param mgt_raw List of original mgt files
+#' @param schedule List of tibbles with the shceduled operations.
+#' @param write_all Logical. If TRUE mgt files are written for all HRUs. If FALSE
+#'   only mgt files are written where operations were scheduled, or an initial
+#'   crop was defined.
+#' @param start_year Numeric. Defines the start year for which to write operations.
+#' @param end_year Numeric. Defines the last year for which to write operations.
+#'
+#' @importFrom dplyr filter if_else mutate %>%
+#' @importFrom lubridate now year ymd
+#' @importFrom readr write_lines
+#'
+#' @keywords internal
+#'
+write_op_2012 <- function(schedule, ...) {
+  n_hru <- length(schedule)
+  hru_files <- names(schedule)
+  for (i_hru in 1:n_hru) {
+    hru_file_i <- hru_files[i_hru]
+    mgt_i <- mgt_raw[[hru_file_i]]
+    schedule_i <- schedule[[hru_file_i]]
 
+    if(!is.null(schedule_i$init_crop)) {
+      mgt_i <- initialize_crop(mgt_i, schedule_i$init_crop)
+    } else if(write_all) {
+      mgt_i[4] <- paste(sprintf("%16i", 0),
+                        "   | IGRO: Land cover status: 0-none growing; 1-growing")
+    }
+    if(!is.null(schedule_i$schedule)) {
+      schedule_tbl <- schedule_i$schedule %>%
+        filter(year(date) >= start_year) %>%
+        filter(year(date) <= end_year) %>%
+        mutate(date = if_else(operation %in% c(0, 17), ymd(NA) , date))
+
+      mgt_i <- add_management_schedule(mgt_i, schedule_tbl)
+    } else if(write_all) {
+      mgt_i <- mgt_i[1:30]
+      mgt_i[29] <- paste(sprintf("%16i", 1),
+                         "   | NROT: number of years of rotation")
+      mgt_i <- c(mgt_i, "                17")
+    }
+    write_lines(mgt_i, path%//%hru_file_i%.%"mgt")
+    display_progress_pct(i_hru, n_hru, t0)
+  }
+  write_file_cio(path, start_year, end_year)
+  finish_progress(n_hru, t0, "Finished writing", "'.mgt' file")
+}
+
+#' Write the mgt files in the TxtInOut folder
+#'
+#' @param path Path to the TxtInOut folder
+#' @param mgt_raw List of original mgt files
+#' @param schedule List of tibbles with the shceduled operations.
+#' @param write_all Logical. If TRUE mgt files are written for all HRUs. If FALSE
+#'   only mgt files are written where operations were scheduled, or an initial
+#'   crop was defined.
+#' @param start_year Numeric. Defines the start year for which to write operations.
+#' @param end_year Numeric. Defines the last year for which to write operations.
+#'
+#' @importFrom dplyr left_join mutate select %>%
+#' @importFrom lubridate now year ymd
+#' @importFrom readr write_lines
+#'
+#' @keywords internal
+#'
 prepare_hru <- function(mgt_raw, assigned_hrus) {
   hru_head <- add_edit_timestamp(mgt_raw$hru_header)
   hru_names <- hru_to_string(names(mgt_raw$hru_data))
@@ -123,6 +177,23 @@ prepare_hru <- function(mgt_raw, assigned_hrus) {
   return(hru_data)
 }
 
+#' Write the mgt files in the TxtInOut folder
+#'
+#' @param path Path to the TxtInOut folder
+#' @param mgt_raw List of original mgt files
+#' @param schedule List of tibbles with the shceduled operations.
+#' @param write_all Logical. If TRUE mgt files are written for all HRUs. If FALSE
+#'   only mgt files are written where operations were scheduled, or an initial
+#'   crop was defined.
+#' @param start_year Numeric. Defines the start year for which to write operations.
+#' @param end_year Numeric. Defines the last year for which to write operations.
+#'
+#' @importFrom dplyr %>%
+#' @importFrom purrr map map_dbl
+#' @importFrom stringr str_extract_all str_remove
+#'
+#' @keywords internal
+#'
 sort_mgt <- function(mgt) {
   mgt_names <- names(mgt)
   base_nm <- str_remove(mgt_names, '\\_[:digit:]+\\_[:digit:]+')
@@ -136,6 +207,23 @@ sort_mgt <- function(mgt) {
   mgt[mgt_order]
 }
 
+#' Write the mgt files in the TxtInOut folder
+#'
+#' @param path Path to the TxtInOut folder
+#' @param mgt_raw List of original mgt files
+#' @param schedule List of tibbles with the shceduled operations.
+#' @param write_all Logical. If TRUE mgt files are written for all HRUs. If FALSE
+#'   only mgt files are written where operations were scheduled, or an initial
+#'   crop was defined.
+#' @param start_year Numeric. Defines the start year for which to write operations.
+#' @param end_year Numeric. Defines the last year for which to write operations.
+#'
+#' @importFrom dplyr filter mutate %>%
+#' @importFrom purrr map map_dbl
+#' @importFrom stringr str_extract str_remove
+#'
+#' @keywords internal
+#'
 prepare_lum_i <- function(schedule_i, name_i, lum_raw) {
   lum_init <- str_remove(name_i, '\\_[:digit:]+\\_[:digit:]+')
   lum_num <- str_extract(name_i, '\\_[:digit:]+\\_[:digit:]+')
@@ -157,6 +245,22 @@ prepare_lum_i <- function(schedule_i, name_i, lum_raw) {
   return(list(lum = lum_i, mgt = mgt_i))
 }
 
+#' Write the mgt files in the TxtInOut folder
+#'
+#' @param path Path to the TxtInOut folder
+#' @param mgt_raw List of original mgt files
+#' @param schedule List of tibbles with the shceduled operations.
+#' @param write_all Logical. If TRUE mgt files are written for all HRUs. If FALSE
+#'   only mgt files are written where operations were scheduled, or an initial
+#'   crop was defined.
+#' @param start_year Numeric. Defines the start year for which to write operations.
+#' @param end_year Numeric. Defines the last year for which to write operations.
+#'
+#' @importFrom dplyr %>%
+#' @importFrom stringr str_remove
+#'
+#' @keywords internal
+#'
 add_edit_timestamp <- function(str) {
   str %>%
     str_remove(., ' and edited.*') %>%
@@ -178,6 +282,22 @@ hru_to_string <- function(hru_line) {
   )
 }
 
+#' Write the mgt files in the TxtInOut folder
+#'
+#' @param path Path to the TxtInOut folder
+#' @param mgt_raw List of original mgt files
+#' @param schedule List of tibbles with the shceduled operations.
+#' @param write_all Logical. If TRUE mgt files are written for all HRUs. If FALSE
+#'   only mgt files are written where operations were scheduled, or an initial
+#'   crop was defined.
+#' @param start_year Numeric. Defines the start year for which to write operations.
+#' @param end_year Numeric. Defines the last year for which to write operations.
+#'
+#' @importFrom dplyr %>%
+#' @importFrom purrr map2_chr
+#'
+#' @keywords internal
+#'
 lum_to_string <- function(lum_line) {
   map2_chr(lum_line,c('%-20s', rep('%17s',13)),   ~ sprintf(.y, .x)) %>%
     paste(., collapse = ' ')
@@ -194,10 +314,6 @@ schdl_to_string <- function(op_line) {
         sprintf('%13s', ifelse(is.na(op_line[5]), 0, op_line[5]))) %>%
     str_replace_all(., '  NA', 'null')
 }
-
-
-
-
 
 #' Write values for any initial crop
 #'
