@@ -12,7 +12,7 @@
 #'
 #' @keywords internal
 #'
-write_operation <- function(path, mgt_raw, schedule, assigned_hrus, write_all,
+write_operation <- function(path, mgt_raw, schedule, assigned_hrus,
                             start_year, end_year, year_range, version) {
 
   if(is.null(start_year)) {

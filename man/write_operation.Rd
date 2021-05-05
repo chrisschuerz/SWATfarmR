@@ -9,7 +9,6 @@ write_operation(
   mgt_raw,
   schedule,
   assigned_hrus,
-  write_all,
   start_year,
   end_year,
   year_range,
@@ -23,13 +22,13 @@ write_operation(
 
 \item{schedule}{List of tibbles with the shceduled operations.}
 
-\item{write_all}{Logical. If TRUE mgt files are written for all HRUs. If FALSE
-only mgt files are written where operations were scheduled, or an initial
-crop was defined.}
-
 \item{start_year}{Numeric. Defines the start year for which to write operations.}
 
 \item{end_year}{Numeric. Defines the last year for which to write operations.}
+
+\item{write_all}{Logical. If TRUE mgt files are written for all HRUs. If FALSE
+only mgt files are written where operations were scheduled, or an initial
+crop was defined.}
 }
 \description{
 Write the mgt files in the TxtInOut folder

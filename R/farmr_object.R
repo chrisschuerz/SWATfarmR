@@ -90,19 +90,18 @@ farmr_project <- R6::R6Class(
                              n_schedule = n_schedule,
                              version = self$.data$meta$swat_version)
 
-        self$write_mgt_files <- function(start_year = NULL, end_year = NULL, write_all = TRUE) {
+        self$write_operations <- function(start_year = NULL, end_year = NULL) {
           write_operation(path = self$.data$meta$project_path,
                           mgt_raw = self$.data$meta$mgt_raw,
                           schedule = self$.data$scheduled_operations$scheduled_operations,
-                          variable = self$.data$variables[[1]],
-                          write_all = write_all,
+                          assigned_hrus = self$.data$scheduled_operations$assigned_hrus,
                           start_year = start_year,
                           end_year = end_year,
-                          scheduled_years = self$.data$scheduled_operations$scheduled_years,
+                          year_range = self$.data$scheduled_operations$scheduled_years,
                           version = self$.data$meta$swat_version)
           self$save()
         }
-        self$reset_mgt_files <- function() {
+        self$reset_files <- function() {
           reset_mgt(path = self$.data$meta$project_path,
                     mgt_raw = self$.data$meta$mgt_raw)
           self$save()
