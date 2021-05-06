@@ -1,13 +1,13 @@
-#' Write the mgt files in the TxtInOut folder
+#' Write the mgt schedules into the respective files in the TxtInOut folder
 #'
 #' @param path Path to the TxtInOut folder
-#' @param mgt_raw List of original mgt files
-#' @param schedule List of tibbles with the shceduled operations.
-#' @param write_all Logical. If TRUE mgt files are written for all HRUs. If FALSE
-#'   only mgt files are written where operations were scheduled, or an initial
-#'   crop was defined.
+#' @param mgt_raw List of original files that are relevant for the mgt scheduling.
+#' @param schedule List of tibbles with the scheduled operations.
+#' @param assigned_hrus Tibble that links the mgt schedules to the HRUs
 #' @param start_year Numeric. Defines the start year for which to write operations.
 #' @param end_year Numeric. Defines the last year for which to write operations.
+#' @param year_range numeric vector with start and end year of the scheduled operations.
+#' @param version String that indicates the SWAT version.
 #'
 #'
 #' @keywords internal
@@ -31,20 +31,18 @@ write_operation <- function(path, mgt_raw, schedule, assigned_hrus,
 
   cat("Writing management files:\n")
   if (version == 'plus') {
-    write_op_plus(mgt_raw, schedule, assigned_hrus, start_year, end_year)
+    write_op_plus(path, mgt_raw, schedule, assigned_hrus, start_year, end_year)
   } else {
     write_op_2012(mgt_raw, schedule, assigned_hrus)
   }
 }
 
-#' Write the mgt files in the TxtInOut folder
+#' Write the management schedules for a SWAT+ project
 #'
 #' @param path Path to the TxtInOut folder
-#' @param mgt_raw List of original mgt files
-#' @param schedule List of tibbles with the shceduled operations.
-#' @param write_all Logical. If TRUE mgt files are written for all HRUs. If FALSE
-#'   only mgt files are written where operations were scheduled, or an initial
-#'   crop was defined.
+#' @param mgt_raw List of original files that are relevant for the mgt scheduling.
+#' @param schedule List of tibbles with the scheduled operations.
+#' @param assigned_hrus Tibble that links the mgt schedules to the HRUs
 #' @param start_year Numeric. Defines the start year for which to write operations.
 #' @param end_year Numeric. Defines the last year for which to write operations.
 #'
@@ -55,11 +53,11 @@ write_operation <- function(path, mgt_raw, schedule, assigned_hrus,
 #'
 #' @keywords internal
 #'
-write_op_plus <- function(mgt_raw, schedule, assigned_hrus, start_year, end_year) {
+write_op_plus <- function(path, mgt_raw, schedule, assigned_hrus, start_year, end_year) {
   t0 <- now()
   cat("  - Writing 'hru-data.hru'\n")
   hru_data <- prepare_hru(mgt_raw, assigned_hrus)
-  write_lines(hru_data, pth%//%'hru-data.hru')
+  write_lines(hru_data, path%//%'hru-data.hru')
 
   cat("  - Writing 'landuse.lum' and 'schedule.mgt'\n")
   lum_head <- add_edit_timestamp(mgt_raw$luse_header)
@@ -77,8 +75,8 @@ write_op_plus <- function(mgt_raw, schedule, assigned_hrus, start_year, end_year
     reduce(., c) %>%
     c(mgt_head, .)
 
-  write_lines(landuse_lum, pth%//%'landuse.lum')
-  write_lines(schedule_mgt, pth%//%'schedule.mgt')
+  write_lines(landuse_lum, path%//%'landuse.lum')
+  write_lines(schedule_mgt, path%//%'schedule.mgt')
 
   cat("  - Writing 'time.sim'\n")
   time_sim <- mgt_raw$time_sim
@@ -87,7 +85,7 @@ write_op_plus <- function(mgt_raw, schedule, assigned_hrus, start_year, end_year
                           ~ sprintf(.y, .x)) %>%
     paste(., collapse = ' ')
 
-  write_lines(time_sim, pth%//%'time.sim')
+  write_lines(time_sim, path%//%'time.sim')
 
   interval(t0,now()) %>%
     round(.) %>%
@@ -96,14 +94,12 @@ write_op_plus <- function(mgt_raw, schedule, assigned_hrus, start_year, end_year
     cat("Finished writing management schedules in", ., "\n")
 }
 
-#' Write the mgt files in the TxtInOut folder
+#' Write the management schedules for a SWAT2012 project
 #'
 #' @param path Path to the TxtInOut folder
-#' @param mgt_raw List of original mgt files
-#' @param schedule List of tibbles with the shceduled operations.
-#' @param write_all Logical. If TRUE mgt files are written for all HRUs. If FALSE
-#'   only mgt files are written where operations were scheduled, or an initial
-#'   crop was defined.
+#' @param mgt_raw List of original files that are relevant for the mgt scheduling.
+#' @param schedule List of tibbles with the scheduled operations.
+#' @param assigned_hrus Tibble that links the mgt schedules to the HRUs
 #' @param start_year Numeric. Defines the start year for which to write operations.
 #' @param end_year Numeric. Defines the last year for which to write operations.
 #'
@@ -113,7 +109,7 @@ write_op_plus <- function(mgt_raw, schedule, assigned_hrus, start_year, end_year
 #'
 #' @keywords internal
 #'
-write_op_2012 <- function(schedule, ...) {
+write_op_2012 <- function(path, schedule, ...) {
   n_hru <- length(schedule)
   hru_files <- names(schedule)
   for (i_hru in 1:n_hru) {
@@ -147,16 +143,10 @@ write_op_2012 <- function(schedule, ...) {
   finish_progress(n_hru, t0, "Finished writing", "'.mgt' file")
 }
 
-#' Write the mgt files in the TxtInOut folder
+#' Prepare the hru-data for writing in SWAT+ and convert it to text lines
 #'
-#' @param path Path to the TxtInOut folder
-#' @param mgt_raw List of original mgt files
-#' @param schedule List of tibbles with the shceduled operations.
-#' @param write_all Logical. If TRUE mgt files are written for all HRUs. If FALSE
-#'   only mgt files are written where operations were scheduled, or an initial
-#'   crop was defined.
-#' @param start_year Numeric. Defines the start year for which to write operations.
-#' @param end_year Numeric. Defines the last year for which to write operations.
+#' @param mgt_raw List of original files that are relevant for the mgt scheduling.
+#' @param assigned_hrus Tibble that links the mgt schedules to the HRUs.
 #'
 #' @importFrom dplyr left_join mutate select %>%
 #' @importFrom lubridate now year ymd
@@ -177,7 +167,7 @@ prepare_hru <- function(mgt_raw, assigned_hrus) {
   return(hru_data)
 }
 
-#' Write the mgt files in the TxtInOut folder
+#' Sort the management schedules by name, unit (sub or rtu), and number of realization.
 #'
 #' @param path Path to the TxtInOut folder
 #' @param mgt_raw List of original mgt files
