@@ -27,7 +27,7 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
 
   unit_lbl <- ifelse(version == 'plus', 'rtu', 'sub')
   luse_lbl <- ifelse(version == 'plus', 'lu_mgt', 'luse')
-  hru_lbl  <- ifelse(version == 'plus', 'hru_name', 'filename') #Check for SWAT2012!
+  hru_lbl  <- ifelse(version == 'plus', 'hru_name', 'file') #Check for SWAT2012!
   init_lbl <- lookup$management$value[lookup$management$label == 'initial_plant']
 
   assigned_hru <- hru_attribute %>%
@@ -267,8 +267,9 @@ schedule_init <- function(mgt_op, version) {
 #' @keywords internal
 #'
 prepare_variables <- function(var_list, hru_var_con, i_hru, version) {
+  pcp_pos <- which(names(hru_var_con) == 'pcp')
   con_i <- filter(hru_var_con, hru == i_hru) %>%
-    .[,5:ncol(.)]
+    .[,pcp_pos:ncol(.)]
 
   var_tbl <- map2(con_i, names(con_i), ~ select(var_list[[.y]], date, matches(.x))) %>%
     map2(., names(.), ~ set_names(.x, c('date', .y))) %>%

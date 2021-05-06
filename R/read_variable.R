@@ -163,7 +163,7 @@ connect_unit_weather <- function(project_path, hru_attributes, variables, versio
   if(version == 'plus') {
     wth_con <- connect_weather_plus(project_path, hru_attributes)
   } else if(version == '2012') {
-    wth_con <- connect_weather_2012(project_path)
+    wth_con <- connect_weather_2012(project_path, hru_attributes, variables)
   }
   return(wth_con)
 }
@@ -267,7 +267,7 @@ connect_weather_2012 <- function(project_path, hru_attributes, variables) {
            )) %>%
     mutate(sub = str_remove(sub_list, "0000.sub") %>% as.numeric()) %>%
     full_join(., hru_attributes, by = 'sub') %>%
-    select(hru, pcp, tmin, tmax, tav)
+    select(sub, hru, pcp, tmin, tmax, tav)
 
   var_names <- map(variables, ~select(.x, -date) %>% names(.))
 
