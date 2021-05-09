@@ -4,9 +4,13 @@
 \alias{prepare_lum_i}
 \title{Write the mgt files in the TxtInOut folder}
 \usage{
-prepare_lum_i(schedule_i, name_i, lum_raw)
+prepare_lum_i(schedule_i, name_i, lum_raw, start_year, end_year)
 }
 \arguments{
+\item{start_year}{Numeric. Defines the start year for which to write operations.}
+
+\item{end_year}{Numeric. Defines the last year for which to write operations.}
+
 \item{path}{Path to the TxtInOut folder}
 
 \item{mgt_raw}{List of original mgt files}
@@ -16,10 +20,6 @@ prepare_lum_i(schedule_i, name_i, lum_raw)
 \item{write_all}{Logical. If TRUE mgt files are written for all HRUs. If FALSE
 only mgt files are written where operations were scheduled, or an initial
 crop was defined.}
-
-\item{start_year}{Numeric. Defines the start year for which to write operations.}
-
-\item{end_year}{Numeric. Defines the last year for which to write operations.}
 }
 \description{
 Write the mgt files in the TxtInOut folder

@@ -49,7 +49,7 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
          " time series for the 'variables'.")
   }
 
-  schdl_yrs <- c(start = min(year(variables[[1]]$date)), end = min(year(variables[[1]]$date)))
+  schdl_yrs <- c(start = min(year(variables[[1]]$date)), end = max(year(variables[[1]]$date)))
 
   t0 <- now()
   i_prg <- 1

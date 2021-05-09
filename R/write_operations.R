@@ -24,9 +24,9 @@ write_operation <- function(path, mgt_raw, schedule, assigned_hrus,
   if(start_year > end_year) {
     stop("'end_year' must be greater than 'start_year'!")
   }
-  if(!(start_year %in% year_range) | !(end_year %in% year_range)) {
+  if(start_year < year_range[1] | end_year > year_range[2]) {
     stop("'start_year' and 'end_year' must be in a range between ",
-         min(year_range), " and ", max(year_range), "!")
+         year_range[1], " and ", year_range[2], "!")
   }
 
   cat("Writing management files:\n")
@@ -64,7 +64,8 @@ write_op_plus <- function(path, mgt_raw, schedule, assigned_hrus, start_year, en
   lum_names <- lum_to_string(names(mgt_raw$landuse_lum))
   mgt_head <- c(add_edit_timestamp(mgt_raw$management_sch[1]), mgt_raw$management_sch[2])
 
-  lum_mgt <- map2(schedule, names(schedule), ~prepare_lum_i(.x, .y, mgt_raw$landuse_lum)) %>%
+  lum_mgt <- map2(schedule, names(schedule), ~prepare_lum_i(.x, .y, mgt_raw$landuse_lum,
+                                                            start_year, end_year)) %>%
     sort_mgt(.)
 
   landuse_lum <- map(lum_mgt, ~.x$lum) %>%
@@ -210,12 +211,13 @@ sort_mgt <- function(mgt) {
 #' @param end_year Numeric. Defines the last year for which to write operations.
 #'
 #' @importFrom dplyr filter mutate %>%
+#' @importFrom lubridate year
 #' @importFrom purrr map map_dbl
 #' @importFrom stringr str_extract str_remove
 #'
 #' @keywords internal
 #'
-prepare_lum_i <- function(schedule_i, name_i, lum_raw) {
+prepare_lum_i <- function(schedule_i, name_i, lum_raw, start_year, end_year) {
   lum_init <- str_remove(name_i, '\\_[:digit:]+\\_[:digit:]+')
   lum_num <- str_extract(name_i, '\\_[:digit:]+\\_[:digit:]+')
   mgt_name <- paste0(str_remove(lum_init, '\\_lum'), '_mgt', ifelse(is.na(lum_num), '', lum_num))
@@ -228,7 +230,9 @@ prepare_lum_i <- function(schedule_i, name_i, lum_raw) {
   if(is.null(schedule_i$schedule)) {
     schdl <- NULL
   } else {
-    schdl <- apply(schedule_i$schedule, 1, schdl_to_string)
+    schdl <- schedule_i$schedule %>%
+      filter(year(date) >= start_year, year(date) <= end_year) %>%
+      apply(., 1, schdl_to_string)
   }
 
   mgt_head <- paste(sprintf('%-24s', mgt_name), sprintf('%10d',length(schdl)),  sprintf('%10d',0))
