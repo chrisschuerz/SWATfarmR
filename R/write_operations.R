@@ -33,7 +33,7 @@ write_operation <- function(path, mgt_raw, schedule, assigned_hrus,
   if (version == 'plus') {
     write_op_plus(path, mgt_raw, schedule, assigned_hrus, start_year, end_year)
   } else {
-    write_op_2012(mgt_raw, schedule, assigned_hrus)
+    write_op_2012(path, mgt_raw, schedule, assigned_hrus, start_year, end_year)
   }
 }
 
@@ -109,17 +109,18 @@ write_op_plus <- function(path, mgt_raw, schedule, assigned_hrus, start_year, en
 #'
 #' @keywords internal
 #'
-write_op_2012 <- function(path, schedule, ...) {
-  n_hru <- length(schedule)
-  hru_files <- names(schedule)
+write_op_2012 <- function(path, mgt_raw, schedule, assigned_hrus, start_year, end_year) {
+  t0 <- now()
+  n_hru <- nrow(assigned_hrus)
   for (i_hru in 1:n_hru) {
-    hru_file_i <- hru_files[i_hru]
+    hru_file_i <- assigned_hrus$file[i_hru]
+    schdl_label_i <- assigned_hrus$schedule[i_hru]
     mgt_i <- mgt_raw[[hru_file_i]]
-    schedule_i <- schedule[[hru_file_i]]
+    schedule_i <- schedule[[schdl_label_i]]
 
     if(!is.null(schedule_i$init_crop)) {
       mgt_i <- initialize_crop(mgt_i, schedule_i$init_crop)
-    } else if(write_all) {
+    } else {
       mgt_i[4] <- paste(sprintf("%16i", 0),
                         "   | IGRO: Land cover status: 0-none growing; 1-growing")
     }
@@ -130,7 +131,7 @@ write_op_2012 <- function(path, schedule, ...) {
         mutate(date = if_else(operation %in% c(0, 17), ymd(NA) , date))
 
       mgt_i <- add_management_schedule(mgt_i, schedule_tbl)
-    } else if(write_all) {
+    } else {
       mgt_i <- mgt_i[1:30]
       mgt_i[29] <- paste(sprintf("%16i", 1),
                          "   | NROT: number of years of rotation")

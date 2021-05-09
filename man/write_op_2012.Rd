@@ -4,14 +4,14 @@
 \alias{write_op_2012}
 \title{Write the management schedules for a SWAT2012 project}
 \usage{
-write_op_2012(path, schedule, ...)
+write_op_2012(path, mgt_raw, schedule, assigned_hrus, start_year, end_year)
 }
 \arguments{
 \item{path}{Path to the TxtInOut folder}
 
-\item{schedule}{List of tibbles with the scheduled operations.}
-
 \item{mgt_raw}{List of original files that are relevant for the mgt scheduling.}
+
+\item{schedule}{List of tibbles with the scheduled operations.}
 
 \item{assigned_hrus}{Tibble that links the mgt schedules to the HRUs}
 
