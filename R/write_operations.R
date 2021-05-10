@@ -77,7 +77,7 @@ write_op_plus <- function(path, mgt_raw, schedule, assigned_hrus, start_year, en
     c(mgt_head, .)
 
   write_lines(landuse_lum, path%//%'landuse.lum')
-  write_lines(schedule_mgt, path%//%'schedule.mgt')
+  write_lines(schedule_mgt, path%//%'management.sch')
 
   cat("  - Writing 'time.sim'\n")
   time_sim <- mgt_raw$time_sim
