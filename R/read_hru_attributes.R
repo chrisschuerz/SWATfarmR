@@ -28,26 +28,18 @@ read_hru_attributes <- function(project_path, version, t0) {
 read_attributes_plus <- function(project_path) {
   rtu_def <- read_rtu_def(project_path)
 
-  hru_data <- read_table(project_path%//%'hru-data.hru', skip = 1,
-                         col_types = cols(id = col_double(),
-                                          .default = col_character())) %>%
+  hru_data <- read_table_linewise(project_path%//%'hru-data.hru',
+                                  n_skip = 2, col_names = 'get',
+                                  col_types = c('d', rep('c', 9))) %>%
     rename(hru = id, hru_name = name)
 
-  soils <- read_table(project_path%//%'soils.sol', skip = 1,
-                      col_types = cols(
-                        .default = col_double(),
-                        name = col_character(),
-                        hyd_grp = col_character(),
-                        texture = col_character()
-                      )) %>%
-    select(name, hyd_grp) %>%
-    filter(nchar(name)>0)
 
-  topo <- read_table(project_path%//%'topography.hyd', skip = 1,
-                     col_types = cols(
-                       name = col_character(),
-                       .default = col_double()
-                     )) %>%
+  soils <- extract_sol_plus(project_path%//%'soils.sol')
+
+  topo <- read_table_linewise(project_path%//%'topography.hyd',
+                              col_types = c('c', rep('d', 5)),
+                              col_names = 'get',
+                              n_skip = 2) %>%
     select(name, slp, slp_len)
 
   hru_attr <- rtu_def %>%
@@ -79,7 +71,7 @@ read_line_file <- function(file_path) {
 
   n_max  <- max(map_dbl(file_data, length))
   id_max <- which.max(map_dbl(file_data, length))
-  col_numeric <- !is.na(suppressWarnings((as.numeric(file_data[[n_max]]))))
+  col_numeric <- !is.na(suppressWarnings((as.numeric(file_data[[id_max]]))))
 
   file_head <-line_file[1] %>%
     str_split(. , "\\s+", simplify = TRUE) %>%
@@ -87,6 +79,41 @@ read_line_file <- function(file_path) {
 
   return(list(data = file_data, header = file_head,
               n_max = n_max, id_max = id_max, col_numeric = col_numeric))
+}
+
+#' Read text file tables safely linewise and then convert to table
+#'
+#' @param file_path String. Path to the file
+#' @param col_names Vector with column names. If 'get' the names are
+#'   estracted from tne n_skip - 1 line.
+#' @param col_types Vector with col types. 'c' for character, 'd' for double
+#' @param n_skip Number of lines to skip
+#'
+#' @importFrom dplyr  %>%
+#' @importFrom purrr map2_df
+#' @importFrom readr read_lines
+#' @importFrom stringr str_split str_trim
+#' @importFrom tibble as_tibble
+#'
+#' @keywords internal
+#'
+read_table_linewise <- function(file_path, col_names, col_types, n_skip) {
+  if(all(col_names == 'get')) {
+    col_names <- read_lines(file_path, skip = (n_skip - 1), n_max = 1) %>%
+      str_trim() %>%
+      str_split(., '[:blank:]+', simplify = TRUE) %>%
+      as.vector()
+  }
+
+  col_fun <- map(col_types, ~ ifelse(.x == 'c', as.character, as.numeric))
+
+  read_lines(file_path, skip = n_skip) %>%
+    str_trim() %>%
+    str_split(., '[:blank:]+', simplify = TRUE) %>%
+    set_colnames(., col_names) %>%
+    as_tibble(.) %>%
+    map2_df(., col_fun, ~ .y(.x))
+
 }
 
 #' Routine to read the SWAT+ routing unit definition
@@ -104,10 +131,9 @@ read_line_file <- function(file_path) {
 read_rtu_def <- function(project_path) {
 
   rtu_def <- read_line_file(project_path%//%'rout_unit.def')
-  rtu_ele <- read_table(project_path%//%'rout_unit.ele', skip = 1,
-                        col_types = cols(name = col_character(),
-                                         obj_typ = col_character(),
-                                         .default = col_double())) %>%
+  rtu_ele <- read_table_linewise(project_path%//%'rout_unit.ele',
+                                 n_skip = 2, col_names = 'get',
+                                 col_types = c('d', 'c', 'c', rep('d', 3))) %>%
     filter(obj_typ == 'hru') %>%
     select(id, obj_id, name) %>%
     set_names(c('ele_id', 'hru', 'hru_name'))
@@ -148,6 +174,33 @@ c_idx <- function(x) {
     reduce(., c) %>%
     c(.,x[-is_rng]) %>%
     sort(.)
+}
+
+#' Extract soil names and hydrological soil groups from soils.sol
+#'
+#' @param sol_file Character string for path to soils.sol file
+#'
+#' @importFrom dplyr %>%
+#' @importFrom readr read_lines
+#' @importFrom stringr str_remove_all str_split str_trim
+#' @importFrom tibble as_tibble
+#'
+#' @keywords internal
+#'
+extract_sol_plus <- function(sol_file) {
+  soils <- read_lines(sol_file, skip = 2) %>%
+    str_trim(.)
+
+  is_soil_name <- soils %>%
+    str_sub(., 1,16) %>%
+    str_remove_all(., '[:punct:]|[:digit:]|[:blank:]') %>%
+    nchar()
+
+  soils[is_soil_name > 0] %>%
+    str_split(., '[:blank:]+', simplify = TRUE) %>%
+    .[, c(1,3)] %>%
+    set_colnames(., c('name', 'hyd_grp')) %>%
+    as_tibble(.)
 }
 
 #' Read HRU attributes from the .hru and .sol files in SWAT2012 projects
