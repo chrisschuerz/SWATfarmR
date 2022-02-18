@@ -4,7 +4,7 @@
 \alias{document_op_skip}
 \title{Document if an operation scheduling did not result in an operation date}
 \usage{
-document_op_skip(op_skip, attribute_hru_i, mgt_j, prev_op, j_op)
+document_op_skip(op_skip, attribute_hru_i, mgt_j, prev_op, j_op, version)
 }
 \arguments{
 \item{op_skip}{Tibble that documents the skipped operations}
@@ -16,6 +16,8 @@ document_op_skip(op_skip, attribute_hru_i, mgt_j, prev_op, j_op)
 \item{prev_op}{Date of the previous opeation in ymd() format.}
 
 \item{j_op}{index of the operation in the mgt schedule table.}
+
+\item{version}{Text string that provides the SWAT version}
 }
 \description{
 Document if an operation scheduling did not result in an operation date
