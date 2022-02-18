@@ -8,7 +8,7 @@
 #' @keywords internal
 #'
 check_version <- function(project_path) {
-  file_cio <- read_lines(project_path%//%'file.cio')
+  file_cio <- read_lines(project_path%//%'file.cio', lazy = FALSE)
   swat_version <- c(0,0)
   if (length(file_cio > 70)) {
     swat_version[1] <- swat_version[1] + 1
