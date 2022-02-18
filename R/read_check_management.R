@@ -107,8 +107,7 @@ read_lookup_plus <- function(project_path) {
   lookup$plt_comm <- read_plt_comm(comm_file = project_path%//%"plant.ini")
 
   lookup$plant <- read_table(file = project_path%//%"plants.plt",
-                             col_names = TRUE, col_types = cols(), skip = 1,
-                             lazy = FALSE) %>%
+                             col_names = TRUE, col_types = cols(), skip = 1) %>%
     rename(t_base = tmp_base)
 
   return(lookup)
@@ -202,14 +201,12 @@ read_lookup_2012 <- function(project_path) {
                                                 "initial_plant")))
 
   lookup$fertilizer <- read_table(file = project_path%//%"fert.dat",
-                                  col_names = FALSE, col_types = cols(),
-                                  lazy = FALSE) %>%
+                                  col_names = FALSE, col_types = cols()) %>%
     .[,1:2] %>%
     set_names(c("value", "label"))
 
   lookup$tillage <- read_table(file = project_path%//%"till.dat",
-                               col_names = FALSE, col_types = cols(),
-                               lazy = FALSE) %>%
+                               col_names = FALSE, col_types = cols()) %>%
     .[,1:2] %>%
     set_names(c("value", "label"))
 

@@ -99,7 +99,8 @@ read_line_file <- function(file_path) {
 #'
 read_table_linewise <- function(file_path, col_names, col_types, n_skip) {
   if(all(col_names == 'get')) {
-    col_names <- read_lines(file_path, skip = (n_skip - 1), n_max = 1) %>%
+    col_names <- read_lines(file_path, skip = (n_skip - 1), n_max = 1,
+                            lazy = FALSE) %>%
       str_trim() %>%
       str_split(., '[:blank:]+', simplify = TRUE) %>%
       as.vector()
@@ -107,7 +108,7 @@ read_table_linewise <- function(file_path, col_names, col_types, n_skip) {
 
   col_fun <- map(col_types, ~ ifelse(.x == 'c', as.character, as.numeric))
 
-  read_lines(file_path, skip = n_skip) %>%
+  read_lines(file_path, skip = n_skip, lazy = FALSE) %>%
     str_trim() %>%
     str_split(., '[:blank:]+', simplify = TRUE) %>%
     set_colnames(., col_names) %>%
