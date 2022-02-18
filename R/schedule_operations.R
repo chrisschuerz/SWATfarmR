@@ -98,7 +98,7 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
               date_j <- schedule_date_j(var_tbl, mgt_j$rules_dynamic, prev_op)
 
               if(is.null(date_j)){
-                op_skip <- document_op_skip(op_skip, attribute_hru_i, mgt_j, prev_op, j_op)
+                op_skip <- document_op_skip(op_skip, attribute_hru_i, mgt_j, prev_op, j_op, version)
               } else if (date_j >= max(var_tbl$date)) {
                 break()
               } else {
@@ -366,21 +366,32 @@ schedule_op_j <- function(schedule_i, mgt_j, date_j, init_lbl, version) {
 #' @param mgt_j j_th line of the mgt table that should be scheduled
 #' @param prev_op Date of the previous opeation in ymd() format.
 #' @param j_op index of the operation in the mgt schedule table.
+#' @param version Text string that provides the SWAT version
 #'
 #' @importFrom dplyr bind_rows filter mutate select %>%
 #' @importFrom tibble tibble
 #'
 #' @keywords internal
 #'
-document_op_skip <- function(op_skip, attribute_hru_i, mgt_j, prev_op, j_op) {
-  skip_i <- tibble(file         = attribute_hru_i$file,
-                   subbasin     = attribute_hru_i$subbasin,
-                   hru          = attribute_hru_i$hru,
-                   landuse      = attribute_hru_i$luse,
-                   op_number    = j_op,
-                   date_prev_op = prev_op,
-                   rule         = mgt_j$rules_dynamic,
-                   mgt_op_code  = mgt_j$operation)
+document_op_skip <- function(op_skip, attribute_hru_i, mgt_j, prev_op, j_op, version) {
+  if (version == '2012') {
+    skip_i <- tibble(file         = attribute_hru_i$file,
+                     subbasin     = attribute_hru_i$subbasin,
+                     hru          = attribute_hru_i$hru,
+                     landuse      = attribute_hru_i$luse,
+                     op_number    = j_op,
+                     date_prev_op = prev_op,
+                     rule         = mgt_j$rules_dynamic,
+                     mgt_op_code  = mgt_j$operation)
+  } else if (version == 'plus') {
+    skip_i <- tibble(rtu          = attribute_hru_i$rtu,
+                     hru          = attribute_hru_i$hru,
+                     landuse      = attribute_hru_i$lu_mgt,
+                     op_number    = j_op,
+                     date_prev_op = prev_op,
+                     rule         = mgt_j$rules_dynamic,
+                     mgt_op_code  = mgt_j$operation)
+  }
   if (is.null(op_skip)) {
     op_skip <- skip_i
   } else {

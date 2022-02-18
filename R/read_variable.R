@@ -34,9 +34,9 @@ read_weather <- function(project_path, version) {
 # library(tidyverse)
 
 read_weather_plus <- function(project_path) {
-  weather_sta <- read_table(project_path%//%'weather-sta.cli',
-                            col_types = cols(.default = col_character()),
-                            skip = 1)
+  weather_sta <- read_table_linewise(project_path%//%'weather-sta.cli',
+                                     n_skip = 2, col_names = 'get',
+                                     col_types = rep('c', 9 ))
 
   pcp_files <- unique(weather_sta$pcp)
   tmp_files <- unique(weather_sta$tmp)
@@ -44,24 +44,18 @@ read_weather_plus <- function(project_path) {
   check_if_daily(pcp_files, project_path)
   check_if_daily(tmp_files, project_path)
 
-  pcp <- map(pcp_files, ~ read_table(project_path%//%.x,
+  pcp <- map(pcp_files, ~ read_table_linewise(project_path%//%.x,
                                      col_names = c('year', 'jdn',
                                                    str_remove(.x, '.pcp')),
-                                     col_types = cols(year = col_integer(),
-                                                      jdn  = col_integer(),
-                                                      .default = col_double()),
-                                     skip = 3, progress = FALSE)) %>%
+                                     col_types = rep('d',3), n_skip = 4)) %>%
     map(., ~ jdnyr_to_date(.x)) %>%
     reduce(., full_join, by = 'date')
 
-  tmp <- map(tmp_files, ~ read_table(project_path%//%.x,
+  tmp <- map(tmp_files, ~ read_table_linewise(project_path%//%.x,
                                      col_names = c('year', 'jdn',
                                                    str_remove(.x, '.tmp')%_%'max',
                                                    str_remove(.x, '.tmp')%_%'min'),
-                                     col_types = cols(year = col_integer(),
-                                                      jdn  = col_integer(),
-                                                      .default = col_double()),
-                                     skip = 3, progress = FALSE)) %>%
+                                     col_types = rep('d',4), n_skip = 4)) %>%
     map(., ~ jdnyr_to_date(.x)) %>%
     reduce(., full_join, by = 'date')
 
@@ -132,7 +126,7 @@ read_weather_2012 <- function(project_path) {
 #' @keywords internal
 #'
 read_weather_file <- function(file, var, skip, digit_var, digit_date) {
-  n_var <-  (nchar(read_lines(file, n_max = (skip + 1))[(skip + 1)]) -
+  n_var <-  (nchar(read_lines(file, n_max = (skip + 1), lazy = FALSE)[(skip + 1)]) -
                sum(digit_date)) / digit_var
 
   cols <- fwf_widths(c(digit_date[1],digit_date[2], rep(digit_var,n_var)),
@@ -183,9 +177,9 @@ connect_unit_weather <- function(project_path, hru_attributes, variables, versio
 #' @keywords internal
 #'
 connect_weather_plus <- function(project_path, hru_attributes) {
-  weather_sta <- read_table(project_path%//%'weather-sta.cli',
-                            col_types = cols(.default = col_character()),
-                            skip = 1)
+  weather_sta <- read_table_linewise(project_path%//%'weather-sta.cli',
+                                     n_skip = 2, col_names = 'get',
+                                     col_types = rep('c', 9 ))
 
   hru_con <- read_con_file(project_path%//%'hru.con') %>%
     select(id, name, wst) %>%
@@ -254,7 +248,7 @@ read_con_file <- function(con_path) {
 #'
 connect_weather_2012 <- function(project_path, hru_attributes, variables) {
   sub_list <- list.files(path = project_path, pattern = "[:0-9:].sub")
-  sub_files <- map(project_path%//%sub_list, read_lines)
+  sub_files <- map(project_path%//%sub_list, ~read_lines(.x, lazy = FALSE))
 
   var_tbl <- sub_files %>%
     map_df(., ~ tibble(pcp  = get_value(.x[7]),
@@ -389,7 +383,7 @@ get_value <- function(x) {
 #' @keywords internal
 #'
 check_if_daily <- function(files, project_path) {
-  is_daily <- map(files, ~read_lines(project_path%//%.x , skip = 2, n_max = 1)) %>%
+  is_daily <- map(files, ~read_lines(project_path%//%.x , skip = 2, n_max = 1, lazy = FALSE)) %>%
     map(., ~str_split(.x, "\\s+")) %>%
     map(., ~.x[[1]][nchar(.x[[1]]) > 0]) %>%
     map(., as.numeric) %>%
@@ -446,7 +440,7 @@ jdnyr_to_date <- function(tbl) {
 #' @keywords internal
 #'
 get_station_names <- function(file_path) {
-  read_lines(file_path, n_max = 1) %>%
+  read_lines(file_path, n_max = 1, lazy = FALSE) %>%
     str_remove(., 'Station ') %>%
     str_split(., ',', simplify = TRUE) %>%
     trimws() %>%
