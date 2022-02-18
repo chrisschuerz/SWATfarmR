@@ -36,7 +36,7 @@ read_mgt_lkp <- function(file, version, project_path, hru_attribute) {
 read_mgt_table_plus <- function(file) {
   tbl <- read_csv(file, col_types = cols(weight = 'd',
                                          op_data3 = 'd',
-                                         .default = 'c')) %>%
+                                         .default = 'c'), lazy = FALSE) %>%
     select(land_use, management, weight, rules_static, rules_dynamic, operation, 'op_data'%&%1:3)
   return(tbl)
 }
@@ -58,7 +58,7 @@ read_mgt_table_2012 <- function(file) {
                                          rules_dynamic = "c",
                                          operation = "c",
                                          mgt1 = "c",
-                                         .default = "d")) %>%
+                                         .default = "d"), lazy = FALSE) %>%
     select(land_use, management, weight, rules_static, rules_dynamic, operation, 'mgt'%&%1:9)
   return(tbl)
 }
@@ -94,16 +94,21 @@ read_lookup_plus <- function(project_path) {
                                         "burn",   "burn",
                                         "skip",   "skip",
                                         "inip",   "initial_plant"))
-  lookup$fertilizer <- read_table(file = project_path%//%"fertilizer.frt",
-                                  col_names = TRUE, col_types = cols(), skip = 1)
+  lookup$fertilizer <- read_table_linewise(file = project_path%//%"fertilizer.frt",
+                                  col_names = c('name', 'fminn', 'fminp', 'forgn',
+                                                'forgp', 'fnh3n', 'pathogens', 'description'),
+                                  col_types = c('c', rep('d', 5), 'c', 'c'), n_skip = 2)
 
-  lookup$tillage <- read_table(file = project_path%//%"tillage.til",
-                               col_names = TRUE, col_types = cols(), skip = 1)
+  lookup$tillage <- read_table_linewise(file = project_path%//%"tillage.til",
+                                        col_names = c('name', 'mix_eff', 'mix_dp', 'rough',
+                                                      'ridge_ht', 'ridge_sp', 'description'),
+                                        col_types = c('c', rep('d', 5), 'c'), n_skip = 2)
 
   lookup$plt_comm <- read_plt_comm(comm_file = project_path%//%"plant.ini")
 
   lookup$plant <- read_table(file = project_path%//%"plants.plt",
-                             col_names = TRUE, col_types = cols(), skip = 1) %>%
+                             col_names = TRUE, col_types = cols(), skip = 1,
+                             lazy = FALSE) %>%
     rename(t_base = tmp_base)
 
   return(lookup)
@@ -122,7 +127,7 @@ read_lookup_plus <- function(project_path) {
 #' @keywords internal
 #'
 read_plt_comm <- function(comm_file) {
-  tbl <- read_lines(file = comm_file, skip = 1) %>%
+  tbl <- read_lines(file = comm_file, skip = 1, lazy = FALSE) %>%
     str_replace_all(., '\t', ' ')
 
   comm_head <- tbl[1] %>%
@@ -197,22 +202,24 @@ read_lookup_2012 <- function(project_path) {
                                                 "initial_plant")))
 
   lookup$fertilizer <- read_table(file = project_path%//%"fert.dat",
-                                  col_names = FALSE, col_types = cols()) %>%
+                                  col_names = FALSE, col_types = cols(),
+                                  lazy = FALSE) %>%
     .[,1:2] %>%
     set_names(c("value", "label"))
 
   lookup$tillage <- read_table(file = project_path%//%"till.dat",
-                               col_names = FALSE, col_types = cols()) %>%
+                               col_names = FALSE, col_types = cols(),
+                               lazy = FALSE) %>%
     .[,1:2] %>%
     set_names(c("value", "label"))
 
-  lookup$plant <- read_lines(project_path%//%"plant.dat") %>%
+  lookup$plant <- read_lines(project_path%//%"plant.dat", lazy = FALSE) %>%
     .[nchar(.) <=14] %>%
     str_split(string = ., pattern = "\\s+") %>%
     map(., ~.x[nchar(.x) > 0]) %>%
     map_df(., ~tibble(value = .x[1], label = .x[2]))
 
-  lookup$plant$t_base <- read_lines(project_path%//%"plant.dat") %>%
+  lookup$plant$t_base <- read_lines(project_path%//%"plant.dat", lazy = FALSE) %>%
     .[which(nchar(.) <=14) + 2]%>%
     str_split(string = ., pattern = "\\s+") %>%
     map(., ~.x[nchar(.x) > 0]) %>%
