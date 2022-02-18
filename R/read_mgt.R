@@ -24,14 +24,16 @@ read_mgt_init <- function(project_path, version) {
 #' @keywords internal
 #'
 read_mgt_plus <- function(project_path) {
-  mgt_sch  <- read_lines(project_path%//%'management.sch')
-  luse_lum <- read_table(file = project_path%//%"landuse.lum",
-                         col_names = TRUE, col_types = cols(), skip = 1)
-  hru_data <- read_table(file = project_path%//%"hru-data.hru",
-                         col_names = TRUE, col_types = cols(), skip = 1)
-  luse_header <- read_lines(project_path%//%'landuse.lum', n_max = 1)
-  hru_header  <- read_lines(project_path%//%'hru-data.hru', n_max = 1)
-  time_sim    <- read_lines(project_path%//%'time.sim')
+  mgt_sch  <- read_lines(project_path%//%'management.sch', lazy = FALSE)
+  luse_lum <- read_table_linewise(file = project_path%//%"landuse.lum",
+                         col_names = 'get', n_skip = 2,
+                         col_types = rep('c', 14))
+  hru_data <- read_table_linewise(file = project_path%//%"hru-data.hru",
+                                  col_names = 'get', n_skip = 2,
+                                  col_types = rep('c', 10))
+  luse_header <- read_lines(project_path%//%'landuse.lum', n_max = 1, lazy = FALSE)
+  hru_header  <- read_lines(project_path%//%'hru-data.hru', n_max = 1, lazy = FALSE)
+  time_sim    <- read_lines(project_path%//%'time.sim', lazy = FALSE)
 
   return(list(management_sch = mgt_sch,
               landuse_lum    = luse_lum,
@@ -53,7 +55,7 @@ read_mgt_plus <- function(project_path) {
 #'
 read_mgt_2012 <- function(project_path) {
   mgt_list <- list.files(path = project_path, pattern = "[:0-9:].mgt")
-  mgt_files <- map(project_path%//%mgt_list, read_lines) %>%
+  mgt_files <- map(project_path%//%mgt_list,  ~ read_lines(.x, lazy = FALSE)) %>%
     set_names(str_remove(mgt_list, ".mgt"))
   return(mgt_files)
 }
