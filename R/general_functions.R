@@ -164,3 +164,15 @@ plural <- function(n) {
 #' \%&&\% pastes two strings by " ".
 #' @keywords internal
 '%&&%' <- function(a, b) paste(a, b, sep = " ")
+
+#' Set colnames of a data frame or matrix
+#'
+#' @param x Data frame or matrix
+#' @param nm Character names vector
+#'
+#' @keywords internal
+#'
+set_colnames <- function(x, nm) {
+  colnames(x) <- nm
+  return(x)
+}
