@@ -170,11 +170,18 @@ read_rtu_def <- function(project_path) {
 #' @keywords internal
 #'
 c_idx <- function(x) {
+  x <- x[!is.na(x)]
   is_rng <- which(x < 0)
-  map(is_rng, ~ (x[.x-1] + 1):(-x[.x])) %>%
-    reduce(., c) %>%
-    c(.,x[-is_rng]) %>%
-    sort(.)
+
+  if (length(is_rng) > 0) {
+    idx <- map(is_rng, ~ (x[.x-1] + 1):(-x[.x])) %>%
+      reduce(., c) %>%
+      c(., x[-is_rng]) %>%
+      sort(.)
+  } else {
+    idx <- x
+  }
+  return(idx)
 }
 
 #' Extract soil names and hydrological soil groups from soils.sol
