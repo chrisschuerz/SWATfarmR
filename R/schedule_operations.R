@@ -271,7 +271,8 @@ prepare_variables <- function(var_list, hru_var_con, i_hru, version) {
   con_i <- filter(hru_var_con, hru == i_hru) %>%
     .[,pcp_pos:ncol(.)]
 
-  var_tbl <- map2(con_i, names(con_i), ~ select(var_list[[.y]], date, matches(.x))) %>%
+  # var_tbl <- map2(con_i, names(con_i), ~ select(var_list[[.y]], date, ends_with(.x))) %>%
+  var_tbl <- map2(con_i, names(con_i), ~ var_list[[.y]][,c('date', .x)]) %>%
     map2(., names(.), ~ set_names(.x, c('date', .y))) %>%
     reduce(., left_join, by = 'date') %>%
     mutate(year = year(date),
