@@ -185,8 +185,8 @@ connect_weather_plus <- function(project_path, hru_attributes) {
     select(id, name, wst) %>%
     left_join(., weather_sta, by = c('wst' = 'name')) %>%
     select(id, name, pcp, tmp) %>%
-    mutate(pcp = str_remove(pcp, '.pcp'),
-           tmp = str_remove(tmp, '.tmp'),
+    mutate(pcp = str_remove(pcp, '\\.pcp'),
+           tmp = str_remove(tmp, '\\.tmp'),
            tmax = tmp,
            tmin = tmp,
            tav  = tmp) %>%
