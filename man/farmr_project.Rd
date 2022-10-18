@@ -11,15 +11,15 @@ farmr_project
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{farmr_project$new()}}
-\item \href{#method-add_variable}{\code{farmr_project$add_variable()}}
-\item \href{#method-read_management}{\code{farmr_project$read_management()}}
-\item \href{#method-save}{\code{farmr_project$save()}}
+\item \href{#method-farmr_project-new}{\code{farmr_project$new()}}
+\item \href{#method-farmr_project-add_variable}{\code{farmr_project$add_variable()}}
+\item \href{#method-farmr_project-read_management}{\code{farmr_project$read_management()}}
+\item \href{#method-farmr_project-save}{\code{farmr_project$save()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-farmr_project-new"></a>}}
+\if{latex}{\out{\hypertarget{method-farmr_project-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{farmr_project$new(project_name, project_path)}\if{html}{\out{</div>}}
@@ -27,8 +27,8 @@ farmr_project
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-add_variable"></a>}}
-\if{latex}{\out{\hypertarget{method-add_variable}{}}}
+\if{html}{\out{<a id="method-farmr_project-add_variable"></a>}}
+\if{latex}{\out{\hypertarget{method-farmr_project-add_variable}{}}}
 \subsection{Method \code{add_variable()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{farmr_project$add_variable(data, name, assign_unit = NULL, overwrite = FALSE)}\if{html}{\out{</div>}}
@@ -36,8 +36,8 @@ farmr_project
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-read_management"></a>}}
-\if{latex}{\out{\hypertarget{method-read_management}{}}}
+\if{html}{\out{<a id="method-farmr_project-read_management"></a>}}
+\if{latex}{\out{\hypertarget{method-farmr_project-read_management}{}}}
 \subsection{Method \code{read_management()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{farmr_project$read_management(file, discard_schedule = FALSE)}\if{html}{\out{</div>}}
@@ -45,8 +45,8 @@ farmr_project
 
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-save"></a>}}
-\if{latex}{\out{\hypertarget{method-save}{}}}
+\if{html}{\out{<a id="method-farmr_project-save"></a>}}
+\if{latex}{\out{\hypertarget{method-farmr_project-save}{}}}
 \subsection{Method \code{save()}}{
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{farmr_project$save()}\if{html}{\out{</div>}}
