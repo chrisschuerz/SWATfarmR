@@ -1,138 +1,138 @@
 land_use,management,weight,rules_static,rules_dynamic,operation,op_data1,op_data2,op_data3
 agrl1_lum,,,,,initial_plant,rota_comm,,
-agrl1_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",till,riprsubs,null,0
-agrl1_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,riprsubs,null,0
-agrl1_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,fldcult,null,0
-agrl1_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plnt,pnut,null,0
-agrl1_lum,,,,"(md >= 0926) * (md <= 1006) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harv,pnut,peanuts,0
-agrl1_lum,,,,,kill,pnut,null,0
-agrl1_lum,,,,"(md >= 0225) * (md <= 0306) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",till,riprsubs,null,0
-agrl1_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,riprsubs,null,0
-agrl1_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,fldcult,null,0
-agrl1_lum,,,,"(md >= 0328) * (md <= 0407) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plnt,corn,null,0
-agrl1_lum,,,,"(md >= 0329) * (md <= 0408) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",fert,elem_n,broadcast,150
-agrl1_lum,,,,,fert,elem_p,broadcast,30
-agrl1_lum,,,,"(md >= 0827) * (md <= 0906) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harv,corn,grain,0
-agrl1_lum,,,,,kill,corn,null,0
-agrl1_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",till,riprsubs,null,0
-agrl1_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,riprsubs,null,0
-agrl1_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,riprsubs,null,0
-agrl1_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,fldcult,null,0
-agrl1_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plnt,cots,null,0
-agrl1_lum,,,,"(md >= 0428) * (md <= 0508) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",fert,anh-nh3,inject,160
-agrl1_lum,,,,,fert,elem_p,broadcast,30
-agrl1_lum,,,,"(md >= 1027) * (md <= 1106) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harv,cots,cotton_strip,0
-agrl1_lum,,,,,kill,cots,null,0
-agrl1_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",till,riprsubs,null,0
-agrl1_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,riprsubs,null,0
-agrl1_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,riprsubs,null,0
-agrl1_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,fldcult,null,0
-agrl1_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plnt,cots,null,0
-agrl1_lum,,,,"(md >= 0428) * (md <= 0508) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",fert,anh-nh3,inject,160
-agrl1_lum,,,,,fert,elem_p,broadcast,30
-agrl1_lum,,,,"(md >= 1027) * (md <= 1106) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harv,cots,cotton_strip,0
-agrl1_lum,,,,,kill,cots,null,0
+agrl1_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",tillage,riprsubs,null,0
+agrl1_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,riprsubs,null,0
+agrl1_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,fldcult,null,0
+agrl1_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plant,pnut,null,0
+agrl1_lum,,,,"(md >= 0926) * (md <= 1006) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harvest_only,pnut,peanuts,0
+agrl1_lum,,,,,kill_only,pnut,null,0
+agrl1_lum,,,,"(md >= 0225) * (md <= 0306) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",tillage,riprsubs,null,0
+agrl1_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,riprsubs,null,0
+agrl1_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,fldcult,null,0
+agrl1_lum,,,,"(md >= 0328) * (md <= 0407) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plant,corn,null,0
+agrl1_lum,,,,"(md >= 0329) * (md <= 0408) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",fertilizer,elem_n,broadcast,150
+agrl1_lum,,,,,fertilizer,elem_p,broadcast,30
+agrl1_lum,,,,"(md >= 0827) * (md <= 0906) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harvest_only,corn,grain,0
+agrl1_lum,,,,,kill_only,corn,null,0
+agrl1_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",tillage,riprsubs,null,0
+agrl1_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,riprsubs,null,0
+agrl1_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,riprsubs,null,0
+agrl1_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,fldcult,null,0
+agrl1_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plant,cots,null,0
+agrl1_lum,,,,"(md >= 0428) * (md <= 0508) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",fertilizer,anh_nh3,inject,160
+agrl1_lum,,,,,fertilizer,elem_p,broadcast,30
+agrl1_lum,,,,"(md >= 1027) * (md <= 1106) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harvest_only,cots,cotton_strip,0
+agrl1_lum,,,,,kill_only,cots,null,0
+agrl1_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",tillage,riprsubs,null,0
+agrl1_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,riprsubs,null,0
+agrl1_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,riprsubs,null,0
+agrl1_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,fldcult,null,0
+agrl1_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plant,cots,null,0
+agrl1_lum,,,,"(md >= 0428) * (md <= 0508) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",fertilizer,anh_nh3,inject,160
+agrl1_lum,,,,,fertilizer,elem_p,broadcast,30
+agrl1_lum,,,,"(md >= 1027) * (md <= 1106) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harvest_only,cots,cotton_strip,0
+agrl1_lum,,,,,kill_only,cots,null,0
 agrl2_lum,,,,,initial_plant,rota_comm,,
-agrl2_lum,,,,"(md >= 0225) * (md <= 0306) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",till,riprsubs,null,0
-agrl2_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,riprsubs,null,0
-agrl2_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,fldcult,null,0
-agrl2_lum,,,,"(md >= 0328) * (md <= 0407) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plnt,corn,null,0
-agrl2_lum,,,,"(md >= 0329) * (md <= 0408) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",fert,elem_n,broadcast,150
-agrl2_lum,,,,,fert,elem_p,broadcast,30
-agrl2_lum,,,,"(md >= 0827) * (md <= 0906) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harv,corn,grain,0
-agrl2_lum,,,,,kill,corn,null,0
-agrl2_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",till,riprsubs,null,0
-agrl2_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,riprsubs,null,0
-agrl2_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,riprsubs,null,0
-agrl2_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,fldcult,null,0
-agrl2_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plnt,cots,null,0
-agrl2_lum,,,,"(md >= 0428) * (md <= 0508) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",fert,elem_n,broadcast,150
-agrl2_lum,,,,,fert,elem_p,broadcast,30
-agrl2_lum,,,,"(md >= 1027) * (md <= 1106) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harv,cots,cotton_strip,0
-agrl2_lum,,,,,kill,cots,null,0
-agrl2_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",till,riprsubs,null,0
-agrl2_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,riprsubs,null,0
-agrl2_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,riprsubs,null,0
-agrl2_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,fldcult,null,0
-agrl2_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plnt,cots,null,0
-agrl2_lum,,,,"(md >= 0428) * (md <= 0508) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",fert,elem_n,broadcast,150
-agrl2_lum,,,,,fert,elem_p,broadcast,30
-agrl2_lum,,,,"(md >= 1027) * (md <= 1106) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harv,cots,cotton_strip,0
-agrl2_lum,,,,,kill,cots,null,0
-agrl2_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",till,riprsubs,null,0
-agrl2_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,riprsubs,null,0
-agrl2_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,fldcult,null,0
-agrl2_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plnt,pnut,null,0
-agrl2_lum,,,,"(md >= 0926) * (md <= 1006) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harv,pnut,peanuts,0
-agrl2_lum,,,,,kill,pnut,null,0
+agrl2_lum,,,,"(md >= 0225) * (md <= 0306) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",tillage,riprsubs,null,0
+agrl2_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,riprsubs,null,0
+agrl2_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,fldcult,null,0
+agrl2_lum,,,,"(md >= 0328) * (md <= 0407) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plant,corn,null,0
+agrl2_lum,,,,"(md >= 0329) * (md <= 0408) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",fertilizer,elem_n,broadcast,150
+agrl2_lum,,,,,fertilizer,elem_p,broadcast,30
+agrl2_lum,,,,"(md >= 0827) * (md <= 0906) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harvest_only,corn,grain,0
+agrl2_lum,,,,,kill_only,corn,null,0
+agrl2_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",tillage,riprsubs,null,0
+agrl2_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,riprsubs,null,0
+agrl2_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,riprsubs,null,0
+agrl2_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,fldcult,null,0
+agrl2_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plant,cots,null,0
+agrl2_lum,,,,"(md >= 0428) * (md <= 0508) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",fertilizer,elem_n,broadcast,150
+agrl2_lum,,,,,fertilizer,elem_p,broadcast,30
+agrl2_lum,,,,"(md >= 1027) * (md <= 1106) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harvest_only,cots,cotton_strip,0
+agrl2_lum,,,,,kill_only,cots,null,0
+agrl2_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",tillage,riprsubs,null,0
+agrl2_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,riprsubs,null,0
+agrl2_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,riprsubs,null,0
+agrl2_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,fldcult,null,0
+agrl2_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plant,cots,null,0
+agrl2_lum,,,,"(md >= 0428) * (md <= 0508) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",fertilizer,elem_n,broadcast,150
+agrl2_lum,,,,,fertilizer,elem_p,broadcast,30
+agrl2_lum,,,,"(md >= 1027) * (md <= 1106) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harvest_only,cots,cotton_strip,0
+agrl2_lum,,,,,kill_only,cots,null,0
+agrl2_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",tillage,riprsubs,null,0
+agrl2_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,riprsubs,null,0
+agrl2_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,fldcult,null,0
+agrl2_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plant,pnut,null,0
+agrl2_lum,,,,"(md >= 0926) * (md <= 1006) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harvest_only,pnut,peanuts,0
+agrl2_lum,,,,,kill_only,pnut,null,0
 agrl3_lum,,,,,initial_plant,rota_comm,,
-agrl3_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",till,riprsubs,null,0
-agrl3_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,riprsubs,null,0
-agrl3_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,riprsubs,null,0
-agrl3_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,fldcult,null,0
-agrl3_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plnt,cots,null,0
-agrl3_lum,,,,"(md >= 0428) * (md <= 0508) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",fert,elem_n,broadcast,150
-agrl3_lum,,,,,fert,elem_p,broadcast,30
-agrl3_lum,,,,"(md >= 1027) * (md <= 1106) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harv,cots,cotton_strip,0
-agrl3_lum,,,,,kill,cots,null,0
-agrl3_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",till,riprsubs,null,0
-agrl3_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,riprsubs,null,0
-agrl3_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,riprsubs,null,0
-agrl3_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,fldcult,null,0
-agrl3_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plnt,cots,null,0
-agrl3_lum,,,,"(md >= 0428) * (md <= 0508) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",fert,elem_n,broadcast,150
-agrl3_lum,,,,,fert,elem_p,broadcast,30
-agrl3_lum,,,,"(md >= 1027) * (md <= 1106) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harv,cots,cotton_strip,0
-agrl3_lum,,,,,kill,cots,null,0
-agrl3_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",till,riprsubs,null,0
-agrl3_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,riprsubs,null,0
-agrl3_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,fldcult,null,0
-agrl3_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plnt,pnut,null,0
-agrl3_lum,,,,"(md >= 0926) * (md <= 1006) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harv,pnut,peanuts,0
-agrl3_lum,,,,,kill,pnut,null,0
-agrl3_lum,,,,"(md >= 0225) * (md <= 0306) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",till,riprsubs,null,0
-agrl3_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,riprsubs,null,0
-agrl3_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,fldcult,null,0
-agrl3_lum,,,,"(md >= 0328) * (md <= 0407) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plnt,corn,null,0
-agrl3_lum,,,,"(md >= 0329) * (md <= 0408) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",fert,elem_n,broadcast,150
-agrl3_lum,,,,,fert,elem_p,broadcast,30
-agrl3_lum,,,,"(md >= 0827) * (md <= 0906) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harv,corn,grain,0
-agrl3_lum,,,,,kill,corn,null,0
+agrl3_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",tillage,riprsubs,null,0
+agrl3_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,riprsubs,null,0
+agrl3_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,riprsubs,null,0
+agrl3_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,fldcult,null,0
+agrl3_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plant,cots,null,0
+agrl3_lum,,,,"(md >= 0428) * (md <= 0508) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",fertilizer,elem_n,broadcast,150
+agrl3_lum,,,,,fertilizer,elem_p,broadcast,30
+agrl3_lum,,,,"(md >= 1027) * (md <= 1106) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harvest_only,cots,cotton_strip,0
+agrl3_lum,,,,,kill_only,cots,null,0
+agrl3_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",tillage,riprsubs,null,0
+agrl3_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,riprsubs,null,0
+agrl3_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,riprsubs,null,0
+agrl3_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,fldcult,null,0
+agrl3_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plant,cots,null,0
+agrl3_lum,,,,"(md >= 0428) * (md <= 0508) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",fertilizer,elem_n,broadcast,150
+agrl3_lum,,,,,fertilizer,elem_p,broadcast,30
+agrl3_lum,,,,"(md >= 1027) * (md <= 1106) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harvest_only,cots,cotton_strip,0
+agrl3_lum,,,,,kill_only,cots,null,0
+agrl3_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",tillage,riprsubs,null,0
+agrl3_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,riprsubs,null,0
+agrl3_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,fldcult,null,0
+agrl3_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plant,pnut,null,0
+agrl3_lum,,,,"(md >= 0926) * (md <= 1006) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harvest_only,pnut,peanuts,0
+agrl3_lum,,,,,kill_only,pnut,null,0
+agrl3_lum,,,,"(md >= 0225) * (md <= 0306) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",tillage,riprsubs,null,0
+agrl3_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,riprsubs,null,0
+agrl3_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,fldcult,null,0
+agrl3_lum,,,,"(md >= 0328) * (md <= 0407) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plant,corn,null,0
+agrl3_lum,,,,"(md >= 0329) * (md <= 0408) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",fertilizer,elem_n,broadcast,150
+agrl3_lum,,,,,fertilizer,elem_p,broadcast,30
+agrl3_lum,,,,"(md >= 0827) * (md <= 0906) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harvest_only,corn,grain,0
+agrl3_lum,,,,,kill_only,corn,null,0
 agrl4_lum,,,,,initial_plant,rota_comm,,
-agrl4_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",till,riprsubs,null,0
-agrl4_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,riprsubs,null,0
-agrl4_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,riprsubs,null,0
-agrl4_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,fldcult,null,0
-agrl4_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plnt,cots,null,0
-agrl4_lum,,,,"(md >= 0428) * (md <= 0508) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",fert,elem_n,broadcast,150
-agrl4_lum,,,,,fert,elem_p,broadcast,30
-agrl4_lum,,,,"(md >= 1027) * (md <= 1106) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harv,cots,cotton_strip,0
-agrl4_lum,,,,,kill,cots,null,0
-agrl4_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",till,riprsubs,null,0
-agrl4_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,riprsubs,null,0
-agrl4_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,fldcult,null,0
-agrl4_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plnt,pnut,null,0
-agrl4_lum,,,,"(md >= 0926) * (md <= 1006) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harv,pnut,peanuts,0
-agrl4_lum,,,,,kill,pnut,null,0
-agrl4_lum,,,,"(md >= 0225) * (md <= 0306) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",till,riprsubs,null,0
-agrl4_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,riprsubs,null,0
-agrl4_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,fldcult,null,0
-agrl4_lum,,,,"(md >= 0328) * (md <= 0407) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plnt,corn,null,0
-agrl4_lum,,,,"(md >= 0329) * (md <= 0408) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",fert,elem_n,broadcast,150
-agrl4_lum,,,,,fert,elem_p,broadcast,30
-agrl4_lum,,,,"(md >= 0827) * (md <= 0906) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harv,corn,grain,0
-agrl4_lum,,,,,kill,corn,null,0
-agrl4_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",till,riprsubs,null,0
-agrl4_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,riprsubs,null,0
-agrl4_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,riprsubs,null,0
-agrl4_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",till,fldcult,null,0
-agrl4_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plnt,cots,null,0
-agrl4_lum,,,,"(md >= 0428) * (md <= 0508) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",fert,elem_n,broadcast,150
-agrl4_lum,,,,,fert,elem_p,broadcast,30
-agrl4_lum,,,,"(md >= 1027) * (md <= 1106) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harv,cots,cotton_strip,0
-agrl4_lum,,,,,kill,cots,null,0
+agrl4_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",tillage,riprsubs,null,0
+agrl4_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,riprsubs,null,0
+agrl4_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,riprsubs,null,0
+agrl4_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,fldcult,null,0
+agrl4_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plant,cots,null,0
+agrl4_lum,,,,"(md >= 0428) * (md <= 0508) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",fertilizer,elem_n,broadcast,150
+agrl4_lum,,,,,fertilizer,elem_p,broadcast,30
+agrl4_lum,,,,"(md >= 1027) * (md <= 1106) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harvest_only,cots,cotton_strip,0
+agrl4_lum,,,,,kill_only,cots,null,0
+agrl4_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",tillage,riprsubs,null,0
+agrl4_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,riprsubs,null,0
+agrl4_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,fldcult,null,0
+agrl4_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plant,pnut,null,0
+agrl4_lum,,,,"(md >= 0926) * (md <= 1006) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harvest_only,pnut,peanuts,0
+agrl4_lum,,,,,kill_only,pnut,null,0
+agrl4_lum,,,,"(md >= 0225) * (md <= 0306) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",tillage,riprsubs,null,0
+agrl4_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,riprsubs,null,0
+agrl4_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,fldcult,null,0
+agrl4_lum,,,,"(md >= 0328) * (md <= 0407) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plant,corn,null,0
+agrl4_lum,,,,"(md >= 0329) * (md <= 0408) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",fertilizer,elem_n,broadcast,150
+agrl4_lum,,,,,fertilizer,elem_p,broadcast,30
+agrl4_lum,,,,"(md >= 0827) * (md <= 0906) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harvest_only,corn,grain,0
+agrl4_lum,,,,,kill_only,corn,null,0
+agrl4_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",tillage,riprsubs,null,0
+agrl4_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,riprsubs,null,0
+agrl4_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,riprsubs,null,0
+agrl4_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",tillage,fldcult,null,0
+agrl4_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",plant,cots,null,0
+agrl4_lum,,,,"(md >= 0428) * (md <= 0508) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",fertilizer,elem_n,broadcast,150
+agrl4_lum,,,,,fertilizer,elem_p,broadcast,30
+agrl4_lum,,,,"(md >= 1027) * (md <= 1106) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == year(prev_op))",harvest_only,cots,cotton_strip,0
+agrl4_lum,,,,,kill_only,cots,null,0
 past_lum,,,,,initial_plant,past_comm,,
-past_lum,,,,"(md >= 1027) * (md <= 1106) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",harv,past,hay_cut_low,0
+past_lum,,,,"(md >= 1027) * (md <= 1106) * (1 - w_log(pcp, 2, 10)) * (1 - w_log(api, 10, 25)) * (year == (year(prev_op) + 1))",harvest_only,past,hay_cut_low,0
 frse_lum,,,,,initial_plant,frse_comm,,
 frst_lum,,,,,initial_plant,frst_comm,,
 frsd_lum,,,,,initial_plant,frsd_comm,,
