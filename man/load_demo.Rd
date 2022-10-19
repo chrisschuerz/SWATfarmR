@@ -29,7 +29,7 @@ The provided data includes demo projects, and management schedule .csv files.
 \section{Examples}{
 
 To learn how to load the different demo data sets with \code{SWATfarmR} see the
-section \href{https://chrisschuerz.github.io/SWATfarmR/articles/SWATfarmR.html#loading-demos}{Loading demos}
+section \href{https://chrisschuerz.github.io/SWATfarmR/articles/SWATfarmR.html#loading-the-demo-data}{Loading the demo data}
 on the package's \emph{Get Started} page.
 }
 
