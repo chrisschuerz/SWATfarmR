@@ -72,7 +72,7 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
       if(attribute_hru_i[[luse_lbl]] %in% unique(mgt_schedule$land_use)) {
         mgt_hru_i <- sample_management(mgt_hru_i) %>%
           filter_static_rules(., attribute_hru_i) %>%
-          select(-land_use, -management, -weight, -rules_static)
+          select(-land_use, -management, -weight, -filter_unit)
       }
 
       schedule_i <- list(init_crop = NULL, schedule = NULL)
@@ -92,10 +92,10 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
             mgt_j <- mgt_hru_i[j_op,]
             var_tbl <- filter(var_tbl, date >= prev_op)
 
-            if(nchar(mgt_j$rules_dynamic) > 0 &
-               !is.na(mgt_j$rules_dynamic) &
+            if(nchar(mgt_j$condition_schedule) > 0 &
+               !is.na(mgt_j$condition_schedule) &
                mgt_j$operation != init_lbl) {
-              date_j <- schedule_date_j(var_tbl, mgt_j$rules_dynamic, prev_op)
+              date_j <- schedule_date_j(var_tbl, mgt_j$condition_schedule, prev_op)
 
               if(is.null(date_j)){
                 op_skip <- document_op_skip(op_skip, attribute_hru_i, mgt_j, prev_op, j_op, version)
@@ -224,9 +224,9 @@ sample_management <- function(mgt_tbl) {
 #' @keywords internal
 #'
 filter_static_rules <- function(mgt_tbl, attribute_hru_i) {
-  mgt_tbl$rules_static[is.na(mgt_tbl$rules_static)] <- TRUE
+  mgt_tbl$filter_unit[is.na(mgt_tbl$filter_unit)] <- TRUE
 
-  sel_rule <- map_df(mgt_tbl$rules_static,
+  sel_rule <- map_df(mgt_tbl$filter_unit,
          ~transmute(attribute_hru_i, sel = !!parse_expr(.x))) %>%
     unlist()
 
@@ -348,7 +348,7 @@ schedule_op_j <- function(schedule_i, mgt_j, date_j, init_lbl, version) {
     schedule_i$init_crop <- schedule_init(mgt_j, version)
   } else if (mgt_j$operation != init_lbl & !is.null(date_j)) {
     op <- mgt_j %>%
-      select(-rules_dynamic) %>%
+      select(-condition_schedule) %>%
       add_column(date = date_j, .before = 1)
 
     if (is.null(schedule_i$schedule)) {
@@ -382,7 +382,7 @@ document_op_skip <- function(op_skip, attribute_hru_i, mgt_j, prev_op, j_op, ver
                      landuse      = attribute_hru_i$luse,
                      op_number    = j_op,
                      date_prev_op = prev_op,
-                     rule         = mgt_j$rules_dynamic,
+                     rule         = mgt_j$condition_schedule,
                      mgt_op_code  = mgt_j$operation)
   } else if (version == 'plus') {
     skip_i <- tibble(rtu          = attribute_hru_i$rtu,
@@ -390,7 +390,7 @@ document_op_skip <- function(op_skip, attribute_hru_i, mgt_j, prev_op, j_op, ver
                      landuse      = attribute_hru_i$lu_mgt,
                      op_number    = j_op,
                      date_prev_op = prev_op,
-                     rule         = mgt_j$rules_dynamic,
+                     rule         = mgt_j$condition_schedule,
                      mgt_op_code  = mgt_j$operation)
   }
   if (is.null(op_skip)) {

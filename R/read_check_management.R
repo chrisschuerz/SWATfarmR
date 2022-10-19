@@ -37,7 +37,7 @@ read_mgt_table_plus <- function(file) {
   tbl <- read_csv(file, col_types = cols(weight = 'd',
                                          op_data3 = 'd',
                                          .default = 'c'), lazy = FALSE) %>%
-    select(land_use, management, weight, rules_static, rules_dynamic, operation, 'op_data'%&%1:3)
+    select(land_use, management, weight, filter_unit, condition_schedule, operation, 'op_data'%&%1:3)
   return(tbl)
 }
 
@@ -54,12 +54,12 @@ read_mgt_table_2012 <- function(file) {
   tbl <- read_csv(file, col_types = cols(management = "c",
                                          weight = "d",
                                          land_use = "c",
-                                         rules_static = "c",
-                                         rules_dynamic = "c",
+                                         filter_unit = "c",
+                                         condition_schedule = "c",
                                          operation = "c",
                                          mgt1 = "c",
                                          .default = "d"), lazy = FALSE) %>%
-    select(land_use, management, weight, rules_static, rules_dynamic, operation, 'mgt'%&%1:9)
+    select(land_use, management, weight, filter_unit, condition_schedule, operation, 'mgt'%&%1:9)
   return(tbl)
 }
 
