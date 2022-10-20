@@ -1,0 +1,10 @@
+pandoc: 2.19.2
+pkgdown: 2.0.6
+pkgdown_sha: ~
+articles:
+  SWATfarmR: SWATfarmR.html
+last_built: 2022-10-20T15:52Z
+urls:
+  reference: https://chrisschuerz.github.io/SWATfarmR/reference
+  article: https://chrisschuerz.github.io/SWATfarmR/articles
+
