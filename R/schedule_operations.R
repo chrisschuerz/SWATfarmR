@@ -71,8 +71,8 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
 
       if(attribute_hru_i[[luse_lbl]] %in% unique(mgt_schedule$land_use)) {
         mgt_hru_i <- sample_management(mgt_hru_i) %>%
-          filter_static_rules(., attribute_hru_i) %>%
-          select(-land_use, -management, -weight, -filter_unit)
+          filter_attributes(., attribute_hru_i) %>%
+          select(-land_use, -management, -weight, -filter_attribute)
       }
 
       schedule_i <- list(init_crop = NULL, schedule = NULL)
@@ -223,10 +223,10 @@ sample_management <- function(mgt_tbl) {
 #'
 #' @keywords internal
 #'
-filter_static_rules <- function(mgt_tbl, attribute_hru_i) {
-  mgt_tbl$filter_unit[is.na(mgt_tbl$filter_unit)] <- TRUE
+filter_attributes <- function(mgt_tbl, attribute_hru_i) {
+  mgt_tbl$filter_attribute[is.na(mgt_tbl$filter_attribute)] <- TRUE
 
-  sel_rule <- map_df(mgt_tbl$filter_unit,
+  sel_rule <- map_df(mgt_tbl$filter_attribute,
          ~transmute(attribute_hru_i, sel = !!parse_expr(.x))) %>%
     unlist()
 
