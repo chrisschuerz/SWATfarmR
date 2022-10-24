@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">SWATfarmR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -108,7 +108,7 @@ you, I recommend to install it before you start working with the example
 below. To install <code>SWATdata</code> you can use again the
 <code>remotes</code> package.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">'chrisschuerz/SWATplusR'</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">'chrisschuerz/SWATdata'</span><span class="op">)</span></span></code></pre></div>
 <!--The [`SWATdata`](https://github.com/chrisschuerz/SWATdata#swatdata-) GitHub page gives an overview of the available data sets. -->
 <div class="section level3">
 <h3 id="loading-the-demo-data">Loading the demo data<a class="anchor" aria-label="anchor" href="#loading-the-demo-data"></a>
@@ -153,6 +153,9 @@ available for SWAT+ available at the moment you have to define
 <span><span class="va">mgt_path</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/load_demo.html">load_demo</a></span><span class="op">(</span>dataset <span class="op">=</span> <span class="st">'schedule'</span>, </span>
 <span>                      path <span class="op">=</span> <span class="va">demo_path</span>,</span>
 <span>                      version <span class="op">=</span> <span class="st">'plus'</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; Warning in load_demo(dataset = "project", path = demo_path, version = "+"): Demo</span></span>
+<span><span class="co">#&gt; already exists in provided 'path'. To work with the existing demo project use</span></span>
+<span><span class="co">#&gt; the returned path.</span></span></code></pre>
 <p>Again <code><a href="../reference/load_demo.html">load_demo()</a></code> returns the path of the <em>csv</em>
 file as a character string in <code>R</code> which will be useful in our
 <code>SWATfarmR</code> workflow. I assigned the file path to the
@@ -338,26 +341,26 @@ filter based on HRU attributes.</p>
 <p>If you want to use a specific operation for example only in the
 management schedules of the routing units 1 to 5, 7, and 10 you could
 for example use the following condition:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rtu</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">7</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <p>If you add this condition for one operation but you do not provide an
 alternative all other routing units will not use an alternative to this
 operation. To provide an alternative for all other locations you can for
 example use the following condition for the alternative operation:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="op">!</span> <span class="va">rtu</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">7</span>, <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
 <p>To apply an operation only for the soil <em>‘LREW06’</em> you can use
 the following:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">soil</span> <span class="op">==</span> <span class="st">'LREW06'</span></span></code></pre></div>
 <p>The alternative again would be:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">soil</span> <span class="op">!=</span> <span class="st">'LREW06'</span></span></code></pre></div>
 <p>If you want to consider several soils, this is the way to do it:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">soil</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'LREW06'</span>, <span class="st">'LREW09'</span><span class="op">)</span></span></code></pre></div>
 <p>You can also combine conditions:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">soil</span> <span class="op">!=</span> <span class="st">'LREW06'</span> <span class="op">&amp;</span> <span class="va">rtu</span>  <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">7</span>, <span class="fl">10</span><span class="op">)</span> <span class="op">&amp;</span> <span class="va">slp</span> <span class="op">&lt;=</span> <span class="fl">0.08</span></span></code></pre></div>
 <p>This operation would be implemented for all HRUs with a soil type
 that is not <em>‘LREW06’</em> for the routing units 1 to 5, 7, and 10
@@ -519,7 +522,7 @@ conditions.</p>
 operations in the example in Fig. 4 follow almost the same pattern. The
 condition for the <code>plant</code> operation for example is the
 following:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="op">(</span><span class="va">md</span> <span class="op">&gt;=</span> <span class="fl">0427</span><span class="op">)</span> <span class="op">*</span> <span class="op">(</span><span class="va">md</span> <span class="op">&lt;=</span> <span class="fl">0507</span><span class="op">)</span> <span class="op">*</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="../reference/w_log.html">w_log</a></span><span class="op">(</span><span class="va">pcp</span>, <span class="fl">0</span>, <span class="fl">7</span><span class="op">)</span><span class="op">)</span> <span class="op">*</span> <span class="op">(</span><span class="va">year</span> <span class="op">==</span> <span class="fu">year</span><span class="op">(</span><span class="va">prev_op</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>You can see that it uses the variables <code>md</code>,
 <code>pcp</code>, <code>year</code>, and <code>prev_op</code> that are
@@ -541,7 +544,7 @@ safer to not risk of having all probabilities for an operation 0 but
 very low and thus risking to skip the scheduling of an operation. This
 can however happen more easily with <code><a href="../reference/w_lin.html">w_lin()</a></code> resulting in
 0.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.5</span>,<span class="fl">1.5</span>, length.out <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span><span class="va">log_wgt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/w_log.html">w_log</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">lin_wgt</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/w_lin.html">w_lin</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span></span>
@@ -552,7 +555,7 @@ can however happen more easily with <code><a href="../reference/w_lin.html">w_li
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/legend.html" class="external-link">legend</a></span><span class="op">(</span><span class="st">"topleft"</span>, legend<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"w_log"</span>, <span class="st">"w_lin"</span><span class="op">)</span>,</span>
 <span>       col<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"red"</span>, <span class="st">"blue"</span><span class="op">)</span>, lty <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, cex<span class="op">=</span><span class="fl">0.8</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
-<img src="SWATfarmR_files/figure-html/unnamed-chunk-15-1.png" alt="Fig. 5: Functional relationship of a variable with the two weight functions w_log() and w_lin()." width="700"><p class="caption">
+<img src="SWATfarmR_files/figure-html/unnamed-chunk-16-1.png" alt="Fig. 5: Functional relationship of a variable with the two weight functions w_log() and w_lin()." width="700"><p class="caption">
 Fig. 5: Functional relationship of a variable with the two weight
 functions w_log() and w_lin().
 </p>
@@ -566,14 +569,14 @@ second expression translates to all dates in any year earlier or equal
 to May 7. When we multiply those two expressions all dates between April
 27 and May 7 get a probability of 1 while all dates outside of this time
 window do have a probability of 0.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="op">(</span><span class="va">md</span> <span class="op">&gt;=</span> <span class="fl">0427</span><span class="op">)</span> <span class="op">*</span> <span class="op">(</span><span class="va">md</span> <span class="op">&lt;=</span> <span class="fl">0507</span><span class="op">)</span></span></code></pre></div>
 <p>The third expression uses the <code><a href="../reference/w_log.html">w_log()</a></code> function together
 with precipitation. The second and third input argument in the function
 define the lower and upper boundary values of the transition range. In
 this case <code><a href="../reference/w_log.html">w_log()</a></code> returns the value 0.01 when
 <code>pcp = 2</code> and a value 0.99 when <code>pcp = 10</code>.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="../reference/w_log.html">w_log</a></span><span class="op">(</span><span class="va">pcp</span>, <span class="fl">0</span>, <span class="fl">7</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Plotting the function shows the intention of this condition. We
 assign to all daily precipitation sums lower of 0 mm a weight of
@@ -581,13 +584,13 @@ assign to all daily precipitation sums lower of 0 mm a weight of
 0.88 and at 4 mm 0.34. Daily precipitation sums of larger than 7 mm
 receive a weight of (almost) 0. This condition makes the scheduling of
 operations on days that exceed a certain precipitation less likely.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pcp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">8</span>, length.out <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span><span class="va">weight</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="../reference/w_log.html">w_log</a></span><span class="op">(</span><span class="va">pcp</span>, <span class="fl">0</span>, <span class="fl">7</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pcp</span>, <span class="va">weight</span>, type <span class="op">=</span> <span class="st">'l'</span><span class="op">)</span></span></code></pre></div>
 <div class="figure">
-<img src="SWATfarmR_files/figure-html/unnamed-chunk-18-1.png" alt="Fig. 6: Example for using w_log() to assign lower weights to days with higher precipitation." width="700"><p class="caption">
+<img src="SWATfarmR_files/figure-html/unnamed-chunk-19-1.png" alt="Fig. 6: Example for using w_log() to assign lower weights to days with higher precipitation." width="700"><p class="caption">
 Fig. 6: Example for using w_log() to assign lower weights to days with
 higher precipitation.
 </p>
@@ -606,7 +609,7 @@ Thus all dates with a weight &gt; 0 can be selected. Dates with larger
 weights are however more likely to be selected than dates with smaller
 weights.</p>
 <div class="figure">
-<img src="SWATfarmR_files/figure-html/unnamed-chunk-19-1.png" alt="Fig. 5: Combination of 3 conditions to a combined condition for scheduling an operation." width="960"><p class="caption">
+<img src="SWATfarmR_files/figure-html/unnamed-chunk-20-1.png" alt="Fig. 5: Combination of 3 conditions to a combined condition for scheduling an operation." width="960"><p class="caption">
 Fig. 5: Combination of 3 conditions to a combined condition for
 scheduling an operation.
 </p>
@@ -619,13 +622,13 @@ Thus, there is a risk that the scheduling of an operation skips years.
 To avoid the skipping of years I strongly recommend to add a constrain
 that the current operation must be scheduled in the same year as the
 previous operation.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="op">(</span><span class="va">year</span> <span class="op">==</span> <span class="fu">year</span><span class="op">(</span><span class="va">prev_op</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>This constrain does however not apply to the first operation or the
 first operation of any year in a crop rotation. In this case you can,
 however, define that this operation should take place in the year that
 is the year of the previous operation plus 1.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="op">(</span><span class="va">year</span> <span class="op">==</span> <span class="fu">year</span><span class="op">(</span><span class="va">prev_op</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -728,8 +731,503 @@ defined in the <em>‘plant.ini’</em> SWAT+ input file.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="generating-a-swatfarmr-project-in-r">Generating a <code>SWATfarmR</code> project in <code>R</code><a class="anchor" aria-label="anchor" href="#generating-a-swatfarmr-project-in-r"></a>
+<h2 id="a-new-swatfarmr-project-in-r">A new <code>SWATfarmR</code> project in <code>R</code><a class="anchor" aria-label="anchor" href="#a-new-swatfarmr-project-in-r"></a>
 </h2>
+<p><code>SWATfarmR</code> uses an object based approach to work with
+your SWAT project. This means that when you start a new
+<code>SWATfarmR</code> project an object (I will call it
+<code>farmr</code> project or <code>farmr</code> object, if I refer to
+the <code>R</code> object, from now on) will be generated in your
+<code>R</code> environment. The <code>farmr</code> project stores
+relevant data of your SWAT project, such as the weather data or HRU
+attributes and provides functions to work with theses data and
+eventually allows you to schedule management operation for your SWAT
+project. In this small example we will use the demo data that I
+described in the section <a href="https://chrisschuerz.github.io/SWATfarmR/articles/SWATfarmR.html#demo-data">Demo
+data</a> above. If you did not load the demo project and the demo
+management input file yet, please do that before you continue. To start
+a new <code>farmr</code> project use the function
+<code><a href="../reference/new_farmr.html">new_farmr()</a></code>. The function requires two inputs. First you
+have to name your project. This will be the name of your
+<code>farmr</code> project in <code>R</code> and the name of the
+<em>‘.farm’</em> file in your SWAT project folder. If you want to
+generate several <code>farmr</code> projects for a SWAT project, they
+have to have different names. The function also requires the path of
+your SWAT project on the hard drive as an input argument. In this
+example I will call the <code>farmr</code> project
+<code>lrew_demo</code> and will use the path of the demo SWAT project
+<code>proj_path</code> which we already defined in the section <a href="https://chrisschuerz.github.io/SWATfarmR/articles/SWATfarmR.html#demo-data">Demo
+data</a>.</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/new_farmr.html">new_farmr</a></span><span class="op">(</span>project_name <span class="op">=</span><span class="st">'lrew_demo'</span>, </span>
+<span>          project_path <span class="op">=</span> <span class="va">proj_path</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">#&gt;  Finished in 1S  </span></span></code></pre></div>
+<p>Now have a look in to your <code>R</code> variables. There is now a
+new object called <code>lrew_demo</code> which is our <code>farmr</code>
+project. You will also find the file <em>‘lrew_demo.farm’</em> in your
+SWAT project folder. This is the file where all your work with in your
+<code>farmr</code> project will be saved and from which you can load
+your <code>farmr</code> project to continue with your work.</p>
+<div class="section level3">
+<h3 id="a-quick-look-into-the-farmr-object">A quick look into the <code>farmr</code> object<a class="anchor" aria-label="anchor" href="#a-quick-look-into-the-farmr-object"></a>
+</h3>
+<p>You can now start exploring the generated <code>farmr</code> object
+in <code>R</code>. To see all elements that are in the new project you
+can use the <code>$</code> operator, like you would access elements of a
+list in <code>R</code>. Fig. 6 shows a screenshot of the new
+<code>farmr</code> object and the suggestions to select an element after
+entering the <code>$</code> operator. The first 4 elements are functions
+to apply operations to your <code>farmr</code> project. The last element
+<code>.$.data</code> holds the data that was read from the SWAT project,
+such as the weather inputs <em>‘pcp’</em> and <em>‘tmp’</em> or HRU
+attributes.</p>
+<p>From the 4 functions, only <code>.$add_variable()</code> and
+<code>.$read_management()</code> are relevant to you as a user.
+<code>.$initialize()</code> is synonymous to <code><a href="../reference/new_farmr.html">new_farmr()</a></code>
+which we already performed. With <code>.$save()</code> you can save the
+current state of the <code>farmr</code> project at any time. Saving is
+however done after each operation automatically. Thus, manually saving
+should not be necessary. After executing some of the functions and
+working through the operation scheduling, new functions will be
+activated (e.g. after reading the management input with
+<code>.$read_management()</code> the function
+<code>.$schedule_operations()</code> becomes visible).</p>
+<div class="figure">
+<img src="figures/farmr_screenshot.JPG" alt=""><p class="caption">Fig. 6: Screenshot of the new <code>farmr</code>
+object in <code>R</code>.</p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="reading-the-management-input">Reading the management input<a class="anchor" aria-label="anchor" href="#reading-the-management-input"></a>
+</h3>
+<p>We will now read the management input file for the demo project which
+we saved on the hard drive in the path <code>mgt_path</code> into the
+<code>farmr</code> project. This is done with the function
+<code>.$read_management()</code>.</p>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">lrew_demo</span><span class="op">$</span><span class="fu">read_management</span><span class="op">(</span>file <span class="op">=</span> <span class="va">mgt_path</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">#&gt; Warning: No management schedules were found for the following SWAT land uses: </span></span>
+<span><span class="co">#&gt;   utrn_lum, urml_lum</span></span>
+<span><span class="co">#&gt;   If managements should be written for any of these land uses</span></span>
+<span><span class="co">#&gt;   please add them to the management table and read the table again.</span></span></code></pre></div>
+<p>You can see that loading the management input file triggers a warning
+message. The management input file does not define any management for
+the land uses <em>‘utrn_lum’</em> and <em>‘urml_lum’</em>. In this case
+this is OK and we can ignore the warning message as we do not want to
+apply any management to the urban land uses. If the warning message
+however lists land uses of your model setup for which you intend to
+implement a management you should go back to your management input file,
+include the managements for the missing land uses and load it again with
+<code>.$read_management()</code>. Besides the input argument
+<code>file</code>, <code>.$read_management()</code> also has a second
+input argument <code>discard_schedule</code>. You can ignore this when
+reading a management into a new <code>farmr</code> project. You have to
+set this however <code>discard_schedule = TRUE</code> if you already
+scheduled operations with an other management input file, but you want
+to change the management inputs. Then the already scheduled operations
+would not match the new management input file that you plan to read. In
+this case you would have to discard the already scheduled
+operations.</p>
+<p>Reading the management input into our <code>farmr</code> project
+<code>lrew_demo</code> unlock the function
+<code>.$schedule_operations()</code>. With
+<code>.$schedule_operations()</code> we can schedule management
+operations based on the operations and conditions that we defined in the
+management input file. We can just try to run the operation scheduling
+and see what happens.</p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">lrew_demo</span><span class="op">$</span><span class="fu">schedule_operations</span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">#&gt; Scheduling operations:</span></span>
+<span><span class="co">#&gt; Error in `mutate()`:</span></span>
+<span><span class="co">#&gt; ! Problem while computing `wgt = ... * (year == (year(prev_op) + 1))`.</span></span>
+<span><span class="co">#&gt; Caused by error in `w_log()`:</span></span>
+<span><span class="co">#&gt; ! object 'api' not found</span></span>
+<span><span class="co">#&gt; Backtrace:</span></span>
+<span><span class="co">#&gt;   1. lrew_demo$schedule_operations()</span></span>
+<span><span class="co">#&gt;  10. SWATfarmR::w_log(api, 5, 20)</span></span></code></pre></div>
+<p>Scheduling operations triggered an error. A closer look into the
+error message tells us that <code>object 'api' not found</code> and that
+the error occurred in <code>SWATfarmR::w_log(api, 5, 20)</code>. This
+looks like one of the operation conditions in the management input file.
+If you have a look into the demo management input file you can see that
+I actually included the variable <code>api</code> into the scheduling
+conditions with the function <code>(1 - w_log(api, 5, 20))</code>. The
+variable <code>api</code> is however no default variable (see again the
+table in the subsection <a href="https://chrisschuerz.github.io/SWATfarmR/articles/SWATfarmR.html#condition_schedule">condition_schedule</a>)
+and we have to add this variable to the <code>farmr</code> project if we
+want to use it in the scheduling conditions.</p>
+</div>
+<div class="section level3">
+<h3 id="adding-variables">Adding variables<a class="anchor" aria-label="anchor" href="#adding-variables"></a>
+</h3>
+<p>My intention with the <code>api</code> condition was to include the
+antecedent precipitation (api = antecedent precipitation index) as a
+condition for the operation scheduling. A disadvantage of
+<code>SWATfarmR</code> compared to decision tables in SWAT+ is that the
+operation scheduling with <code>SWATfarmR</code> cannot make use of the
+values of any state variables during the simulation which is possible
+with decision tables. While for example decision tables can use the soil
+moisture as a condition, <code>SWATfarmR</code> must use a proxy
+variable which is related to the “wetness” of the soil.</p>
+<div class="section level4">
+<h4 id="excursus-variable_decay">Excursus <code>variable_decay()</code><a class="anchor" aria-label="anchor" href="#excursus-variable_decay"></a>
+</h4>
+<p>One approach to account for the precipitation of previous days would
+be to calculate the precipitation sums for a certain number of days
+before the current day. This might however not be the best approach to
+do that. As an alternative approach, I included a function called
+<code><a href="../reference/variable_decay.html">variable_decay()</a></code> in <code>SWATfarmR</code> which assigns
+weights to previous days based on exponential decay. The example below
+shows how the weight of an event on day 1 changes for following days.
+Depending on the <code>decay_rate</code> the weight of day 1 would only
+have a weight of 0.37 for a <code>decay_rate = 1</code>, but still be
+accounted with 0.78 with a <code>decay_rate = 0.25</code>. The event on
+day 1 would not have much impact from day 5 on for
+<code>decay_rate = 1</code>, but would still have a weight of 0.37 for
+<code>decay_rate = 0.25</code>.</p>
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x_1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">y1</span><span class="op">&lt;-</span> <span class="fu"><a href="../reference/variable_decay.html">variable_decay</a></span><span class="op">(</span>variable <span class="op">=</span> <span class="va">x</span>, n_steps <span class="op">=</span> <span class="op">-</span><span class="fl">10</span>, decay_rate <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">y2</span><span class="op">&lt;-</span> <span class="fu"><a href="../reference/variable_decay.html">variable_decay</a></span><span class="op">(</span>variable <span class="op">=</span> <span class="va">x</span>, n_steps <span class="op">=</span> <span class="op">-</span><span class="fl">10</span>, decay_rate <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
+<span><span class="va">y3</span><span class="op">&lt;-</span> <span class="fu"><a href="../reference/variable_decay.html">variable_decay</a></span><span class="op">(</span>variable <span class="op">=</span> <span class="va">x</span>, n_steps <span class="op">=</span> <span class="op">-</span><span class="fl">10</span>, decay_rate <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">y1</span><span class="op">$</span><span class="va">x_1</span>, type <span class="op">=</span> <span class="st">"l"</span>, col <span class="op">=</span> <span class="fl">1</span>, ylab <span class="op">=</span> <span class="st">'weight'</span>, xlab <span class="op">=</span> <span class="st">'day'</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">y2</span><span class="op">$</span><span class="va">x_1</span>, col <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">y3</span><span class="op">$</span><span class="va">x_1</span>, col <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="SWATfarmR_files/figure-html/unnamed-chunk-26-1.png" alt="Fig. 7: The effect of `decay_rate` on the `variable_decay()` function." width="700"><p class="caption">
+Fig. 7: The effect of <code>decay_rate</code> on the
+<code><a href="../reference/variable_decay.html">variable_decay()</a></code> function.
+</p>
+</div>
+<p>The small example below should illustrate how we can use
+<code><a href="../reference/variable_decay.html">variable_decay()</a></code> to account for antecedent precipitation.
+The black bars in the plot are daily precipitation sums. I calculated
+<code><a href="../reference/variable_decay.html">variable_decay()</a></code> including the 5 previous days
+(<code>time_steps &lt;- -5</code>) and used the two rates 0.25 (black
+line) and 1 (red line). If we would condition <code>api</code> now with
+the rule that triggered the error above
+(<code>(1 - w_log(api, 5, 20))</code>) we would get lower probabilities
+for the days after the large precipitation event on day 4 for both api
+time series. While the red line would be already below 5 mm on day 6,
+the black line does not fall below 11.5 mm. Thus, in the case of the
+black line several days after a rain event would have lower weights in
+the operation scheduling. The behaviors of the two api lines could
+e.g. be translated to different water retention behaviors of different
+soils.</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pcp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>pcp_1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">3</span>,<span class="fl">7</span>,<span class="fl">15</span>,<span class="fl">2</span>,<span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">5</span>,<span class="fl">2</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">time_steps</span> <span class="op">&lt;-</span> <span class="op">-</span><span class="fl">5</span></span>
+<span></span>
+<span><span class="va">rate1</span> <span class="op">&lt;-</span> <span class="fl">0.25</span></span>
+<span><span class="va">api1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/variable_decay.html">variable_decay</a></span><span class="op">(</span><span class="va">pcp</span>, <span class="va">time_steps</span>, <span class="va">rate1</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">rate2</span> <span class="op">&lt;-</span> <span class="fl">1</span></span>
+<span><span class="va">api2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/variable_decay.html">variable_decay</a></span><span class="op">(</span><span class="va">pcp</span>, <span class="va">time_steps</span>, <span class="va">rate2</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pcp</span><span class="op">$</span><span class="va">pcp_1</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">22</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">'h'</span>, </span>
+<span>     ylab <span class="op">=</span> <span class="st">'pcp, api'</span>, xlab <span class="op">=</span> <span class="st">'day'</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">api1</span><span class="op">$</span><span class="va">pcp_1</span>, col <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/lines.html" class="external-link">lines</a></span><span class="op">(</span><span class="va">api2</span><span class="op">$</span><span class="va">pcp_1</span>, col <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<img src="SWATfarmR_files/figure-html/unnamed-chunk-27-1.png" alt="Fig. 8: Two different api time series based on precipitation input and different decay rates" width="700"><p class="caption">
+Fig. 8: Two different api time series based on precipitation input and
+different decay rates
+</p>
+</div>
+</div>
+<div class="section level4">
+<h4 id="including-api-into-lrew_demo">Including <code>api</code> into <code>lrew_demo</code><a class="anchor" aria-label="anchor" href="#including-api-into-lrew_demo"></a>
+</h4>
+<p>We now want to include a new variable <code>api</code> into the
+<code>SWATfarmR</code> project <code>lrew_demo</code> which uses the
+function <code><a href="../reference/variable_decay.html">variable_decay()</a></code> to account for the antecedent
+precipitation. <code>api</code> in each HRU will be based on the
+precipitation time series that is linked with an HRU. In this small
+example we also want to account for different hydrological soil groups
+(HSG) to consider faster (<code>hsg == 'A'</code>) and slower
+(<code>hsg == 'D'</code>) soil water retention. Be aware that the
+approach below works in such a simple way as we only have one weather
+station for the entire demo watershed. In a more complex example with
+several weather stations you also must account for the links between
+weather stations and HRUs. Thus, this would also require to calculate
+all combinations of weather stations and HSGs, which would result in
+more than only 4 <code>api</code> variables. In a first step we will
+extract the precipitation data and the HSG information for all HRUs from
+<code>lrew_demo$.data</code>.</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Load dplyr. We will use functions such as 'mutate' and 'select'.</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="co"># Extract the precipitation from the farmr project</span></span>
+<span><span class="va">pcp</span> <span class="op">&lt;-</span> <span class="va">lrew_demo</span><span class="op">$</span><span class="va">.data</span><span class="op">$</span><span class="va">variables</span><span class="op">$</span><span class="va">pcp</span></span>
+<span></span>
+<span><span class="co"># Extract the hydrologic soil group values for all HRUs</span></span>
+<span><span class="va">hsg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">lrew_demo</span><span class="op">$</span><span class="va">.data</span><span class="op">$</span><span class="va">meta</span><span class="op">$</span><span class="va">hru_attributes</span>, <span class="va">hru</span>, <span class="va">hyd_grp</span><span class="op">)</span></span></code></pre></div>
+<p>In a next step we calculate different <code>api</code>s based on the
+precipitation data <code>pcp</code>, but using different
+<code>decay_rate</code>s for the different HSGs. The values that I set
+here for the decay rates are no literature values and were only chosen
+for demonstration of the concept here. In an actual study the choice of
+values for <code>decay_rate</code> would need some supporting
+literature. We combine the variables <code>api_A</code> to
+<code>api_D</code> together into one table and assign the names
+<code>'api_A'</code> to <code>'api_D'</code> to the columns.</p>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Calculate api values for the hsg classes A to D</span></span>
+<span><span class="va">api_A</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/variable_decay.html">variable_decay</a></span><span class="op">(</span>variable <span class="op">=</span> <span class="va">pcp</span>, n_steps <span class="op">=</span> <span class="op">-</span><span class="fl">5</span>, decay_rate <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">api_B</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/variable_decay.html">variable_decay</a></span><span class="op">(</span>variable <span class="op">=</span> <span class="va">pcp</span>, n_steps <span class="op">=</span> <span class="op">-</span><span class="fl">5</span>, decay_rate <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
+<span><span class="va">api_C</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/variable_decay.html">variable_decay</a></span><span class="op">(</span>variable <span class="op">=</span> <span class="va">pcp</span>, n_steps <span class="op">=</span> <span class="op">-</span><span class="fl">5</span>, decay_rate <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span></span>
+<span><span class="va">api_D</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/variable_decay.html">variable_decay</a></span><span class="op">(</span>variable <span class="op">=</span> <span class="va">pcp</span>, n_steps <span class="op">=</span> <span class="op">-</span><span class="fl">5</span>, decay_rate <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Bind the data together into one api table and name them with the hsgs</span></span>
+<span><span class="va">api</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind.html" class="external-link">bind_cols</a></span><span class="op">(</span><span class="va">api_A</span>, <span class="va">api_B</span>, <span class="va">api_C</span>, <span class="va">api_D</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">api</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'api_A'</span>, <span class="st">'api_B'</span>, <span class="st">'api_C'</span>, <span class="st">'api_D'</span><span class="op">)</span></span></code></pre></div>
+<p>This is how the final <code>api</code> table looks like.</p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">api</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 9,131 × 4</span></span></span>
+<span><span class="co">#&gt;     api_A api_B api_C api_D</span></span>
+<span><span class="co">#&gt;     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 20.3   20.3  20.3  20.3 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 30.3   32.0  33.0  35.2 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 11.2   14.4  16.4  21.3 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>  4.11   6.46  8.13 12.9 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>  1.51   2.90  4.04  7.85</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>  8.18   8.92  9.62 12.4 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>  5.50   6.38  7.01  9.04</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>  7.05   7.76  8.22  9.42</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>  2.59   3.49  4.08  5.72</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>  0.954  1.57  2.03  3.47</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># … with 9,121 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ Use `print(n = ...)` to see more rows</span></span></span></code></pre></div>
+<p>We now generated four different time series for <code>api</code>
+depending on different retention behaviors based on the HSGs A to D. For
+the implementation in the <code>farmr</code> object we have to link the
+different <code>api</code> time series to spatial units of the model
+setup. Thus, the table to link variables and spatial units must have two
+columns, one for the ids of the spatial units and one for the variable
+link. We could link e.g. on a routing unit level if we would use
+<code>rtu</code> ids, or to HRUs by assigning an <code>api</code> column
+to each <code>hru</code> id in the model setup. In this case we link
+HRUs and our new variable. The only variable that determines the link of
+the <code>api</code> columns with the HRUs is the HSG of an HRU. We
+already extracted <code>hsg</code> above and will now link the
+<code>hru</code>s with the <code>api</code>s, by creating a table with
+the columns <code>hru</code> and <code>api</code>.</p>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># To add the variable to the farmR you have to tell it which variables are</span></span>
+<span><span class="co"># assigned to which HRUs</span></span>
+<span><span class="va">hru_asgn</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span><span class="va">hsg</span>, api <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">'api_'</span>, <span class="va">hyd_grp</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">hru</span>, <span class="va">api</span><span class="op">)</span></span></code></pre></div>
+<p>A quick look at the table shows as how the links between HRUs and
+<code>api</code> looks like.</p>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">hru_asgn</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 49 × 2</span></span></span>
+<span><span class="co">#&gt;      hru api  </span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     1 api_B</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     2 api_B</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     3 api_D</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     4 api_C</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     5 api_B</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     6 api_B</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     7 api_D</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     8 api_B</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     9 api_C</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>    10 api_B</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># … with 39 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ Use `print(n = ...)` to see more rows</span></span></span></code></pre></div>
+<p>We prepared all information that we need to add a new variable. We
+can add now the new variable to the <code>farmr</code> object with the
+function <code>.$add_variable()</code>. The <code>data</code> we want to
+add is the table <code>api</code> that we prepared. The added data must
+have the same number of rows as all other variables that are already in
+the <code>farmr</code> object. This is ensured in this case as we used
+<code>pcp</code> from <code>lrew_demo</code> to calculate
+<code>api</code>. We assign the variable <code>name = 'api'</code> to
+the new variable in <code>lrew_demo</code>. The name must match the
+variable name that is used in the operation conditions of the management
+input file and must be different to the names of the already existing
+variables. The third input argument <code>assign_unit</code> links the
+new variable to the HRUs. Above we defined the links between
+<code>hru</code>s and <code>api</code>s in the table
+<code>hru_asgn</code> which we will now pass to
+<code>.$add_variable</code>.</p>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Add the variable api to the farmR project</span></span>
+<span><span class="va">lrew_demo</span><span class="op">$</span><span class="fu">add_variable</span><span class="op">(</span>data <span class="op">=</span> <span class="va">api</span>, name <span class="op">=</span> <span class="st">'api'</span>, assign_unit <span class="op">=</span> <span class="va">hru_asgn</span><span class="op">)</span></span></code></pre></div>
+<p>We can now check if the new variable <code>api</code> is available in
+<code>lrew_demo</code>. <code>api</code> should be available in
+<code>lrew_demo$.data$variables$api</code>.</p>
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">lrew_demo</span><span class="op">$</span><span class="va">.data</span><span class="op">$</span><span class="va">variables</span><span class="op">$</span><span class="va">api</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 9,131 × 5</span></span></span>
+<span><span class="co">#&gt;    date        api_A api_B api_C api_D</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 1988-01-02 20.3   20.3  20.3  20.3 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 1988-01-03 30.3   32.0  33.0  35.2 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 1988-01-04 11.2   14.4  16.4  21.3 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 1988-01-05  4.11   6.46  8.13 12.9 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 1988-01-06  1.51   2.90  4.04  7.85</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 1988-01-07  8.18   8.92  9.62 12.4 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 1988-01-08  5.50   6.38  7.01  9.04</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 1988-01-09  7.05   7.76  8.22  9.42</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 1988-01-10  2.59   3.49  4.08  5.72</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 1988-01-11  0.954  1.57  2.03  3.47</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># … with 9,121 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ Use `print(n = ...)` to see more rows</span></span></span></code></pre></div>
+<p>The connections between variables and HRUs are saved in the table
+<code>hru_var_connect</code>. We can see that besides the initially
+existing variables <code>pcp</code>, <code>tmax</code>,
+<code>tmin</code>, and <code>tav</code> which link to the weather
+station, there is now a new column that links to the <code>api</code>
+columns that we generated.</p>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">lrew_demo</span><span class="op">$</span><span class="va">.data</span><span class="op">$</span><span class="va">meta</span><span class="op">$</span><span class="va">hru_var_connect</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 49 × 9</span></span></span>
+<span><span class="co">#&gt;      rtu rtu_name   hru hru_name pcp    tmax     tmin     tav      api  </span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     1 rtu10        1 hru01    pcp144 lrew_tmp lrew_tmp lrew_tmp api_B</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     1 rtu10        2 hru02    pcp144 lrew_tmp lrew_tmp lrew_tmp api_B</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     1 rtu10        3 hru03    pcp144 lrew_tmp lrew_tmp lrew_tmp api_D</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     1 rtu10        4 hru04    pcp144 lrew_tmp lrew_tmp lrew_tmp api_C</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     1 rtu10        5 hru05    pcp144 lrew_tmp lrew_tmp lrew_tmp api_B</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     1 rtu10        6 hru06    pcp144 lrew_tmp lrew_tmp lrew_tmp api_B</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     1 rtu10        7 hru07    pcp144 lrew_tmp lrew_tmp lrew_tmp api_D</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     1 rtu10        8 hru08    pcp144 lrew_tmp lrew_tmp lrew_tmp api_B</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     1 rtu10        9 hru09    pcp144 lrew_tmp lrew_tmp lrew_tmp api_C</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>     1 rtu10       10 hru10    pcp144 lrew_tmp lrew_tmp lrew_tmp api_B</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># … with 39 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ Use `print(n = ...)` to see more rows</span></span></span></code></pre></div>
+</div>
+</div>
+<div class="section level3">
+<h3 id="scheduling-operations">Scheduling operations<a class="anchor" aria-label="anchor" href="#scheduling-operations"></a>
+</h3>
+<p><code>lrew_demo</code> now contains a management input file and all
+the required variables that are used in the scheduling conditions. So we
+can start scheduling management operations. We can again use the
+function <code>.$schedule_operations()</code> that was unlocked after
+reading the management input file. <code>.$schedule_operations()</code>
+has three input arguments.</p>
+<p>The first two input arguments are <code>start_year</code> and
+<code>end_year</code>. By default <code>.$schedule_operations()</code>
+would schedule farm management operations for the entire time period
+that is available from the variable time series. Above you can see that
+the <code>date</code> of <code>api</code> starts in 1988 (and ends in
+2012). This is the available time period of the weather data that was
+used in the model setup process. Scheduling farm management operations
+can be quite time intensive and may run several hours for larger model
+setups. Thus I recommend to constrain the time window for the operation
+scheduling to a shorter time period if any time period outside of the
+defined time window would never be used in simulations. Be aware that if
+you want to use a time period that is not covered by
+<code>start_year</code> and <code>end_year</code> would require to
+repeat the scheduling.</p>
+<p>The third input argument is <code>n_schedule</code> which is useful
+to speed up the scheduling process a bit by reducing the number of
+different schedules. <code>n_schedule</code> controls how many different
+schedules per land use and routing unit will be generated. Default a
+unique operation schedule will be generated for each HRU. If
+e.g. <code>n_schedule = 1</code> a schedule will be generated for a
+certain land use in a routing unit and all other land uses within the
+same routing unit would use the same schedule. Our small demo watershed
+for example only consists of one routing unit with 49 HRUs. 3 HRUs use
+the land use <em>‘lrew_ag1’</em>. In this case only 1 schedule would be
+generated if <code>n_schedule = 1</code> and the other two HRUs would
+use the same schedule (which saves computation time as the scheduling
+process would simply be skipped for those 2 HRUs). If e.g
+<code>n_schedule = 2</code> the first 2 HRUs would get different
+schedules and the third HRU would select one of the two existing
+schedules randomly.</p>
+<p>In our simple example we want to generate operation schedules for the
+time window 2000 to 2008. We will only generate two individual schedules
+per land use.</p>
+<div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">lrew_demo</span><span class="op">$</span><span class="fu">schedule_operations</span><span class="op">(</span>start_year <span class="op">=</span> <span class="fl">2000</span>, end_year <span class="op">=</span> <span class="fl">2008</span>, n_schedule <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">#&gt; Scheduling operations:</span></span>
+<span><span class="co">#&gt;  HRU 1 of 49   Time elapsed: 0S   Time remaining: 48S</span></span>
+<span><span class="co">#&gt;   </span></span>
+<span><span class="co">#&gt; Scheduling operations:</span></span>
+<span><span class="co">#&gt;  Finished scheduling 49 HRUs in 11S </span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="writing-operations">Writing operations<a class="anchor" aria-label="anchor" href="#writing-operations"></a>
+</h3>
+<p>When the scheduling was successful we can write the scheduled
+operations into the SWAT project using the function
+<code>.$write_operations()</code>. <code>.$write_operations()</code>
+again uses the two optional input arguments <code>start_year</code> and
+<code>end_year</code>. Within the scheduled time window we can select a
+shorter time window to write the operations for. This is for example an
+interesting option if you want to only write the operations for the
+calibration time period, run the simulations to calibrate the model and
+then rewrite the management for the validation period. If
+<code>start_year</code> and <code>end_year</code> are not used the
+entire time period that was scheduled will be written into the
+management files. For the demo project we will write the management in
+the time window 2000 to 2005.</p>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">lrew_demo</span><span class="op">$</span><span class="fu">write_operations</span><span class="op">(</span>start_year <span class="op">=</span> <span class="fl">2000</span>, end_year <span class="op">=</span> <span class="fl">2005</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">#&gt; Writing management files:</span></span>
+<span><span class="co">#&gt;   - Writing 'hru-data.hru'</span></span>
+<span><span class="co">#&gt;   - Writing 'landuse.lum' and 'schedule.mgt'</span></span>
+<span><span class="co">#&gt;   - Writing 'time.sim'</span></span>
+<span><span class="co">#&gt; Finished writing management schedules in 1S</span></span></code></pre></div>
+<p>From the output message you can see that for a SWAT+ setup the files
+<em>‘hru-data.hru’</em>, <em>‘landuse.lum’</em>,
+<em>‘schedule.mgt’</em>, and <em>‘time.sim’</em> are overwritten. In
+<em>‘landuse.lum’</em> you can see that copies of the initial
+agricultural land uses were made and a suffix
+<code>&lt;rout_unit&gt;_&lt;i_schedule&gt;</code> with two values was
+added to differentiate between the individual scheduled managements. The
+last suffix is either 1 or 2 as we limited the number of individual
+schedules per land use to 2.</p>
+<div class="figure">
+<img src="figures/landuse_lum.JPG" alt=""><p class="caption">Fig. 9: Screenshot of the rewritten ‘landuse.lum’
+file in the SWAT+ project.</p>
+</div>
+<p>The HRUs in the <em>‘hru-data.hru’</em> now point to the new land
+uses in <em>‘landuse.lum’</em>.</p>
+<div class="figure">
+<img src="figures/hru_data.JPG" alt=""><p class="caption">Fig. 10: Screenshot of the rewritten ‘hru-data.hru’
+file in the SWAT+ project.</p>
+</div>
+<p>Fig. 11 shows a screenshot of the written operation schedule for
+<code>agrl1_mgt_1_1</code> in <em>‘schedule.mgt’</em>. You can see that
+operations for 6 years (2000 to 2005) were written. The scheduled
+operation dates are now selected based on the conditions in the
+management input file and the time series of the weather variables and
+the additional variable <code>api</code>. I therefore want to stress
+that the scheduled operation dates are always linked to the simulation
+period, which is controlled by the input file <em>‘time.sim’</em>. Thus,
+<em>‘time.sim’</em> is always written together with the management
+schedule. By manually changing the simulation period in
+<em>‘time.sim’</em> we would loose this link between scheduling
+conditions and the time series of the variables.</p>
+<div class="figure">
+<img src="figures/management.JPG" alt=""><p class="caption">Fig. 11: Screenshot of the rewritten ‘schedule.mgt’
+file in the SWAT+ project.</p>
+</div>
+</div>
+<div class="section level3">
+<h3 id="resetting-the-swat-project">Resetting the SWAT project<a class="anchor" aria-label="anchor" href="#resetting-the-swat-project"></a>
+</h3>
+<p>Writing the management schedules overwrites the original SWAT project
+input files. The <code>farmr</code> project however made a copy of the
+initial input files which will be overwritten. With
+<code>.$reset_files()</code> you can reset the project to its initial
+version.</p>
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">lrew_demo</span><span class="op">$</span><span class="fu">reset_files</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2 unnumbered">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
