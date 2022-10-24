@@ -8,9 +8,10 @@
 #'   fertilizer codes from SWAT data base.
 #'
 #' @importFrom dplyr filter select %>%
-#' @importFrom lubridate now year
+#' @importFrom lubridate now year years
 #' @importFrom purrr map set_names
 #' @importFrom rlang sym
+#' @importFrom stringr str_detect
 #' @importFrom tidyselect all_of
 #'
 #' @keywords internal
@@ -86,6 +87,7 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
 
           var_tbl <- prepare_variables(variables, var_con, i_hru, version)
           date_j <- var_tbl$date[1]
+
           prev_op <- date_j
 
           repeat{
@@ -95,6 +97,14 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
             if(nchar(mgt_j$condition_schedule) > 0 &
                !is.na(mgt_j$condition_schedule) &
                mgt_j$operation != init_lbl) {
+
+              str_check <- str_remove_all(mgt_j$condition_schedule, '[:space:]')
+
+              if(all(str_detect(str_check, c('year\\=\\=', 'year\\(prev_op\\)\\+1'))) &
+                 is.null(schedule_i$schedule)) {
+                prev_op <- prev_op - years(1)
+              }
+
               date_j <- schedule_date_j(var_tbl, mgt_j$condition_schedule, prev_op)
 
               if(is.null(date_j)){
