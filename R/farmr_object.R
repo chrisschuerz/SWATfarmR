@@ -103,7 +103,8 @@ farmr_project <- R6::R6Class(
         }
         self$reset_files <- function() {
           reset_mgt(path = self$.data$meta$project_path,
-                    mgt_raw = self$.data$meta$mgt_raw)
+                    mgt_raw = self$.data$meta$mgt_raw,
+                    version = self$.data$meta$swat_version)
           self$save()
         }
         self$save()

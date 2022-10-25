@@ -39,7 +39,8 @@ read_mgt_plus <- function(project_path) {
               landuse_lum    = luse_lum,
               hru_data       = hru_data,
               luse_header    = luse_header,
-              hru_header     = hru_header))
+              hru_header     = hru_header,
+              time_sim       = time_sim))
 }
 
 #' Read SWAT mgt input files for SWAT2012

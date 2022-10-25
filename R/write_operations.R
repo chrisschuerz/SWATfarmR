@@ -92,7 +92,7 @@ write_op_plus <- function(path, mgt_raw, schedule, assigned_hrus, start_year, en
     round(.) %>%
     as.period(.) %>%
     as.character(.) %>%
-    cat("Finished writing management schedules in", ., "\n")
+    cat("Finished writing management files in", ., "\n")
 }
 
 #' Write the management schedules for a SWAT2012 project
@@ -405,14 +405,64 @@ write_file_cio <- function(path, start_year, end_year) {
 #'
 #' @keywords internal
 #'
-reset_mgt <- function(path, mgt_raw) {
-  cat("Resetting all management files:\n")
-  n_hru <- length(mgt_raw)
+reset_mgt <- function(path, mgt_raw, version) {
   t0 <- now()
-  for (i_hru in 1:n_hru) {
-    file_i <- names(mgt_raw)[i_hru]
-    write_lines(mgt_raw[[file_i]], path%//%file_i%.%"mgt")
-    SWATfarmR:::display_progress_pct(i_hru, n_hru, t0)
+  cat("Resetting all management files:\n")
+  if(version == 'plus') {
+    cat("  - Resetting 'hru-data.hru'\n")
+    hru_data <- reset_hru_plus(mgt_raw)
+    write_lines(hru_data, path%//%'hru-data.hru')
+
+    cat("  - Resetting 'landuse.lum' and 'schedule.mgt'\n")
+    landuse_lum <- reset_lum_plus(mgt_raw)
+    write_lines(landuse_lum, path%//%'landuse.lum')
+    write_lines(mgt_raw$management_sch, path%//%'management.sch')
+
+    cat("  - Resetting 'time.sim'\n")
+    write_lines(mgt_raw$time_sim, path%//%'time.sim')
+
+    interval(t0,now()) %>%
+      round(.) %>%
+      as.period(.) %>%
+      as.character(.) %>%
+      cat("Finished resetting management files in", ., "\n")
+
+  } else if(version == '2012') {
+    n_hru <- length(mgt_raw)
+    t0 <- now()
+    for (i_hru in 1:n_hru) {
+      file_i <- names(mgt_raw)[i_hru]
+      write_lines(mgt_raw[[file_i]], path%//%file_i%.%"mgt")
+      display_progress_pct(i_hru, n_hru, t0)
+    }
+    finish_progress(n_hru, t0, "Finished resetting", "'.mgt' file")
   }
-  SWATfarmR:::finish_progress(n_hru, t0, "Finished resetting", "'.mgt' file")
+}
+
+#' Reset the file 'hru-data.hru' file of a SWAT+ setup to the initial file
+#'
+#' @param mgt_raw List of original mgt files
+#'
+#' @keywords internal
+#'
+reset_hru_plus <- function(mgt_raw) {
+  hru_names <- hru_to_string(names(mgt_raw$hru_data))
+  hru_data <- mgt_raw$hru_data %>%
+    apply(., 1, hru_to_string) %>%
+    c(mgt_raw$hru_header, hru_names, .)
+  return(hru_data)
+}
+
+#' Reset the file 'landuse.lum' file of a SWAT+ setup to the initial file
+#'
+#' @param mgt_raw List of original mgt files
+#'
+#' @keywords internal
+#'
+reset_lum_plus <- function(mgt_raw) {
+  lum_names <- lum_to_string(names(mgt_raw$landuse_lum))
+  landuse_lum <- mgt_raw$landuse_lum %>%
+    apply(., 1, lum_to_string) %>%
+    c(mgt_raw$luse_header, lum_names, .)
+  return(landuse_lum)
 }

@@ -4,7 +4,7 @@
 \alias{reset_mgt}
 \title{Reset all management files back to the original files}
 \usage{
-reset_mgt(path, mgt_raw)
+reset_mgt(path, mgt_raw, version)
 }
 \arguments{
 \item{path}{Tibble Path to the TxtInOut folder}
