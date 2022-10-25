@@ -538,8 +538,15 @@ Writing the management schedules overwrites the original SWAT project input file
 
 ```{r, eval=FALSE}
 lrew_demo$reset_files()
+
+#> Resetting all management files:
+#>   - Resetting 'hru-data.hru'
+#>   - Resetting 'landuse.lum' and 'schedule.mgt'
+#>   - Resetting 'time.sim'
+#> Finished resetting management files in 0S 
 ```
 
+This can be for instance relevant if you want to setup a new `farmr` project for the initial state of the SWAT model setup which uses the original land use label without any suffixes. If you would start a new `farmr` project with the rewritten *'landuse.lum'* file, `.$read_management()` would warn you that for all land uses that now have a suffix added no managements are defined in the management input file. To correctly link the land uses of the HRUs with the operation schedules defined in the management input file you would have to reset the input files in the SWAT project folder first.
 
 
 ## References
