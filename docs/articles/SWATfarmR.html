@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">SWATfarmR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.7.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.8.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -1226,7 +1226,23 @@ initial input files which will be overwritten. With
 <code>.$reset_files()</code> you can reset the project to its initial
 version.</p>
 <div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">lrew_demo</span><span class="op">$</span><span class="fu">reset_files</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">lrew_demo</span><span class="op">$</span><span class="fu">reset_files</span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">#&gt; Resetting all management files:</span></span>
+<span><span class="co">#&gt;   - Resetting 'hru-data.hru'</span></span>
+<span><span class="co">#&gt;   - Resetting 'landuse.lum' and 'schedule.mgt'</span></span>
+<span><span class="co">#&gt;   - Resetting 'time.sim'</span></span>
+<span><span class="co">#&gt; Finished resetting management files in 0S </span></span></code></pre></div>
+<p>This can be for instance relevant if you want to setup a new
+<code>farmr</code> project for the initial state of the SWAT model setup
+which uses the original land use label without any suffixes. If you
+would start a new <code>farmr</code> project with the rewritten
+<em>‘landuse.lum’</em> file, <code>.$read_management()</code> would warn
+you that for all land uses that now have a suffix added no managements
+are defined in the management input file. To correctly link the land
+uses of the HRUs with the operation schedules defined in the management
+input file you would have to reset the input files in the SWAT project
+folder first.</p>
 </div>
 </div>
 <div class="section level2 unnumbered">
