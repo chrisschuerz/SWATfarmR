@@ -26,7 +26,7 @@ You can install `SWATfarmR` from its GitHub repository. If you did not install t
 # If the package remotes is not installed run first:
 install.packages('remotes')
 
-remotes::install_github('chrisschuerz/SWATplusR')
+remotes::install_github('chrisschuerz/SWATfarmR')
 ```
 
 Before we start exploring the package load `SWATfarmR`.
@@ -91,7 +91,7 @@ Again `load_demo()` returns the path of the *csv* file as a character string in 
 
 The `SWATfarmR` workflow reads the management operations from a *csv* file. Depending how complex you define the management to be for a SWAT model setup this file can be rather long. The *csv* file can be edited and prepared in any spreadsheet software, such as Excel or Libre office Calc which may be easier than processing the file in `R`.
 
-The image below shows a minimum example for a management input file for a SWAT+ model setup. The columns **land_use**, **management**, **weight**, **filter_unit**, and **condition_schedule** are the same for SWAT2012 and SWAT+ and are required in the table even if they are left empty. The remaining columns are SWAT version dependent and are the actual operation parameters which are written into the management schedules of the SWAT model input files. SWAT+ management operations consist of the **operation** type and three parameters for each operation which are called **op_data1**, **op_data2**, and **op_data3**. These names are used as column names in the management input file. SWAT2012 management inputs also use different **operation** types, but each operation can be controlled by 9 different parameters **mgt1** to **mgt9**. Thus the `SWATfarmR` management input must be prepared for SWAT2012 model setups accordingly. The following explanations only address the use of `SWATfarmR` with SWAT+ model setups. An application with SWAT2012 may be added in the future.
+The image below shows a minimum example for a management input file for a SWAT+ model setup. The columns **land_use**, **management**, **weight**, **filter_attribute**, and **condition_schedule** are the same for SWAT2012 and SWAT+ and are required in the table even if they are left empty. The remaining columns are SWAT version dependent and are the actual operation parameters which are written into the management schedules of the SWAT model input files. SWAT+ management operations consist of the **operation** type and three parameters for each operation which are called **op_data1**, **op_data2**, and **op_data3**. These names are used as column names in the management input file. SWAT2012 management inputs also use different **operation** types, but each operation can be controlled by 9 different parameters **mgt1** to **mgt9**. Thus the `SWATfarmR` management input must be prepared for SWAT2012 model setups accordingly. The following explanations only address the use of `SWATfarmR` with SWAT+ model setups. An application with SWAT2012 may be added in the future.
 
 ![Fig. 1: Minimum example of a management input file. The table shows only operations for one **land_use** and one crop. In the example no **management** alternatives and **filter_attributes** would be applied.](figures/mgt_tbl_ex.JPG)
 
@@ -110,7 +110,7 @@ The most important column is **condition_schedule** in which you define the temp
 
 ### land_use
 
-The **land_use** label defines to which land use class the sequences of operations that are defined in the table belong to. When the scheduling routine of `SWATfarmR` iterates over all HRUs, the routine filters all operations from the management input table where the land uses in the column **land_use** match the HRUs land use (which is defined in the file *'hru-data.hru'*. See the figure above.). This means that you must be careful how you define the land uses in the management input table. Not match land use labels are ignored in the scheduling (e.g. in the case of typos). If you accidentally put an operation sequence for a land use into the table twice all these data will be used in the operation scheduling (so be careful when copy pasting!).
+The **land_use** label defines to which land use class the sequences of operations that are defined in the table belong to. When the scheduling routine of `SWATfarmR` iterates over all HRUs, the routine filters all operations from the management input table where the land uses in the column **land_use** match the HRUs land use (which is defined in the file *'hru-data.hru'*. See the figure above.). This means that you must be careful how you define the land uses in the management input table. Not match land use labels are ignored in the scheduling (e.g. in the case of typos). If you accidentally put an operation sequence for a land use into the table twice all these data will be used in the operation scheduling (so be careful when copy/pasting!).
 
 ### management and weight
 
@@ -129,7 +129,7 @@ hru_attr <- readRDS(here('vignettes/data/hru_attr.rds'))
 hru_attr
 ```
 
-The attributes that can be useful in practice are `rtu`, `soil`, `slp`, `slp_len`, and `hyd_grp`. You can use and combine filter conditions for these attributes in many different ways. You should however clearly consider the consequences for the operation scheduling when you filter operations based on HRU attributes. In the schematic workflow in Fig. 2 you can for example see that I introduced 2 conditions which complement each other. By conditioning one operation with `slp >= 0.08` and a second one with `slp < 0.8` one of the two operations will be used and there will not be a case where none or both operations are kept in the operation schedule. Below I show a few small examples for conditions to filter based on HRU attributes.
+The attributes that can be useful in practice are `rtu`, `soil`, `slp`, `slp_len`, and `hyd_grp`. You can use and combine filter conditions for these attributes in many different ways. You should however clearly consider the consequences for the operation scheduling when you filter operations based on HRU attributes. In the schematic workflow in Fig. 2 you can for example see that I introduced 2 conditions which complement each other. By conditioning one operation with `slp >= 0.08` and a second one with `slp < 0.08` one of the two operations will be used and there will not be a case where none or both operations are kept in the operation schedule. Below I show a few small examples for conditions to filter based on HRU attributes.
 
 If you want to use a specific operation for example only in the management schedules of the routing units 1 to 5, 7, and 10 you could for example use the following condition: 
 
@@ -228,13 +228,13 @@ We will now go through the individual conditions that were combined by multiplyi
 (md >= 0427) * (md <= 0507)
 ```
 
-The third expression uses the `w_log()` function together with precipitation. The second and third input argument in the function define the lower and upper boundary values of the transition range. In this case `w_log()` returns the value 0.01 when `pcp = 2` and a value 0.99 when `pcp = 10`. 
+The third expression uses the `w_log()` function together with precipitation. The second and third input argument in the function define the lower and upper boundary values of the transition range. In this case `w_log()` returns the value 0.01 when `pcp = 0` and a value 0.99 when `pcp = 7`. 
 
 ```{r, eval=FALSE}
 (1 - w_log(pcp, 0, 7))
 ```
 
-Plotting the function shows the intention of this condition. We assign to all daily precipitation sums lower of 0 mm a weight of (almost) 1. Yet, precipitation sums of 2 mm still have a probability of 0.88 and at 4 mm 0.34. Daily precipitation sums of larger than 7 mm receive a weight of (almost) 0. This condition makes the scheduling of operations on days that exceed a certain precipitation less likely.
+Plotting the function shows the intention of this condition. We assign to all daily precipitation values of 0 mm a weight of (almost) 1. Yet, precipitation sums of 2 mm still result in a probability of 0.88 while at 4 mm the probability dercreases to 0.34. Daily precipitation sums of larger than 7 mm receive a weight of (almost) 0. This condition makes the scheduling of operations on days that exceed a certain precipitation less likely.
 
 ```{r, fig.cap= 'Fig. 6: Example for using w_log() to assign lower weights to days with higher precipitation.'}
 pcp <- seq(0, 8, length.out = 100)
