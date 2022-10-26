@@ -23,17 +23,17 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4"
-     inkscape:cx="299.08083"
-     inkscape:cy="81.814416"
+     inkscape:zoom="3.959798"
+     inkscape:cx="446.96164"
+     inkscape:cy="157.79878"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
      showgrid="false"
-     inkscape:window-width="1920"
-     inkscape:window-height="1147"
-     inkscape:window-x="1912"
-     inkscape:window-y="-8"
+     inkscape:window-width="2880"
+     inkscape:window-height="1721"
+     inkscape:window-x="-11"
+     inkscape:window-y="-11"
      inkscape:window-maximized="1" />
   <metadata
      id="metadata2108">
@@ -773,7 +773,7 @@
          x="176.54152"
          y="77.462769"
          style="font-size:2.82222px;stroke-width:0.264583"
-         id="tspan4251">slope of hru_i is &gt;= 0.2</tspan></text>
+         id="tspan4251">slope of hru_i is &gt;= 0.08</tspan></text>
     <path
        style="fill:none;stroke:#000000;stroke-width:0.195875;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        d="m 175.43191,71.439695 h 0.36093 v 7.400772 h -0.37603"

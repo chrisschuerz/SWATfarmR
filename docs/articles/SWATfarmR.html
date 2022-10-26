@@ -84,7 +84,7 @@ you did not install the <code>R</code> package yet, install it with
 <code class="sourceCode R"><span><span class="co"># If the package remotes is not installed run first:</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'remotes'</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">'chrisschuerz/SWATplusR'</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">'chrisschuerz/SWATfarmR'</span><span class="op">)</span></span></code></pre></div>
 <p>Before we start exploring the package load
 <code>SWATfarmR</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
@@ -180,16 +180,16 @@ processing the file in <code>R</code>.</p>
 <p>The image below shows a minimum example for a management input file
 for a SWAT+ model setup. The columns <strong>land_use</strong>,
 <strong>management</strong>, <strong>weight</strong>,
-<strong>filter_unit</strong>, and <strong>condition_schedule</strong>
-are the same for SWAT2012 and SWAT+ and are required in the table even
-if they are left empty. The remaining columns are SWAT version dependent
-and are the actual operation parameters which are written into the
-management schedules of the SWAT model input files. SWAT+ management
-operations consist of the <strong>operation</strong> type and three
-parameters for each operation which are called
-<strong>op_data1</strong>, <strong>op_data2</strong>, and
-<strong>op_data3</strong>. These names are used as column names in the
-management input file. SWAT2012 management inputs also use different
+<strong>filter_attribute</strong>, and
+<strong>condition_schedule</strong> are the same for SWAT2012 and SWAT+
+and are required in the table even if they are left empty. The remaining
+columns are SWAT version dependent and are the actual operation
+parameters which are written into the management schedules of the SWAT
+model input files. SWAT+ management operations consist of the
+<strong>operation</strong> type and three parameters for each operation
+which are called <strong>op_data1</strong>, <strong>op_data2</strong>,
+and <strong>op_data3</strong>. These names are used as column names in
+the management input file. SWAT2012 management inputs also use different
 <strong>operation</strong> types, but each operation can be controlled
 by 9 different parameters <strong>mgt1</strong> to
 <strong>mgt9</strong>. Thus the <code>SWATfarmR</code> management input
@@ -261,7 +261,7 @@ the land uses in the management input table. Not match land use labels
 are ignored in the scheduling (e.g. in the case of typos). If you
 accidentally put an operation sequence for a land use into the table
 twice all these data will be used in the operation scheduling (so be
-careful when copy pasting!).</p>
+careful when copy/pasting!).</p>
 </div>
 <div class="section level3">
 <h3 id="management-and-weight">management and weight<a class="anchor" aria-label="anchor" href="#management-and-weight"></a>
@@ -334,7 +334,7 @@ operations based on HRU attributes. In the schematic workflow in Fig. 2
 you can for example see that I introduced 2 conditions which complement
 each other. By conditioning one operation with
 <code>slp &gt;= 0.08</code> and a second one with
-<code>slp &lt; 0.8</code> one of the two operations will be used and
+<code>slp &lt; 0.08</code> one of the two operations will be used and
 there will not be a case where none or both operations are kept in the
 operation schedule. Below I show a few small examples for conditions to
 filter based on HRU attributes.</p>
@@ -575,15 +575,16 @@ window do have a probability of 0.</p>
 with precipitation. The second and third input argument in the function
 define the lower and upper boundary values of the transition range. In
 this case <code><a href="../reference/w_log.html">w_log()</a></code> returns the value 0.01 when
-<code>pcp = 2</code> and a value 0.99 when <code>pcp = 10</code>.</p>
+<code>pcp = 0</code> and a value 0.99 when <code>pcp = 7</code>.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="../reference/w_log.html">w_log</a></span><span class="op">(</span><span class="va">pcp</span>, <span class="fl">0</span>, <span class="fl">7</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Plotting the function shows the intention of this condition. We
-assign to all daily precipitation sums lower of 0 mm a weight of
-(almost) 1. Yet, precipitation sums of 2 mm still have a probability of
-0.88 and at 4 mm 0.34. Daily precipitation sums of larger than 7 mm
-receive a weight of (almost) 0. This condition makes the scheduling of
-operations on days that exceed a certain precipitation less likely.</p>
+assign to all daily precipitation values of 0 mm a weight of (almost) 1.
+Yet, precipitation sums of 2 mm still result in a probability of 0.88
+while at 4 mm the probability dercreases to 0.34. Daily precipitation
+sums of larger than 7 mm receive a weight of (almost) 0. This condition
+makes the scheduling of operations on days that exceed a certain
+precipitation less likely.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pcp</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">8</span>, length.out <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
 <span><span class="va">weight</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="../reference/w_log.html">w_log</a></span><span class="op">(</span><span class="va">pcp</span>, <span class="fl">0</span>, <span class="fl">7</span><span class="op">)</span><span class="op">)</span></span>
