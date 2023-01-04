@@ -55,11 +55,11 @@ write_operation <- function(path, mgt_raw, schedule, assigned_hrus,
 #'
 write_op_plus <- function(path, mgt_raw, schedule, assigned_hrus, start_year, end_year) {
   t0 <- now()
-  cat("  - Writing 'hru-data.hru'\n")
+  cat("  - Preparing 'hru-data.hru'\n")
   hru_data <- prepare_hru(mgt_raw, assigned_hrus)
   write_lines(hru_data, path%//%'hru-data.hru')
 
-  cat("  - Writing 'landuse.lum' and 'schedule.mgt'\n")
+  cat("  - Preparing 'landuse.lum'\n")
   lum_head <- add_edit_timestamp(mgt_raw$luse_header)
   lum_names <- lum_to_string(names(mgt_raw$landuse_lum))
   mgt_head <- c(add_edit_timestamp(mgt_raw$management_sch[1]), mgt_raw$management_sch[2])
@@ -72,14 +72,19 @@ write_op_plus <- function(path, mgt_raw, schedule, assigned_hrus, start_year, en
     reduce(., c) %>%
     c(lum_head, lum_names, .)
 
+  cat("  - Preparing 'schedule.mgt'\n")
   schedule_mgt <-  map(lum_mgt, ~.x$mgt) %>%
     reduce(., c) %>%
     c(mgt_head, .)
 
+  cat("  - Preparing 'plant.ini'\n")
+  plnt_ini <- map(schedule, ~ build_plant_ini_i(.x, start_year, end_year))
+
+  cat("  - Writing files \n")
   write_lines(landuse_lum, path%//%'landuse.lum')
   write_lines(schedule_mgt, path%//%'management.sch')
 
-  cat("  - Writing 'time.sim'\n")
+  cat("  - Updating 'time.sim'\n")
   time_sim <- mgt_raw$time_sim
   time_sim[3] <- map2_chr(c(0, start_year, 0, end_year, 0),
                           c('%9s','%10s', '%9s',  '%9s',  '%9s'),
@@ -199,14 +204,11 @@ sort_mgt <- function(mgt) {
   mgt[mgt_order]
 }
 
-#' Write the mgt files in the TxtInOut folder
+#' Prepare the landuse.lum for the the generated operation schedule i
 #'
-#' @param path Path to the TxtInOut folder
-#' @param mgt_raw List of original mgt files
-#' @param schedule List of tibbles with the shceduled operations.
-#' @param write_all Logical. If TRUE mgt files are written for all HRUs. If FALSE
-#'   only mgt files are written where operations were scheduled, or an initial
-#'   crop was defined.
+#' @param schedule_i Tibble with the ith scheduled operations.
+#' @param name_i Name of the ith operation schedule
+#' @param lum_raw Initial landuse.lum
 #' @param start_year Numeric. Defines the start year for which to write operations.
 #' @param end_year Numeric. Defines the last year for which to write operations.
 #'
@@ -225,7 +227,8 @@ prepare_lum_i <- function(schedule_i, name_i, lum_raw, start_year, end_year) {
     filter(name == lum_init) %>%
     mutate(name = name_i,
            mgt = mgt_name,
-           plnt_com = ifelse(is.null(schedule_i$init_crop), plnt_com, schedule_i$init_crop)) %>%
+           plnt_com = NULL) %>%
+           # plnt_com = ifelse(is.null(schedule_i$init_crop), plnt_com, schedule_i$init_crop)) %>%
     lum_to_string(.)
   if(is.null(schedule_i$schedule)) {
     schdl <- NULL
@@ -238,6 +241,94 @@ prepare_lum_i <- function(schedule_i, name_i, lum_raw, start_year, end_year) {
   mgt_head <- paste(sprintf('%-24s', mgt_name), sprintf('%10d',length(schdl)),  sprintf('%10d',0))
   mgt_i <- c(mgt_head, schdl)
   return(list(lum = lum_i, mgt = mgt_i))
+}
+
+#' Prepare the plant.ini for the the generated operation schedule i
+#'
+#' @param schedule_i Tibble with the ith scheduled operations.
+#' @param start_year Numeric. Defines the start year for which to write operations.
+#' @param end_year Numeric. Defines the last year for which to write operations.
+#'
+#' @importFrom dplyr bind_rows filter mutate %>%
+#' @importFrom lubridate year
+#' @importFrom purrr map_df
+#' @importFrom tibble tibble
+#'
+#' @keywords internal
+#'
+prepare_plant_ini_i <- function(schedule_i, start_year, end_year) {
+  if(!is.null(schedule_i$schedule)) {
+    plnt_hrv <- schedule_i$schedule %>%
+      filter(., year(date) >= start_year & year(date) <= end_year) %>%
+      filter(., operation %in% c('plnt', 'harv', 'hvkl', 'kill'))
+
+    if(nrow(plnt_hrv) == 0) {
+      plnt_comm <- schedule_i$init_crop %>%
+        mutate(., lc_status = 'y', .after = plt_name)
+    } else if (all(!unique(plnt_hrv$operation) %in% c('plnt', 'hvkl', 'kill'))) {
+      if(!is.null(schedule_i$init_crop)) {
+        plnt_comm <- map_df(unique(plnt_hrv$op_data1),
+                            ~ mutate(schedule_i$init_crop, plt_name = .x)) %>%
+          mutate(., lc_status = 'y', .after = plt_name)
+      } else {
+        plnt_comm  <- tibble(plt_name  = unique(plnt_hrv$op_data1),
+                             lc_status = 'y',
+                             lai_init  = 1,
+                             bm_init   = 1000,
+                             phu_init  = 0,
+                             plnt_pop  = 0,
+                             yrs_init  = 1,
+                             rsd_init  = 1000)
+      }
+    } else {
+      first_plnt_pos <- which(plnt_hrv$operation == 'plnt')[1]
+
+      plnts <- unique(plnt_hrv$op_data1)
+
+      plnt_name_lc_stat_y <- plnt_hrv[0:(first_plnt_pos - 1),] %>%
+        filter(operation %in% c('hvkl', 'kill')) %>%
+        .$op_data1 %>%
+        unique(.)
+
+      if(!is.null(schedule_i$init_crop) & length(plnt_lc_stat_y) > 0) {
+        plnt_lc_stat_y <- map_df(plnt_lc_stat_y,
+                                 ~ mutate(schedule_i$init_crop, plt_name = .x)) %>%
+          mutate(., lc_status = 'y', .after = plt_name)
+      } else if(is.null(schedule_i$init_crop) & length(plnt_lc_stat_y) > 0) {
+        plnt_lc_stat_y <- tibble(plt_name  = plnt_lc_stat_y,
+                                 lc_status = 'y',
+                                 lai_init  = 1,
+                                 bm_init   = 1000,
+                                 phu_init  = 0,
+                                 plnt_pop  = 0,
+                                 yrs_init  = 1,
+                                 rsd_init  = 1000)
+      } else {
+        plnt_lc_stat_y <- NULL
+      }
+
+      plnt_name_lc_stat_n <-  plnts[!plnts %in% plnt_name_lc_stat_y]
+
+      if(length(plnt_name_lc_stat_n) > 0) {
+        plnt_lc_stat_n <- tibble(plt_name  = plnt_name_lc_stat_n,
+                                 lc_status = 'n',
+                                 lai_init  = 0,
+                                 bm_init   = 0,
+                                 phu_init  = 0,
+                                 plnt_pop  = 0,
+                                 yrs_init  = 0,
+                                 rsd_init  = 0)
+      } else {
+        plnt_lc_stat_n <- NULL
+      }
+      plnt_comm <- bind_rows(plnt_lc_stat_y, plnt_lc_stat_n)
+    }
+  } else {
+    plnt_comm <- schedule_i$init_crop %>%
+      mutate(., lc_status = 'y', .after = plt_name)
+  }
+
+  return(plnt_comm)
 }
 
 #' Write the mgt files in the TxtInOut folder
