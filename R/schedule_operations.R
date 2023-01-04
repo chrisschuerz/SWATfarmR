@@ -58,7 +58,7 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
   cat("Scheduling operations:\n")
   for(i_hru in hru_attribute$hru) {
 
-    attribute_hru_i <- filter(hru_attribute, hru ==i_hru)
+    attribute_hru_i <- filter(hru_attribute, hru == i_hru)
 
     assigned_hru_i <- assigned_hru %>%
       filter(!!sym(unit_lbl) == attribute_hru_i[[unit_lbl]]) %>%
@@ -107,7 +107,15 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
 
               date_j <- schedule_date_j(var_tbl, mgt_j$condition_schedule, prev_op)
 
-              if(is.null(date_j)){
+              if(is.null(date_j) & mgt_j$operation == 'plnt') {
+                stop('Scheduling operation number ', j_op, ' for the HRU ', i_hru,
+                     " with the land_use '", hru_attribute$lu_mgt[i_hru], "' failed! \n",
+                     'The date resulted in a NULL value. \n',
+                     'A reason can be that the date ranges of the lines ', j_op - 1, ' and ',
+                     j_op, " for the land_use '", hru_attribute$lu_mgt[i_hru], "' overlap.\n",
+                     'Please fix and reload the management input table accordingly \n',
+                     'and repeat the scheduling of the operations.')
+              } else if(is.null(date_j)){
                 op_skip <- document_op_skip(op_skip, attribute_hru_i, mgt_j, prev_op, j_op, version)
               } else if (date_j >= max(var_tbl$date)) {
                 break()
@@ -149,10 +157,17 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
   }
   finish_progress(nrow(hru_attribute), t0, "Finished scheduling", "HRU")
 
-  return(list(scheduled_operations = schedule,
-              assigned_hrus = assigned_hru,
-              skipped_operations   = op_skip,
-              scheduled_years = schdl_yrs))
+  if (version == '2012') {
+    return(list(scheduled_operations = schedule,
+                assigned_hrus = assigned_hru,
+                skipped_operations   = op_skip,
+                scheduled_years = schdl_yrs))
+  } else {
+    return(list(scheduled_operations = schedule,
+                assigned_hrus = assigned_hru,
+                skipped_operations   = op_skip,
+                scheduled_years = schdl_yrs))
+  }
 }
 
 #' Prepare the management schedule connection table
@@ -246,7 +261,6 @@ filter_attributes <- function(mgt_tbl, attribute_hru_i) {
 #' Schedule the initial crop operation
 #'
 #' @param mgt_op Tibble with one line for the current operation
-#' @param version Text string that provides the SWAT version
 #'
 #' @importFrom dplyr %>%
 #' @importFrom purrr set_names
@@ -254,12 +268,16 @@ filter_attributes <- function(mgt_tbl, attribute_hru_i) {
 #' @keywords internal
 #'
 schedule_init <- function(mgt_op, version) {
-  if(version == 'plus') {
-    mgt_op$op_data1[1]
-  } else if(version =='2012') {
-    mgt_op[1,3:6] %>%
-      set_names(c("plant_id", "lai_init", "bio_init", "phu_plant"))
+  if (version == 'plus') {
+    plnt_ini <- str_split(mgt_op$op_data2, ',', simplify = TRUE) %>%
+      as.numeric(.) %>%
+      set_names(., c('lai_init', 'bm_init', 'phu_init', 'plnt_pop', 'yrs_init', 'rsd_init')) %>%
+      as_tibble_row(.) %>%
+      add_column(., plt_name = mgt_op$op_data1, .before = 1)
+  } else {
+    plnt_ini <- set_names(mgt_op[1,3:6],c("plant_id", "lai_init", "bio_init", "phu_plant"))
   }
+  return(plnt_ini)
 }
 
 #' Prepare the variable table for the respective HRU
@@ -453,12 +471,13 @@ compute_hu <- function(var_tbl, mgt_j, lookup, date_j, schedule_i, version) {
     }
   } else if (version == 'plus') {
     if(op_i == init_lbl & !is.null(date_j) & is.null(schedule_i$init_crop)) {
-      comm_i <-  filter(lookup$plt_comm, plt_comm == mgt_j$op_data1)
-      plant_i <- comm_i$plt_name
-      hu_i <- comm_i$phu_init
-      t_base <- comm_i %>%
-        left_join(., lookup$plant, by = c('plt_name' = 'name')) %>%
-        .$t_base
+      plant_i <- mgt_j$op_data1
+      hu_i <- mgt_j$op_data2 %>%
+          str_split(., ',', simplify = TRUE) %>%
+          .[3] %>%
+          as.numeric(.)
+
+      t_base <- lookup$plant[lookup$plant$name == plant_i,]$t_base
 
       var_tbl <- t_base %>%
         map(., ~ transmute(var_tbl, hu = ifelse(date >= date_j, tav - ., 0),

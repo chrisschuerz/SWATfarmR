@@ -8,8 +8,6 @@ schedule_init(mgt_op, version)
 }
 \arguments{
 \item{mgt_op}{Tibble with one line for the current operation}
-
-\item{version}{Text string that provides the SWAT version}
 }
 \description{
 Schedule the initial crop operation
