@@ -78,11 +78,17 @@ write_op_plus <- function(path, mgt_raw, schedule, assigned_hrus, start_year, en
     c(mgt_head, .)
 
   cat("  - Preparing 'plant.ini'\n")
-  plnt_ini <- map(schedule, ~ build_plant_ini_i(.x, start_year, end_year))
+  ini_head <- c(add_edit_timestamp(mgt_raw$plant_ini[1]), mgt_raw$plant_ini[2])
+  plnt_ini <- map(schedule, ~ prepare_plant_ini_i(.x, start_year, end_year)) %>%
+    map2(., names(schedule), ~ build_ini_line(.x, .y)) %>%
+    unlist(.) %>%
+    unname(.) %>%
+    c(ini_head, .)
 
   cat("  - Writing files \n")
   write_lines(landuse_lum, path%//%'landuse.lum')
   write_lines(schedule_mgt, path%//%'management.sch')
+  write_lines(plnt_ini, path%//%'plant.ini')
 
   cat("  - Updating 'time.sim'\n")
   time_sim <- mgt_raw$time_sim
@@ -222,14 +228,16 @@ sort_mgt <- function(mgt) {
 prepare_lum_i <- function(schedule_i, name_i, lum_raw, start_year, end_year) {
   lum_init <- str_remove(name_i, '\\_[:digit:]+\\_[:digit:]+')
   lum_num <- str_extract(name_i, '\\_[:digit:]+\\_[:digit:]+')
-  mgt_name <- paste0(str_remove(lum_init, '\\_lum'), '_mgt', ifelse(is.na(lum_num), '', lum_num))
+  mgt_name <- paste0(str_remove(lum_init, '\\_lum'), '_mgt' , ifelse(is.na(lum_num), '', lum_num))
+  com_name <- paste0(str_remove(lum_init, '\\_lum'), '_comm', ifelse(is.na(lum_num), '', lum_num))
   lum_i <- lum_raw %>%
     filter(name == lum_init) %>%
     mutate(name = name_i,
            mgt = mgt_name,
-           plnt_com = NULL) %>%
+           plnt_com = com_name) %>%
            # plnt_com = ifelse(is.null(schedule_i$init_crop), plnt_com, schedule_i$init_crop)) %>%
     lum_to_string(.)
+
   if(is.null(schedule_i$schedule)) {
     schdl <- NULL
   } else {
@@ -290,12 +298,12 @@ prepare_plant_ini_i <- function(schedule_i, start_year, end_year) {
         .$op_data1 %>%
         unique(.)
 
-      if(!is.null(schedule_i$init_crop) & length(plnt_lc_stat_y) > 0) {
-        plnt_lc_stat_y <- map_df(plnt_lc_stat_y,
+      if(!is.null(schedule_i$init_crop) & length(plnt_name_lc_stat_y) > 0) {
+        plnt_lc_stat_y <- map_df(plnt_name_lc_stat_y,
                                  ~ mutate(schedule_i$init_crop, plt_name = .x)) %>%
           mutate(., lc_status = 'y', .after = plt_name)
-      } else if(is.null(schedule_i$init_crop) & length(plnt_lc_stat_y) > 0) {
-        plnt_lc_stat_y <- tibble(plt_name  = plnt_lc_stat_y,
+      } else if(is.null(schedule_i$init_crop) & length(plnt_name_lc_stat_y) > 0) {
+        plnt_lc_stat_y <- tibble(plt_name  = plnt_name_lc_stat_y,
                                  lc_status = 'y',
                                  lai_init  = 1,
                                  bm_init   = 1000,
@@ -331,6 +339,36 @@ prepare_plant_ini_i <- function(schedule_i, start_year, end_year) {
   return(plnt_comm)
 }
 
+#' Build the lines for the plant.ini text file from the prepared plant inis
+#'
+#' @param ini_i Tibble with the ith plant_ini.
+#' @param name_i Name of the corresponding operation schedule.
+#'
+#' @importFrom dplyr %>%
+#' @importFrom purrr map2_df
+#' @importFrom stringr str_remove str_extract
+#'
+#' @keywords internal
+#'
+build_ini_line  <- function(ini_i, name_i) {
+  lum_init <- str_remove(name_i, '\\_[:digit:]+\\_[:digit:]+')
+  lum_num <- str_extract(name_i, '\\_[:digit:]+\\_[:digit:]+')
+  com_name <- paste0(str_remove(lum_init, '\\_lum'), '_comm',
+                     ifelse(is.na(lum_num), '', lum_num))
+
+  ini_lines <- ini_i %>%
+    map2_df(., c('%56s', rep('%13s', 7)), ~ sprintf(.y, .x)) %>%
+    apply(., 1, paste, collapse = ' ')
+
+  ini_head <- paste(sprintf('%-18s', com_name),
+                    sprintf('%7s', length(ini_lines)),
+                    sprintf('%11s', 1))
+
+  ini_lines <- c(ini_head, ini_lines)
+
+  return(ini_lines)
+}
+
 #' Write the mgt files in the TxtInOut folder
 #'
 #' @param path Path to the TxtInOut folder
@@ -350,7 +388,7 @@ prepare_plant_ini_i <- function(schedule_i, start_year, end_year) {
 add_edit_timestamp <- function(str) {
   str %>%
     str_remove(., ' and edited.*') %>%
-    paste(. , 'and edited with SWATfarmR on', Sys.time())
+    paste(. , 'and edited with SWATfarmR 2.0.0 on', Sys.time())
 }
 
 hru_to_string <- function(hru_line) {
