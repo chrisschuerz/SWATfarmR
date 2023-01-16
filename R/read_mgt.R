@@ -24,7 +24,11 @@ read_mgt_init <- function(project_path, version) {
 #' @keywords internal
 #'
 read_mgt_plus <- function(project_path) {
-  mgt_sch  <- read_lines(project_path%//%'management.sch', lazy = FALSE)
+  if ('management.sch' %in% list.files(project_path)) {
+    mgt_sch  <- read_lines(project_path%//%'management.sch', lazy = FALSE)
+  } else {
+    mgt_sch <- NULL
+  }
   luse_lum <- read_table_linewise(file = project_path%//%"landuse.lum",
                          col_names = 'get', n_skip = 2,
                          col_types = rep('c', 14))
@@ -35,6 +39,7 @@ read_mgt_plus <- function(project_path) {
   hru_header  <- read_lines(project_path%//%'hru-data.hru', n_max = 1, lazy = FALSE)
   plant_ini   <- read_lines(project_path%//%'plant.ini', lazy = FALSE)
   time_sim    <- read_lines(project_path%//%'time.sim', lazy = FALSE)
+  file_cio    <- read_lines(project_path%//%'file.cio', lazy = FALSE)
 
   return(list(management_sch = mgt_sch,
               landuse_lum    = luse_lum,
@@ -42,7 +47,8 @@ read_mgt_plus <- function(project_path) {
               luse_header    = luse_header,
               hru_header     = hru_header,
               plant_ini      = plant_ini,
-              time_sim       = time_sim))
+              time_sim       = time_sim,
+              file_cio       = file_cio))
 }
 
 #' Read SWAT mgt input files for SWAT2012

@@ -50,6 +50,7 @@ write_operation <- function(path, mgt_raw, schedule, assigned_hrus,
 #' @importFrom lubridate now interval
 #' @importFrom purrr map map2 map2_chr reduce
 #' @importFrom readr write_lines
+#' @importFrom stringr str_trim str_split
 #'
 #' @keywords internal
 #'
@@ -96,8 +97,17 @@ write_op_plus <- function(path, mgt_raw, schedule, assigned_hrus, start_year, en
                           c('%9s','%10s', '%9s',  '%9s',  '%9s'),
                           ~ sprintf(.y, .x)) %>%
     paste(., collapse = ' ')
-
   write_lines(time_sim, path%//%'time.sim')
+
+  cat("  - Updating 'file.cio'\n")
+  file_cio <- mgt_raw$file_cio
+  lum_line <- file_cio[21] %>%
+    str_trim(.) %>%
+    str_split(., '[:space:]+', simplify = TRUE)
+  lum_line[3] <- 'management.sch'
+  file_cio[21] <- paste(sprintf(rep('%-17s', length(lum_line)), lum_line),
+                        collapse = ' ')
+  write_lines(file_cio, path%//%'file.cio')
 
   interval(t0,now()) %>%
     round(.) %>%
@@ -545,7 +555,14 @@ reset_mgt <- function(path, mgt_raw, version) {
     cat("  - Resetting 'landuse.lum' and 'schedule.mgt'\n")
     landuse_lum <- reset_lum_plus(mgt_raw)
     write_lines(landuse_lum, path%//%'landuse.lum')
-    write_lines(mgt_raw$management_sch, path%//%'management.sch')
+    if (!is.null(mgt_raw$management_sch)) {
+      write_lines(mgt_raw$management_sch, path%//%'management.sch')
+    } else {
+      suppressWarnings(suppressMessages(file.remove(path%//%'management.sch')))
+    }
+
+    cat("  - Resetting 'file.cio'\n")
+    write_lines(mgt_raw$file_cio, path%//%'file.cio')
 
     cat("  - Resetting 'time.sim'\n")
     write_lines(mgt_raw$time_sim, path%//%'time.sim')
