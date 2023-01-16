@@ -1,7 +1,7 @@
 Package: SWATfarmR
 Type: Package
 Title: Simple rule based scheduling of management operations in SWAT
-Version: 2.0.0
+Version: 2.0.1
 Authors@R: person("Christoph", "Schuerz",
                 email = "c.schuerz@posteo.org",
                 role = c("aut", "cre"),

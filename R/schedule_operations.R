@@ -58,6 +58,10 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
   cat("Scheduling operations:\n")
   for(i_hru in hru_attribute$hru) {
 
+    # if (i_hru == 76) {
+    #   cat('debug')
+    # }
+
     attribute_hru_i <- filter(hru_attribute, hru == i_hru)
 
     assigned_hru_i <- assigned_hru %>%
@@ -124,7 +128,7 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
               }
             }
 
-            var_tbl <- compute_hu(var_tbl, mgt_j, lookup, date_j, schedule_i, version)
+            var_tbl <- compute_hu(var_tbl, mgt_j, lookup, date_j, schedule_i, version, i_hru)
             schedule_i <- schedule_op_j(schedule_i, mgt_j, date_j, init_lbl, version)
             j_op <- ifelse(j_op < n_op, j_op + 1, 1)
           }
@@ -264,6 +268,7 @@ filter_attributes <- function(mgt_tbl, attribute_hru_i) {
 #'
 #' @importFrom dplyr %>%
 #' @importFrom purrr set_names
+#' @importFrom tibble as_tibble_row
 #'
 #' @keywords internal
 #'
@@ -429,7 +434,7 @@ document_op_skip <- function(op_skip, attribute_hru_i, mgt_j, prev_op, j_op, ver
   return(op_skip)
 }
 
-compute_hu <- function(var_tbl, mgt_j, lookup, date_j, schedule_i, version) {
+compute_hu <- function(var_tbl, mgt_j, lookup, date_j, schedule_i, version, i_hru) {
 
   init_lbl <- lookup$management$value[lookup$management$label == 'initial_plant']
   plnt_lbl <- lookup$management$value[lookup$management$label == 'plant']
@@ -492,8 +497,13 @@ compute_hu <- function(var_tbl, mgt_j, lookup, date_j, schedule_i, version) {
       plant_i <- mgt_j$op_data1
 
       if('grw'%_%plant_i %in% names(var_tbl)) {
-        warning('HU for ', plant_i,' in HRU ', i_hru , ' overwritten.')
-        var_tbl <- select(var_tbl, -(c('hu', 'grw')%_%plant_i))
+        # warning('HU for ', plant_i,' in HRU ', i_hru , ' overwritten.')
+        # var_tbl <- select(var_tbl, -(c('hu', 'grw')%_%plant_i))
+        stop("Plant '", plant_i,"' is already growing on HRU ", i_hru , '.\n',
+             "Planting of '", plant_i,"' was scheduled another time before killing the plant.",
+             '\nThere may be an issue with harvesting and killing this plant.\n',
+             'Please check the management inputs for HRU ', i_hru, ' and fix the issue',
+             '\nbefore you restart the management scheduling.')
       }
 
       t_base <- filter(lookup$plant, name == plant_i) %>% .$t_base
