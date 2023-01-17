@@ -1,5 +1,4 @@
 land_use,management,weight,filter_attribute,condition_schedule,operation,op_data1,op_data2,op_data3
-agrl1_lum,,,,,initial_plant,rota_comm,,
 agrl1_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 0, 7)) * (1 - w_log(api, 5, 20)) * (year == (year(prev_op) + 1))",tillage,riprsubs,null,0
 agrl1_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 0, 7)) * (1 - w_log(api, 5, 20)) * (year == year(prev_op))",tillage,riprsubs,null,0
 agrl1_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 0, 7)) * (1 - w_log(api, 5, 20)) * (year == year(prev_op))",tillage,fldcult,null,0
@@ -32,7 +31,6 @@ agrl1_lum,,,,"(md >= 0428) * (md <= 0508) * (1 - w_log(pcp, 0, 7)) * (1 - w_log(
 agrl1_lum,,,,,fertilizer,elem_p,broadcast,30
 agrl1_lum,,,,"(md >= 1027) * (md <= 1106) * (1 - w_log(pcp, 0, 7)) * (1 - w_log(api, 5, 20)) * (year == year(prev_op))",harvest_only,cots,cotton_strip,0
 agrl1_lum,,,,,kill_only,cots,null,0
-agrl2_lum,,,,,initial_plant,rota_comm,,
 agrl2_lum,,,,"(md >= 0225) * (md <= 0306) * (1 - w_log(pcp, 0, 7)) * (1 - w_log(api, 5, 20)) * (year == (year(prev_op) + 1))",tillage,riprsubs,null,0
 agrl2_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 0, 7)) * (1 - w_log(api, 5, 20)) * (year == year(prev_op))",tillage,riprsubs,null,0
 agrl2_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 0, 7)) * (1 - w_log(api, 5, 20)) * (year == year(prev_op))",tillage,fldcult,null,0
@@ -65,7 +63,6 @@ agrl2_lum,,,,"(md >= 0426) * (md <= 0506) * (1 - w_log(pcp, 0, 7)) * (1 - w_log(
 agrl2_lum,,,,"(md >= 0427) * (md <= 0507) * (1 - w_log(pcp, 0, 7)) * (1 - w_log(api, 5, 20)) * (year == year(prev_op))",plant,pnut,null,0
 agrl2_lum,,,,"(md >= 0926) * (md <= 1006) * (1 - w_log(pcp, 0, 7)) * (1 - w_log(api, 5, 20)) * (year == year(prev_op))",harvest_only,pnut,peanuts,0
 agrl2_lum,,,,,kill_only,pnut,null,0
-agrl3_lum,,,,,initial_plant,rota_comm,,
 agrl3_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 0, 7)) * (1 - w_log(api, 5, 20)) * (year == (year(prev_op) + 1))",tillage,riprsubs,null,0
 agrl3_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 0, 7)) * (1 - w_log(api, 5, 20)) * (year == year(prev_op))",tillage,riprsubs,null,0
 agrl3_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 0, 7)) * (1 - w_log(api, 5, 20)) * (year == year(prev_op))",tillage,riprsubs,null,0
@@ -98,7 +95,6 @@ agrl3_lum,,,,"(md >= 0329) * (md <= 0408) * (1 - w_log(pcp, 0, 7)) * (1 - w_log(
 agrl3_lum,,,,,fertilizer,elem_p,broadcast,30
 agrl3_lum,,,,"(md >= 0827) * (md <= 0906) * (1 - w_log(pcp, 0, 7)) * (1 - w_log(api, 5, 20)) * (year == year(prev_op))",harvest_only,corn,grain,0
 agrl3_lum,,,,,kill_only,corn,null,0
-agrl4_lum,,,,,initial_plant,rota_comm,,
 agrl4_lum,,,,"(md >= 0310) * (md <= 0320) * (1 - w_log(pcp, 0, 7)) * (1 - w_log(api, 5, 20)) * (year == (year(prev_op) + 1))",tillage,riprsubs,null,0
 agrl4_lum,,,,"(md >= 0327) * (md <= 0406) * (1 - w_log(pcp, 0, 7)) * (1 - w_log(api, 5, 20)) * (year == year(prev_op))",tillage,riprsubs,null,0
 agrl4_lum,,,,"(md >= 0410) * (md <= 0420) * (1 - w_log(pcp, 0, 7)) * (1 - w_log(api, 5, 20)) * (year == year(prev_op))",tillage,riprsubs,null,0
@@ -131,13 +127,14 @@ agrl4_lum,,,,"(md >= 0428) * (md <= 0508) * (1 - w_log(pcp, 0, 7)) * (1 - w_log(
 agrl4_lum,,,,,fertilizer,elem_p,broadcast,30
 agrl4_lum,,,,"(md >= 1027) * (md <= 1106) * (1 - w_log(pcp, 0, 7)) * (1 - w_log(api, 5, 20)) * (year == year(prev_op))",harvest_only,cots,cotton_strip,0
 agrl4_lum,,,,,kill_only,cots,null,0
-past_lum,,,,,initial_plant,past_comm,,
+past_lum,,,,,initial_plant,past,"1,1000,0,0,1,1000",
 past_lum,,,,"(md >= 1027) * (md <= 1106) * (1 - w_log(pcp, 0, 7)) * (1 - w_log(api, 5, 20)) * (year == (year(prev_op) + 1))",harvest_only,past,hay_cut_low,0
-frse_lum,,,,,initial_plant,frse_comm,,
-frst_lum,,,,,initial_plant,frst_comm,,
-frsd_lum,,,,,initial_plant,frsd_comm,,
-rngb_lum,,,,,initial_plant,rngb_comm,,
-shrb_lum,,,,,initial_plant,shrb_comm,,
-wehb_lum,,,,,initial_plant,wehb_comm,,
-wetf_lum,,,,,initial_plant,wetf_comm,,
-wetw_lum,,,,,initial_plant,wetw_comm,,
+frse_lum,,,,,initial_plant,frse,"2,5000,0,0,30,10000",
+frst_lum,,,,,initial_plant,frst,"2,5000,0,0,30,10000",
+frsd_lum,,,,,initial_plant,frsd,"2,5000,0,0,30,10000",
+rngb_lum,,,,,initial_plant,rngb,"2,3000,0,0,10,5000",
+shrb_lum,,,,,initial_plant,shrb,"2,3000,0,0,10,5000",
+wehb_lum,,,,,initial_plant,wehb,"1,1000,0,0,1,1000",
+wetf_lum,,,,,initial_plant,wetf,"1,1000,0,0,1,1000",
+wetw_lum,,,,,initial_plant,wetw,"1,1000,0,0,1,1000",
+urml_lum,,,,,initial_plant,past,"1,1000,0,0,1,1000",
