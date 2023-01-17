@@ -239,7 +239,11 @@ prepare_lum_i <- function(schedule_i, name_i, lum_raw, start_year, end_year) {
   lum_init <- str_remove(name_i, '\\_[:digit:]+\\_[:digit:]+')
   lum_num <- str_extract(name_i, '\\_[:digit:]+\\_[:digit:]+')
   mgt_name <- paste0(str_remove(lum_init, '\\_lum'), '_mgt' , ifelse(is.na(lum_num), '', lum_num))
-  com_name <- paste0(str_remove(lum_init, '\\_lum'), '_comm', ifelse(is.na(lum_num), '', lum_num))
+  if (is.null(schedule_i$init_crop) & is.null(schedule_i$schedule)) {
+    com_name <- 'null'
+  } else {
+    com_name <- paste0(str_remove(lum_init, '\\_lum'), '_comm', ifelse(is.na(lum_num), '', lum_num))
+  }
   lum_i <- lum_raw %>%
     filter(name == lum_init) %>%
     mutate(name = name_i,
@@ -341,9 +345,11 @@ prepare_plant_ini_i <- function(schedule_i, start_year, end_year) {
       }
       plnt_comm <- bind_rows(plnt_lc_stat_y, plnt_lc_stat_n)
     }
-  } else {
+  } else if (!is.null( schedule_i$init_crop)){
     plnt_comm <- schedule_i$init_crop %>%
       mutate(., lc_status = 'y', .after = plt_name)
+  } else {
+    plnt_comm <- NULL
   }
 
   return(plnt_comm)
@@ -361,20 +367,24 @@ prepare_plant_ini_i <- function(schedule_i, start_year, end_year) {
 #' @keywords internal
 #'
 build_ini_line  <- function(ini_i, name_i) {
-  lum_init <- str_remove(name_i, '\\_[:digit:]+\\_[:digit:]+')
-  lum_num <- str_extract(name_i, '\\_[:digit:]+\\_[:digit:]+')
-  com_name <- paste0(str_remove(lum_init, '\\_lum'), '_comm',
-                     ifelse(is.na(lum_num), '', lum_num))
+  if(!is.null(ini_i)) {
+    lum_init <- str_remove(name_i, '\\_[:digit:]+\\_[:digit:]+')
+    lum_num <- str_extract(name_i, '\\_[:digit:]+\\_[:digit:]+')
+    com_name <- paste0(str_remove(lum_init, '\\_lum'), '_comm',
+                       ifelse(is.na(lum_num), '', lum_num))
 
-  ini_lines <- ini_i %>%
-    map2_df(., c('%56s', rep('%13s', 7)), ~ sprintf(.y, .x)) %>%
-    apply(., 1, paste, collapse = ' ')
+    ini_lines <- ini_i %>%
+      map2_df(., c('%56s', rep('%13s', 7)), ~ sprintf(.y, .x)) %>%
+      apply(., 1, paste, collapse = ' ')
 
-  ini_head <- paste(sprintf('%-18s', com_name),
-                    sprintf('%7s', length(ini_lines)),
-                    sprintf('%11s', 1))
+    ini_head <- paste(sprintf('%-18s', com_name),
+                      sprintf('%7s', length(ini_lines)),
+                      sprintf('%11s', 1))
 
-  ini_lines <- c(ini_head, ini_lines)
+    ini_lines <- c(ini_head, ini_lines)
+  } else {
+    ini_lines <- NULL
+  }
 
   return(ini_lines)
 }
