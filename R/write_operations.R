@@ -408,7 +408,7 @@ build_ini_line  <- function(ini_i, name_i) {
 add_edit_timestamp <- function(str) {
   str %>%
     str_remove(., ' and edited.*') %>%
-    paste(. , 'and edited with SWATfarmR 2.0.0 on', Sys.time())
+    paste(. , 'and edited with SWATfarmR 2.0.4 on', Sys.time())
 }
 
 hru_to_string <- function(hru_line) {
@@ -562,14 +562,20 @@ reset_mgt <- function(path, mgt_raw, version) {
     hru_data <- reset_hru_plus(mgt_raw)
     write_lines(hru_data, path%//%'hru-data.hru')
 
-    cat("  - Resetting 'landuse.lum' and 'schedule.mgt'\n")
+    cat("  - Resetting 'landuse.lum'\n")
     landuse_lum <- reset_lum_plus(mgt_raw)
     write_lines(landuse_lum, path%//%'landuse.lum')
+
+    cat("  - Resetting 'schedule.mgt'\n")
     if (!is.null(mgt_raw$management_sch)) {
       write_lines(mgt_raw$management_sch, path%//%'management.sch')
     } else {
       suppressWarnings(suppressMessages(file.remove(path%//%'management.sch')))
     }
+
+    cat("  - Resetting 'plant.ini'\n")
+    landuse_lum <- reset_lum_plus(mgt_raw)
+    write_lines(mgt_raw$plant_ini, path%//%'plant.ini')
 
     cat("  - Resetting 'file.cio'\n")
     write_lines(mgt_raw$file_cio, path%//%'file.cio')
