@@ -199,16 +199,28 @@ extract_sol_plus <- function(sol_file) {
   soils <- read_lines(sol_file, skip = 2) %>%
     str_trim(.)
 
-  is_soil_name <- soils %>%
-    str_sub(., 1,16) %>%
-    str_remove_all(., '[:punct:]|[:digit:]|[:blank:]') %>%
-    nchar()
+  is_soil_header <- soils %>%
+    str_split(., '[:space:]+') %>%
+    map_chr(., ~ .x[3]) %>%
+    is_one_of(., LETTERS[1:4])
 
-  soils[is_soil_name > 0] %>%
+  soils[is_soil_header] %>%
     str_split(., '[:blank:]+', simplify = TRUE) %>%
     .[, c(1,3)] %>%
     set_colnames(., c('name', 'hyd_grp')) %>%
     as_tibble(.)
+}
+
+#' Identify if x is one of the inputs provided with of_what. To be used in
+#' pipe workflow
+#'
+#' @param x Vector to be analyzed
+#' @param of_what Vector to be compared with
+#'
+#' @keywords internal
+#'
+is_one_of <- function(x, of_what) {
+  x %in% of_what
 }
 
 #' Read HRU attributes from the .hru and .sol files in SWAT2012 projects
