@@ -63,7 +63,6 @@ write_op_plus <- function(path, mgt_raw, schedule, assigned_hrus, start_year, en
   cat("  - Preparing 'landuse.lum'\n")
   lum_head <- add_edit_timestamp(mgt_raw$luse_header)
   lum_names <- lum_to_string(names(mgt_raw$landuse_lum))
-  mgt_head <- c(add_edit_timestamp(mgt_raw$management_sch[1]), mgt_raw$management_sch[2])
 
   lum_mgt <- map2(schedule, names(schedule), ~prepare_lum_i(.x, .y, mgt_raw$landuse_lum,
                                                             start_year, end_year)) %>%
@@ -74,6 +73,7 @@ write_op_plus <- function(path, mgt_raw, schedule, assigned_hrus, start_year, en
     c(lum_head, lum_names, .)
 
   cat("  - Preparing 'schedule.mgt'\n")
+  mgt_head <- c(add_edit_timestamp(mgt_raw$management_sch[1]), mgt_raw$management_sch[2])
   schedule_mgt <-  map(lum_mgt, ~.x$mgt) %>%
     reduce(., c) %>%
     c(mgt_head, .)
