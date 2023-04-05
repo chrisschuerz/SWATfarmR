@@ -236,7 +236,7 @@ read_lookup_2012 <- function(project_path) {
 #' @keywords internal
 #'
 check_mgt_table_plus <- function(mgt_tbl, lookup, hru_attribute) {
-  plant_mgt <-  filter(mgt_tbl, operation == "plant") %>% .$op_data1 %>% unique(.)
+  plant_mgt <-  filter(mgt_tbl, operation %in% c("plant", "plnt")) %>% .$op_data1 %>% unique(.)
   plant_lkp <- unique(lookup$plant$name)
   plant_miss <- plant_mgt[!(plant_mgt %in% plant_lkp)]
   if(length(plant_miss) > 0) {
@@ -245,7 +245,7 @@ check_mgt_table_plus <- function(mgt_tbl, lookup, hru_attribute) {
            paste(plant_miss, collapse = ", ") %&%
            "\n  Please check the inputs in the management table!")
   }
-  fert_mgt <-  filter(mgt_tbl, operation == "fertilizer") %>% .$op_data1 %>% unique(.)
+  fert_mgt <-  filter(mgt_tbl, operation %in% c("fertilizer", "fert")) %>% .$op_data1 %>% unique(.)
   fert_lkp <- unique(lookup$fertilizer$name)
   fert_miss <- fert_mgt[!(fert_mgt %in% fert_lkp)]
   if(length(fert_miss) > 0) {
@@ -261,13 +261,13 @@ check_mgt_table_plus <- function(mgt_tbl, lookup, hru_attribute) {
            paste(no_fert_amount, collapse = ", ") %&%
            "\n  Please check the inputs in the management table!")
   }
-  till_mgt <-  filter(mgt_tbl, operation == "tillage") %>% .$op_data1 %>% unique(.)
+  till_mgt <-  filter(mgt_tbl, operation %in% c("tillage", "till")) %>% .$op_data1 %>% unique(.)
   till_lkp <- unique(lookup$tillage$name)
   till_miss <- till_mgt[!(till_mgt %in% till_lkp)]
   if(length(till_miss) > 0) {
     stop("The following tillage types are not defined in the SWAT data base" %&%
            ", but were found in the management table:\n  " %&%
-           paste(fert_miss, collapse = ", ") %&%
+           paste(till_miss, collapse = ", ") %&%
            "\n  Please check the inputs in the management table!")
   }
   luse_hru <- unique(hru_attribute$lu_mgt)
@@ -333,19 +333,25 @@ check_mgt_table_2012 <- function(mgt_tbl, lookup, hru_attribute) {
 #' @param mgt_tbl Loaded tibble with the management operation schedules
 #' @param lookup  List of lookup tables
 #'
-#' @importFrom dplyr %>%
+#' @importFrom dplyr left_join mutate select %>%
 #'
 #' @keywords internal
 #'
 translate_mgt_table_plus <- function(mgt_tbl, lookup) {
-  for (i_op in 1:nrow(mgt_tbl)) {
-    if(mgt_tbl$operation[i_op] %in% lookup$management$label) {
-      mgt_tbl$operation[i_op] <-
-        lookup$management$value[lookup$management$label ==  mgt_tbl$operation[i_op]]
-    } else if(!(mgt_tbl$operation[i_op] %in% lookup$management$label) &
-              !(mgt_tbl$operation[i_op] %in% lookup$management$value))
-    stop("Error in line ", i_op, " of the management table. Unknown 'operation'.")
+  mgt_tbl <- mgt_tbl %>%
+    left_join(., lookup$management, c('operation' = 'label')) %>%
+    mutate(operation = ifelse(!is.na(value), value, operation)) %>%
+    select(-value)
+
+  is_no_op <- which(!mgt_tbl$operation %in% lookup$management$value)
+  if(length(is_no_op) > 0) {
+    n_el <- min(20, length(is_no_op))
+    cont_sym <- ifelse(length(is_no_op) > 20, ', ...', '')
+    is_no_op <- paste0('  ', paste(is_no_op[1:n_el], collapse = ', '), cont_sym)
+    stop("The 'operation's defined in the following lines of the management input table are unknown:\n",
+         is_no_op)
   }
+
   return(mgt_tbl)
 }
 
