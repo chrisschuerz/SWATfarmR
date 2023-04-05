@@ -52,17 +52,27 @@ farmr_project <- R6::R6Class(
       self$.data$meta$hru_var_connect <- var_add$con
     },
 
-    read_management = function(file, discard_schedule = FALSE) {
-      if(!discard_schedule & !is.null(self$.data$scheduled_operations)) {
-        stop("Management operations were already scheduled based on an other ",
-             "management table! If you want to discard the scheduled operations",
-             "and start from scratch, please set 'discard_schedule = TRUE.")
+    read_management = function(file, discard_schedule = 'no') {
+      if(discard_schedule == 'no' & !is.null(self$.data$scheduled_operations)) {
+        stop("Management operations were already scheduled based on existing management table!\n\n",
+             "If you only want to discard scheduled operations for HRUs where the new management\n",
+             "is updated set  discard_schedule = 'new'.\n\n",
+             "If you want to discard all already scheduled operations set discard_schedule = 'all'.\n",
+             "!CAUTION! This will delete all scheduled operations and you have to start from scratch!")
       }
 
       mgt_lkp <- read_mgt_lkp(file,
                               self$.data$meta$swat_version,
                               self$.data$meta$project_path,
                               self$.data$meta$hru_attributes)
+
+      if(discard_schedule == 'new' & !is.null(self$.data$scheduled_operations)) {
+        self$.data$scheduled_operations$assigned_hrus <-
+          compare_mgt(mgt_lkp,
+                      self$.data$management$schedule,
+                      self$.data$scheduled_operations)
+      }
+
       self$.data$management$schedule <- mgt_lkp$mgt_code
       self$.data$management$schedule_text <- mgt_lkp$mgt_text
       self$.data$meta$parameter_lookup <- mgt_lkp$lookup

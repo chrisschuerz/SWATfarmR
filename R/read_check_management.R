@@ -380,3 +380,82 @@ translate_mgt_table_2012 <- function(mgt_tbl, lookup) {
     select(-value) %>%
     mutate(mgt1 = as.integer(mgt1))
 }
+
+#' Compare the mgt schedule which is already stored in the farmr object with
+#' the new read schedule
+#'
+#' @param mgt_new Tibble with new read management schedule
+#' @param mgt_old Management schedule which was used to generate existing
+#'   scheduled operations.
+#' @param schdl_ops List with data of previously scheduled operations
+#'
+#' @importFrom dplyr filter group_by group_split select %>%
+#' @importFrom purrr map_chr map2_lgl set_names
+#'
+#' @keywords internal
+#'
+compare_mgt <- function(mgt_new, mgt_old, schdl_ops) {
+  mgt0 <- mgt_old %>%
+    group_by(land_use) %>%
+    group_split()
+
+  mgt1 <- mgt_new$mgt_code %>%
+    group_by(land_use) %>%
+    group_split()
+
+  mgt0_names <- map_chr(mgt0, ~ .x$land_use[1])
+  mgt1_names <- map_chr(mgt1, ~ .x$land_use[1])
+
+  mgt_names <- unique(c(mgt0_names, mgt1_names))
+
+  mgt0 <- mgt0 %>%
+    set_names(mgt0_names) %>%
+    as.list(.) %>%
+    .[mgt_names]
+
+  mgt1 <- mgt1%>%
+    set_names(mgt1_names) %>%
+    as.list(.) %>%
+    .[mgt_names]
+
+  mgt_comp <- map2_lgl(mgt0, mgt1, ~is_identical(.x, .y))
+  mgt_diff <- mgt_names[!mgt_comp]
+  assigned_hrus <- schdl_ops$assigned_hrus
+
+  if(any(!mgt_comp)) {
+    hrus_to_be_upd <- assigned_hrus[assigned_hrus[[4]] %in% mgt_diff,] %>%
+      filter(!is.na(schedule))
+
+    if (nrow(hrus_to_be_upd) > 0) {
+      choice <- select.list(choices = c("proceed", "cancel"),
+                            title = paste("The new management is different for the following land uses\n",
+                                          "for which operations were already scheduled:\n",
+                                          paste(unique(hrus_to_be_upd[[4]]), collapse = ', '), '\n\n',
+                                          "Continuing would delete the schedules for these land uses.\n",
+                                          "Type '1' to proceed or '2' to cancel:"))
+      if(choice == "proceed") {
+        assigned_hrus[assigned_hrus[[4]] %in% mgt_diff,]$schedule <- NA_character_
+        assigned_hrus[assigned_hrus[[4]] %in% mgt_diff,]$n <- 0
+      } else {
+        stop('Reading new management input cancelled!')
+      }
+    }
+  }
+
+  return(assigned_hrus)
+}
+
+#' Check if two tables are identical
+#'
+#' @param x First table
+#' @param y Second table
+#'
+#' @keywords internal
+#'
+is_identical <- function(x,y) {
+  if(all(dim(x) == dim(y))) {
+    identical(x,y)
+  } else {
+    FALSE
+  }
+}

@@ -40,7 +40,7 @@ farmr_project
 \if{latex}{\out{\hypertarget{method-farmr_project-read_management}{}}}
 \subsection{Method \code{read_management()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{farmr_project$read_management(file, discard_schedule = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{farmr_project$read_management(file, discard_schedule = "no")}\if{html}{\out{</div>}}
 }
 
 }
