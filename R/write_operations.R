@@ -73,7 +73,9 @@ write_op_plus <- function(path, mgt_raw, schedule, assigned_hrus, start_year, en
     c(lum_head, lum_names, .)
 
   cat("  - Preparing 'schedule.mgt'\n")
-  mgt_head <- c(add_edit_timestamp(mgt_raw$management_sch[1]), mgt_raw$management_sch[2])
+
+  mgt_col <- 'name                       numb_ops  numb_auto            op_typ       mon       day        hu_sch          op_data1          op_data2      op_data3'
+  mgt_head <- c(add_edit_timestamp(mgt_raw$management_sch[1]), mgt_col)
   schedule_mgt <-  map(lum_mgt, ~.x$mgt) %>%
     reduce(., c) %>%
     c(mgt_head, .)
@@ -93,6 +95,7 @@ write_op_plus <- function(path, mgt_raw, schedule, assigned_hrus, start_year, en
 
   cat("  - Updating 'time.sim'\n")
   time_sim <- mgt_raw$time_sim
+  time_sim[1] <- add_edit_timestamp(time_sim[1])
   time_sim[3] <- map2_chr(c(0, start_year, 0, end_year, 0),
                           c('%9s','%10s', '%9s',  '%9s',  '%9s'),
                           ~ sprintf(.y, .x)) %>%
@@ -101,6 +104,7 @@ write_op_plus <- function(path, mgt_raw, schedule, assigned_hrus, start_year, en
 
   cat("  - Updating 'file.cio'\n")
   file_cio <- mgt_raw$file_cio
+  file_cio[1] <- add_edit_timestamp(file_cio[1])
   lum_line <- file_cio[21] %>%
     str_trim(.) %>%
     str_split(., '[:space:]+', simplify = TRUE)
@@ -406,9 +410,14 @@ build_ini_line  <- function(ini_i, name_i) {
 #' @keywords internal
 #'
 add_edit_timestamp <- function(str) {
-  str %>%
-    str_remove(., ' and edited.*') %>%
-    paste(. , 'and edited with SWATfarmR 2.0.4 on', Sys.time())
+  farmr_version <- '2.0.5'
+  if (is.null(str)) {
+    paste('Written by SWATfarmR', farmr_version, 'on', Sys.time())
+  } else {
+    str %>%
+      str_remove(., ' and edited.*') %>%
+      paste(. , 'and edited with SWATfarmR', farmr_version, 'on', Sys.time())
+  }
 }
 
 hru_to_string <- function(hru_line) {
