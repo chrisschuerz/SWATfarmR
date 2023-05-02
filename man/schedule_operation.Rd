@@ -13,6 +13,8 @@ schedule_operation(
   start_year,
   end_year,
   n_schedule,
+  project_path,
+  project_name,
   version
 )
 }

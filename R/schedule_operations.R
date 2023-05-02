@@ -7,18 +7,23 @@
 #' @param lookup list of tibbles with lookup tables for plant, tillage,
 #'   fertilizer codes from SWAT data base.
 #'
+#' @importFrom DBI dbClearResult dbConnect dbDisconnect dbReadTable dbSendStatement dbWriteTable
 #' @importFrom dplyr filter select %>%
 #' @importFrom lubridate now year years
 #' @importFrom purrr map set_names
 #' @importFrom rlang sym
+#' @importFrom RSQLite SQLite
 #' @importFrom stringr str_detect
 #' @importFrom tidyselect all_of
 #'
 #' @keywords internal
 #'
 schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
-                               var_con, start_year, end_year, n_schedule, version) {
+                               var_con, start_year, end_year, n_schedule,
+                               project_path, project_name, version) {
 #Add n_schedule option to define how many repetitions per sub/rtu and crop should be done
+
+  mgts_path <- paste0(project_path, '/', project_name, '.mgts')
 
   schedule <- list()
   schedule_con <- prepare_schedule_con(hru_attribute, version)
@@ -31,9 +36,6 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
   hru_lbl  <- ifelse(version == 'plus', 'hru_name', 'file') #Check for SWAT2012!
   init_lbl <- lookup$management$value[lookup$management$label == 'initial_plant']
 
-  assigned_hru <- hru_attribute %>%
-    select(all_of(unit_lbl), hru, all_of(hru_lbl) ,all_of(luse_lbl)) %>%
-    mutate(schedule = NA_character_, n = 0)
 
   if(!is.null(start_year)) {
     stopifnot(is.numeric(start_year))
@@ -50,7 +52,23 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
          " time series for the 'variables'.")
   }
 
-  schdl_yrs <- c(start = min(year(variables[[1]]$date)), end = max(year(variables[[1]]$date)))
+  schdl_yrs <- tibble(start = min(year(variables[[1]]$date)), end = max(year(variables[[1]]$date)))
+
+  if (file.exists(mgts_path)) {
+    mgt_db <- dbConnect(SQLite(), mgts_path)
+    assigned_hru <- dbReadTable(conn = mgt_db, name = 'assigned_hru') %>%
+      as_tibble(.)
+    schdl_yrs <- dbReadTable(conn = mgt_db, name = 'scheduled_years')
+  } else {
+    mgt_db <- dbConnect(SQLite(), mgts_path)
+    assigned_hru <- hru_attribute %>%
+      select(all_of(unit_lbl), hru, all_of(hru_lbl) ,all_of(luse_lbl)) %>%
+      mutate(schedule = NA_character_, n = 0)
+
+    dbWriteTable(conn = mgt_db, name = 'assigned_hru', value = assigned_hru)
+    dbWriteTable(conn = mgt_db, name = 'scheduled_years', value = schdl_yrs)
+  }
+  dbDisconnect(mgt_db)
 
   t0 <- now()
   i_prg <- 1
@@ -83,7 +101,9 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
       schedule_i <- list(init_crop = NULL, schedule = NULL)
 
       if(nrow(mgt_hru_i) > 0) {
-        if(all(mgt_hru_i$operation == init_lbl)){
+        has_only_init <- all(mgt_hru_i$operation == init_lbl)
+
+        if(has_only_init){
           schedule_i$init_crop <- schedule_init(mgt_hru_i, version)
         } else {
           j_op <- 1
@@ -145,16 +165,40 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
         schedule_name <- attribute_hru_i[[luse_lbl]]%_%attribute_hru_i[[unit_lbl]]%_%(n_max + 1)
         n_i <- n_max + 1
       }
-        schedule[[schedule_name]] <- schedule_i
+
         assigned_hru[assigned_hru$hru == i_hru, 5] <- schedule_name
         assigned_hru[assigned_hru$hru == i_hru, 6] <- n_i
 
+        mgt_db <- dbConnect(SQLite(), paste0(project_path, '/', project_name, '.mgts'))
+
+        sql_schdl <- paste0("UPDATE assigned_hru SET schedule = '", schedule_name, "' WHERE hru = ", i_hru)
+        rs <- dbSendStatement(conn = mgt_db, statement = sql_schdl)
+        dbClearResult(rs)
+        sql_n <- paste0("UPDATE assigned_hru SET n = '", n_i, "' WHERE hru = ", i_hru)
+        rs <- dbSendStatement(conn = mgt_db, statement = sql_n)
+        dbClearResult(rs)
+
+        init_already_assigned <- n_i == 0 & schedule_name %in% assigned_hru$schedule
+        if(!is.null(schedule_i$init_crop) & !init_already_assigned) {
+          dbWriteTable(conn = mgt_db, name = paste0('init::',schedule_name), value = schedule_i$init_crop)
+        }
+        if(!is.null(schedule_i$schedule)) {
+          dbWriteTable(conn = mgt_db, name = paste0('schd::',schedule_name), value = schedule_i$schedule)
+        }
+        dbDisconnect(mgt_db)
     } else {
       assign_i <- assigned_hru_i %>%
         filter(n > 0) %>%
         sample_n(., 1)
 
       assigned_hru[assigned_hru$hru == i_hru, c(5,6)] <- assign_i[,c(5,6)]
+
+      sql_schdl <- paste0("UPDATE assigned_hru SET schedule = '", assign_i[[5]], "' WHERE hru = ", i_hru)
+      rs <- dbSendStatement(conn = mgt_db, statement = sql_schdl)
+      dbClearResult(rs)
+      sql_n     <- paste0("UPDATE assigned_hru SET n = '", assign_i[[6]], "' WHERE hru = ", i_hru)
+      rs <- dbSendStatement(conn = mgt_db, statement = sql_n)
+      dbClearResult(rs)
     }
     display_progress(i_prg, nrow(hru_attribute), t0, "HRU")
     i_prg <- i_prg + 1
