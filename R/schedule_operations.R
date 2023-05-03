@@ -52,10 +52,10 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
          " time series for the 'variables'.")
   }
 
-  var_time <- map(variables, ~ tibble(start_jdn = yday(.x$date[1]),
-                                      start_yr  = year(.x$date[1]),
-                                      end_jdn   = yday(.x$date[nrow(.x)]),
-                                      end_yr    = year(.x$date[nrow(.x)]),
+  var_years <- map(variables, ~ tibble(start_jdn = yday(.x$date[1]),
+                                       start_yr  = year(.x$date[1]),
+                                       end_jdn   = yday(.x$date[nrow(.x)]),
+                                       end_yr    = year(.x$date[nrow(.x)]),
                                           )) %>%
     map2_df(., names(.), ~ mutate(.x, variable = .y, .before = 1)) %>%
     check_var_times(., start_year, end_year)
@@ -658,6 +658,7 @@ set_skip_flag <- function(tbl, skip_flag) {
 #' @param end_year   User defined end year for operation scheduling
 #'
 #' @importFrom lubridate leap_year
+#' @importFrom tibble tibble
 #'
 #' @keywords internal
 #'
@@ -665,9 +666,9 @@ check_var_times <- function(var_time, start_year, end_year) {
 
   is_leapyr <- leap_year(max(var_time$end_yr))
 
-  wrong_start_jdn <- var_time$start_jdn != 2
+  wrong_start_jdn <- var_time$start_jdn != 1
   wrong_start_yr  <- var_time$start_yr  != min(start_year, var_time$start_yr)
-  wrong_end_jdn   <- var_time$end_jdn   != ifelse(is_leapyr, 366, 367)
+  wrong_end_jdn   <- var_time$end_jdn   != ifelse(is_leapyr, 366, 365)
   wrong_end_yr    <- var_time$end_yr    != min(end_year, var_time$end_yr)
 
   if(any(wrong_start_jdn)) {
@@ -709,4 +710,9 @@ check_var_times <- function(var_time, start_year, end_year) {
     stop('The following issues were identified for the dates of the variable time series:\n\n',
          msg_wrong_dates)
   }
+
+  var_years <- tibble(start_year = var_time$start_yr[1],
+                      end_year   = var_time$end_yr[1])
+
+  return(var_years)
 }
