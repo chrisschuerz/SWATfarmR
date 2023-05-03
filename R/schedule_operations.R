@@ -57,56 +57,8 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
                                       end_jdn   = yday(.x$date[nrow(.x)]),
                                       end_yr    = year(.x$date[nrow(.x)]),
                                           )) %>%
-    map2_df(., names(.), ~ mutate(.x, variable = .y, .before = 1))
-
-  # time_vals_equal <- apply(var_time[,2:ncol(var_time)], 2, all_equal)
-  is_leapyr <- leap_year(max(var_time$end_yr))
-
-  wrong_start_jdn <- var_time$start_jdn != 2
-  wrong_start_yr  <- var_time$start_yr  != min(start_year, var_time$start_yr)
-  wrong_end_jdn   <- var_time$end_jdn   != ifelse(is_leapyr, 366, 367)
-  wrong_end_yr    <- var_time$end_yr    != min(end_year, var_time$end_yr)
-
-  if(any(wrong_start_jdn)) {
-    var_wrong_start_jdn <- var_time$variable[which(wrong_start_jdn)]
-    msg_wrong_start_jdn <- paste0('The variable time series do not start on the first day of the start_year:',
-                                  '\n', paste(var_wrong_start_jdn, collapse = ', '), '\n\n')
-  } else {
-    msg_wrong_start_jdn <- ''
-  }
-
-  if(any(wrong_start_yr)) {
-    var_wrong_start_yr <- var_time$variable[which(wrong_start_yr)]
-    msg_wrong_start_yr <- paste0('The variable time series do not start in the start_year:',
-                                  '\n', paste(var_wrong_start_yr, collapse = ', '), '\n\n')
-  } else {
-    msg_wrong_start_yr <- ''
-  }
-
-  if(any(wrong_end_jdn)) {
-    var_wrong_end_jdn <- var_time$variable[which(wrong_end_jdn)]
-    msg_wrong_end_jdn <- paste0('The variable time series do not end on the last day of the end_year:',
-                                  '\n', paste(var_wrong_end_jdn, collapse = ', '), '\n\n')
-  } else {
-    msg_wrong_end_jdn <- ''
-  }
-
-  if(any(wrong_end_yr)) {
-    var_wrong_end_yr <- var_time$variable[which(wrong_end_yr)]
-    msg_wrong_end_yr <- paste0('The variable time series do not end in the end_year:',
-                                  '\n', paste(var_wrong_end_yr, collapse = ', '), '\n\n')
-  } else {
-    msg_wrong_end_yr <- ''
-  }
-
-  msg_wrong_dates <- c(msg_wrong_start_jdn, msg_wrong_start_yr,
-                           msg_wrong_end_jdn, msg_wrong_end_yr)
-
-  if(any(nchar(msg_wrong_dates) > 0)) {
-    stop('The following issues were identified for the dates of the variable time series:\n\n',
-         msg_wrong_dates)
-  }
-
+    map2_df(., names(.), ~ mutate(.x, variable = .y, .before = 1)) %>%
+    check_var_times(., start_year, end_year)
 
   if (file.exists(mgts_path)) {
     mgt_db <- dbConnect(SQLite(), mgts_path)
@@ -696,4 +648,65 @@ set_skip_flag <- function(tbl, skip_flag) {
     tbl$operation <- skip_flag
   }
   return(tbl)
+}
+
+#' Check if all variables in the farmR project cover the entire time window
+#' which was defined by the start and end years.
+#'
+#' @param var_time Overview table of time windows for all variables
+#' @param start_year User defined start year for operation scheduling
+#' @param end_year   User defined end year for operation scheduling
+#'
+#' @importFrom lubridate leap_year
+#'
+#' @keywords internal
+#'
+check_var_times <- function(var_time, start_year, end_year) {
+
+  is_leapyr <- leap_year(max(var_time$end_yr))
+
+  wrong_start_jdn <- var_time$start_jdn != 2
+  wrong_start_yr  <- var_time$start_yr  != min(start_year, var_time$start_yr)
+  wrong_end_jdn   <- var_time$end_jdn   != ifelse(is_leapyr, 366, 367)
+  wrong_end_yr    <- var_time$end_yr    != min(end_year, var_time$end_yr)
+
+  if(any(wrong_start_jdn)) {
+    var_wrong_start_jdn <- var_time$variable[which(wrong_start_jdn)]
+    msg_wrong_start_jdn <- paste0('The variable time series do not start on the first day of the start_year:',
+                                  '\n', paste(var_wrong_start_jdn, collapse = ', '), '\n\n')
+  } else {
+    msg_wrong_start_jdn <- ''
+  }
+
+  if(any(wrong_start_yr)) {
+    var_wrong_start_yr <- var_time$variable[which(wrong_start_yr)]
+    msg_wrong_start_yr <- paste0('The variable time series do not start in the start_year:',
+                                 '\n', paste(var_wrong_start_yr, collapse = ', '), '\n\n')
+  } else {
+    msg_wrong_start_yr <- ''
+  }
+
+  if(any(wrong_end_jdn)) {
+    var_wrong_end_jdn <- var_time$variable[which(wrong_end_jdn)]
+    msg_wrong_end_jdn <- paste0('The variable time series do not end on the last day of the end_year:',
+                                '\n', paste(var_wrong_end_jdn, collapse = ', '), '\n\n')
+  } else {
+    msg_wrong_end_jdn <- ''
+  }
+
+  if(any(wrong_end_yr)) {
+    var_wrong_end_yr <- var_time$variable[which(wrong_end_yr)]
+    msg_wrong_end_yr <- paste0('The variable time series do not end in the end_year:',
+                               '\n', paste(var_wrong_end_yr, collapse = ', '), '\n\n')
+  } else {
+    msg_wrong_end_yr <- ''
+  }
+
+  msg_wrong_dates <- c(msg_wrong_start_jdn, msg_wrong_start_yr,
+                       msg_wrong_end_jdn, msg_wrong_end_yr)
+
+  if(any(nchar(msg_wrong_dates) > 0)) {
+    stop('The following issues were identified for the dates of the variable time series:\n\n',
+         msg_wrong_dates)
+  }
 }
