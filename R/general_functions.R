@@ -60,7 +60,7 @@ check_version <- function(project_path) {
 #' @importFrom lubridate as.period interval now seconds
 #' @keywords internal
 #'
-display_progress <- function(n, nmax, t0, word){
+display_progress_hru <- function(id, n, nmax, t0){
   t1 <- now()
   time_elaps  <- interval(t0,t1) %>%
     round(.) %>%
@@ -70,7 +70,7 @@ display_progress <- function(n, nmax, t0, word){
     seconds(.) %>%
     as.period(., unit = "days")
 
-  cat("\r", word, n, "of", nmax,
+  cat("\r", "HRU", id, paste0("(", n, " of ", nmax, ')'),
       "  Time elapsed:", as.character(time_elaps),
       "  Time remaining:", as.character(time_remain),
       "   ")

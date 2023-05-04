@@ -22,6 +22,7 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
                                var_con, start_year, end_year, n_schedule, replace,
                                project_path, project_name, version) {
 #Add n_schedule option to define how many repetitions per sub/rtu and crop should be done
+  stopifnot(replace %in% c('missing', 'all'))
 
   mgts_path <- paste0(project_path, '/', project_name, '.mgts')
 
@@ -35,7 +36,6 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
   luse_lbl <- ifelse(version == 'plus', 'lu_mgt', 'luse')
   hru_lbl  <- ifelse(version == 'plus', 'hru_name', 'file') #Check for SWAT2012!
   init_lbl <- lookup$management$value[lookup$management$label == 'initial_plant']
-
 
   if(!is.null(start_year)) {
     stopifnot(is.numeric(start_year))
@@ -72,7 +72,8 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
       err_msg <- dplyr::case_when(start_yrs_differ & end_yrs_differ ~ "'start_year' and 'end_year'",
                            start_yrs_differ ~ "'start_year'",
                            end_yrs_differ ~ "'end_year'")
-      stop(err_msg, " are different for the current call of '.$schedule_operations()' and the already scheduled operations!")
+      stop(err_msg, " are different for the current call of ",
+           "'.$schedule_operations()' and the already scheduled operations!")
     }
   } else {
     mgt_db <- dbConnect(SQLite(), mgts_path)
@@ -87,140 +88,150 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
   }
   dbDisconnect(mgt_db)
 
-  t0 <- now()
-  i_prg <- 1
+  if(replace == 'all') {
+    assigned_hru$schedule <- NA_character_
+    assigned_hru$n <- 0
+  }
 
-  cat("Scheduling operations:\n")
-  for(i_hru in hru_attribute$hru) {
+  hrus_to_schdl <- assigned_hru %>%
+    filter(lu_mgt %in% unique(mgt_schedule$land_use) & is.na(schedule)) %>%
+    .$hru
 
-    # if (i_hru == 76) {
-    #   cat('debug')
-    # }
+  if(length(hrus_to_schdl) == 0) {
+    message('No HRUs with unscheduled management in this project! \n\n',
+            " - Set replace = 'all' if you want to redo the scheduling for all HRUs.\n",
+            " - Or provide new mgt inputs for the HRUs you want to redo the scheduling and run again.")
+  } else {
+    t0 <- now()
+    i_prg <- 1
 
-    attribute_hru_i <- filter(hru_attribute, hru == i_hru)
+    cat("Scheduling operations for", length(hrus_to_schdl), "HRUs:\n")
+    for(i_hru in hrus_to_schdl) {
+      attribute_hru_i <- filter(hru_attribute, hru == i_hru)
 
-    assigned_hru_i <- assigned_hru %>%
-      filter(!!sym(unit_lbl) == attribute_hru_i[[unit_lbl]]) %>%
-      filter(!!sym(luse_lbl) == attribute_hru_i[[luse_lbl]])
+      assigned_hru_i <- assigned_hru %>%
+        filter(!!sym(unit_lbl) == attribute_hru_i[[unit_lbl]]) %>%
+        filter(!!sym(luse_lbl) == attribute_hru_i[[luse_lbl]])
 
-    n_max <- max(assigned_hru_i$n)
+      n_max <- max(assigned_hru_i$n)
 
-    if(n_max < n_schedule) {
-      mgt_hru_i <- mgt_schedule %>%
-        filter(land_use == attribute_hru_i[[luse_lbl]])
+      if(n_max < n_schedule) {
+        mgt_hru_i <- mgt_schedule %>%
+          filter(land_use == attribute_hru_i[[luse_lbl]])
 
-      if(attribute_hru_i[[luse_lbl]] %in% unique(mgt_schedule$land_use)) {
-        mgt_hru_i <- sample_management(mgt_hru_i) %>%
-          filter_attributes(., attribute_hru_i) %>%
-          select(-land_use, -management, -weight, -filter_attribute)
-      }
+        if(attribute_hru_i[[luse_lbl]] %in% unique(mgt_schedule$land_use)) {
+          mgt_hru_i <- sample_management(mgt_hru_i) %>%
+            filter_attributes(., attribute_hru_i) %>%
+            select(-land_use, -management, -weight, -filter_attribute)
+        }
 
-      schedule_i <- list(init_crop = NULL, schedule = NULL)
+        schedule_i <- list(init_crop = NULL, schedule = NULL)
 
-      if(nrow(mgt_hru_i) > 0) {
-        has_only_init <- all(mgt_hru_i$operation == init_lbl)
+        if(nrow(mgt_hru_i) > 0) {
+          has_only_init <- all(mgt_hru_i$operation == init_lbl)
 
-        if(has_only_init){
-          schedule_i$init_crop <- schedule_init(mgt_hru_i, version)
-        } else {
-          j_op <- 1
-          n_op <- nrow(mgt_hru_i)
+          if(has_only_init){
+            schedule_i$init_crop <- schedule_init(mgt_hru_i, version)
+          } else {
+            j_op <- 1
+            n_op <- nrow(mgt_hru_i)
 
-          var_tbl <- prepare_variables(variables, var_con, i_hru, version)
-          date_j <- var_tbl$date[1]
+            var_tbl <- prepare_variables(variables, var_con, i_hru, version)
+            date_j <- var_tbl$date[1]
 
-          prev_op <- date_j
+            prev_op <- date_j
 
-          repeat{
-            mgt_j <- mgt_hru_i[j_op,]
-            var_tbl <- filter(var_tbl, date >= prev_op)
+            repeat{
+              mgt_j <- mgt_hru_i[j_op,]
+              var_tbl <- filter(var_tbl, date >= prev_op)
 
-            if(nchar(mgt_j$condition_schedule) > 0 &
-               !is.na(mgt_j$condition_schedule) &
-               mgt_j$operation != init_lbl) {
+              if(nchar(mgt_j$condition_schedule) > 0 &
+                 !is.na(mgt_j$condition_schedule) &
+                 mgt_j$operation != init_lbl) {
 
-              str_check <- str_remove_all(mgt_j$condition_schedule, '[:space:]')
+                str_check <- str_remove_all(mgt_j$condition_schedule, '[:space:]')
 
-              if(all(str_detect(str_check, c('year\\=\\=', 'year\\(prev_op\\)\\+1'))) &
-                 is.null(schedule_i$schedule)) {
-                prev_op <- prev_op - years(1)
+                if(all(str_detect(str_check, c('year\\=\\=', 'year\\(prev_op\\)\\+1'))) &
+                   is.null(schedule_i$schedule)) {
+                  prev_op <- prev_op - years(1)
+                }
+
+                date_j <- schedule_date_j(var_tbl, mgt_j$condition_schedule, prev_op)
+
+                if(is.null(date_j) & mgt_j$operation == 'plnt') {
+                  stop('Scheduling operation number ', j_op, ' for the HRU ', i_hru,
+                       " with the land_use '", hru_attribute$lu_mgt[i_hru], "' failed! \n",
+                       'The date resulted in a NULL value. \n',
+                       'A reason can be that the date ranges of the lines ', j_op - 1, ' and ',
+                       j_op, " for the land_use '", hru_attribute$lu_mgt[i_hru], "' overlap.\n",
+                       'Please fix and reload the management input table accordingly \n',
+                       'and repeat the scheduling of the operations.')
+                } else if(is.null(date_j)){
+                  op_skip <- document_op_skip(op_skip, attribute_hru_i, mgt_j, prev_op, j_op, version)
+                } else if (date_j >= max(var_tbl$date)) {
+                  break()
+                } else {
+                  prev_op <- date_j
+                }
               }
 
-              date_j <- schedule_date_j(var_tbl, mgt_j$condition_schedule, prev_op)
-
-              if(is.null(date_j) & mgt_j$operation == 'plnt') {
-                stop('Scheduling operation number ', j_op, ' for the HRU ', i_hru,
-                     " with the land_use '", hru_attribute$lu_mgt[i_hru], "' failed! \n",
-                     'The date resulted in a NULL value. \n',
-                     'A reason can be that the date ranges of the lines ', j_op - 1, ' and ',
-                     j_op, " for the land_use '", hru_attribute$lu_mgt[i_hru], "' overlap.\n",
-                     'Please fix and reload the management input table accordingly \n',
-                     'and repeat the scheduling of the operations.')
-              } else if(is.null(date_j)){
-                op_skip <- document_op_skip(op_skip, attribute_hru_i, mgt_j, prev_op, j_op, version)
-              } else if (date_j >= max(var_tbl$date)) {
-                break()
-              } else {
-                prev_op <- date_j
-              }
+              var_tbl <- compute_hu(var_tbl, mgt_j, lookup, date_j, schedule_i, version, i_hru)
+              schedule_i <- schedule_op_j(schedule_i, mgt_j, date_j, init_lbl, version)
+              j_op <- ifelse(j_op < n_op, j_op + 1, 1)
             }
 
-            var_tbl <- compute_hu(var_tbl, mgt_j, lookup, date_j, schedule_i, version, i_hru)
-            schedule_i <- schedule_op_j(schedule_i, mgt_j, date_j, init_lbl, version)
-            j_op <- ifelse(j_op < n_op, j_op + 1, 1)
+            schedule_i$schedule <- add_end_year_flag(schedule_i$schedule, lookup)
+            schedule_i$schedule <- add_skip_year_flag(schedule_i$schedule, variables[[1]], lookup)
+            # schedule_i$schedule$date[schedule_i$schedule$operation == 0] <- NA
           }
-
-          schedule_i$schedule <- add_end_year_flag(schedule_i$schedule, lookup)
-          schedule_i$schedule <- add_skip_year_flag(schedule_i$schedule, variables[[1]], lookup)
-          # schedule_i$schedule$date[schedule_i$schedule$operation == 0] <- NA
         }
-      }
-      if(is.null(schedule_i$schedule)) {
-        schedule_name <- attribute_hru_i[[luse_lbl]]
-        n_i <- 0
+        if(is.null(schedule_i$schedule)) {
+          schedule_name <- attribute_hru_i[[luse_lbl]]
+          n_i <- 0
+        } else {
+          schedule_name <- attribute_hru_i[[luse_lbl]]%_%attribute_hru_i[[unit_lbl]]%_%(n_max + 1)
+          n_i <- n_max + 1
+        }
+
+          assigned_hru[assigned_hru$hru == i_hru, 5] <- schedule_name
+          assigned_hru[assigned_hru$hru == i_hru, 6] <- n_i
+
+          mgt_db <- dbConnect(SQLite(), paste0(project_path, '/', project_name, '.mgts'))
+
+          sql_schdl <- paste0("UPDATE assigned_hru SET schedule = '", schedule_name, "' WHERE hru = ", i_hru)
+          rs <- dbSendStatement(conn = mgt_db, statement = sql_schdl)
+          dbClearResult(rs)
+          sql_n <- paste0("UPDATE assigned_hru SET n = '", n_i, "' WHERE hru = ", i_hru)
+          rs <- dbSendStatement(conn = mgt_db, statement = sql_n)
+          dbClearResult(rs)
+
+          init_already_assigned <- n_i == 0 & schedule_name %in% assigned_hru$schedule
+          if(!is.null(schedule_i$init_crop) & !init_already_assigned) {
+            dbWriteTable(conn = mgt_db, name = paste0('init::',schedule_name), value = schedule_i$init_crop)
+          }
+          if(!is.null(schedule_i$schedule)) {
+            dbWriteTable(conn = mgt_db, name = paste0('schd::',schedule_name), value = schedule_i$schedule)
+          }
+          dbDisconnect(mgt_db)
       } else {
-        schedule_name <- attribute_hru_i[[luse_lbl]]%_%attribute_hru_i[[unit_lbl]]%_%(n_max + 1)
-        n_i <- n_max + 1
-      }
+        assign_i <- assigned_hru_i %>%
+          filter(n > 0) %>%
+          sample_n(., 1)
 
-        assigned_hru[assigned_hru$hru == i_hru, 5] <- schedule_name
-        assigned_hru[assigned_hru$hru == i_hru, 6] <- n_i
+        assigned_hru[assigned_hru$hru == i_hru, c(5,6)] <- assign_i[,c(5,6)]
 
-        mgt_db <- dbConnect(SQLite(), paste0(project_path, '/', project_name, '.mgts'))
-
-        sql_schdl <- paste0("UPDATE assigned_hru SET schedule = '", schedule_name, "' WHERE hru = ", i_hru)
+        sql_schdl <- paste0("UPDATE assigned_hru SET schedule = '", assign_i[[5]], "' WHERE hru = ", i_hru)
         rs <- dbSendStatement(conn = mgt_db, statement = sql_schdl)
         dbClearResult(rs)
-        sql_n <- paste0("UPDATE assigned_hru SET n = '", n_i, "' WHERE hru = ", i_hru)
+        sql_n     <- paste0("UPDATE assigned_hru SET n = '", assign_i[[6]], "' WHERE hru = ", i_hru)
         rs <- dbSendStatement(conn = mgt_db, statement = sql_n)
         dbClearResult(rs)
-
-        init_already_assigned <- n_i == 0 & schedule_name %in% assigned_hru$schedule
-        if(!is.null(schedule_i$init_crop) & !init_already_assigned) {
-          dbWriteTable(conn = mgt_db, name = paste0('init::',schedule_name), value = schedule_i$init_crop)
-        }
-        if(!is.null(schedule_i$schedule)) {
-          dbWriteTable(conn = mgt_db, name = paste0('schd::',schedule_name), value = schedule_i$schedule)
-        }
-        dbDisconnect(mgt_db)
-    } else {
-      assign_i <- assigned_hru_i %>%
-        filter(n > 0) %>%
-        sample_n(., 1)
-
-      assigned_hru[assigned_hru$hru == i_hru, c(5,6)] <- assign_i[,c(5,6)]
-
-      sql_schdl <- paste0("UPDATE assigned_hru SET schedule = '", assign_i[[5]], "' WHERE hru = ", i_hru)
-      rs <- dbSendStatement(conn = mgt_db, statement = sql_schdl)
-      dbClearResult(rs)
-      sql_n     <- paste0("UPDATE assigned_hru SET n = '", assign_i[[6]], "' WHERE hru = ", i_hru)
-      rs <- dbSendStatement(conn = mgt_db, statement = sql_n)
-      dbClearResult(rs)
+      }
+      display_progress_hru(i_hru, i_prg, length(hrus_to_schdl), t0)
+      i_prg <- i_prg + 1
     }
-    display_progress(i_prg, nrow(hru_attribute), t0, "HRU")
-    i_prg <- i_prg + 1
+    finish_progress(length(hrus_to_schdl), t0, "Finished scheduling", "HRU")
   }
-  finish_progress(nrow(hru_attribute), t0, "Finished scheduling", "HRU")
 
   if (version == '2012') {
     return(list(scheduled_operations = schedule,
