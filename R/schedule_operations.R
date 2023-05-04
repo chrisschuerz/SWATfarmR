@@ -19,7 +19,7 @@
 #' @keywords internal
 #'
 schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
-                               var_con, start_year, end_year, n_schedule,
+                               var_con, start_year, end_year, n_schedule, replace,
                                project_path, project_name, version) {
 #Add n_schedule option to define how many repetitions per sub/rtu and crop should be done
 
@@ -52,11 +52,11 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
          " time series for the 'variables'.")
   }
 
-  var_years <- map(variables, ~ tibble(start_jdn = yday(.x$date[1]),
-                                       start_yr  = year(.x$date[1]),
-                                       end_jdn   = yday(.x$date[nrow(.x)]),
-                                       end_yr    = year(.x$date[nrow(.x)]),
-                                          )) %>%
+  var_yrs <- map(variables, ~ tibble(start_jdn = yday(.x$date[1]),
+                                     start_yr  = year(.x$date[1]),
+                                     end_jdn   = yday(.x$date[nrow(.x)]),
+                                     end_yr    = year(.x$date[nrow(.x)]),
+                                    )) %>%
     map2_df(., names(.), ~ mutate(.x, variable = .y, .before = 1)) %>%
     check_var_times(., start_year, end_year)
 
@@ -65,11 +65,22 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
     assigned_hru <- dbReadTable(conn = mgt_db, name = 'assigned_hru') %>%
       as_tibble(.)
     schdl_yrs <- dbReadTable(conn = mgt_db, name = 'scheduled_years')
+
+    start_yrs_differ <- schdl_yrs$start_year != var_yrs$start_year
+    end_yrs_differ <- schdl_yrs$end_year != var_yrs$end_year
+    if (any(start_yrs_differ, end_yrs_differ) & replace != 'all') {
+      err_msg <- dplyr::case_when(start_yrs_differ & end_yrs_differ ~ "'start_year' and 'end_year'",
+                           start_yrs_differ ~ "'start_year'",
+                           end_yrs_differ ~ "'end_year'")
+      stop(err_msg, " are different for the current call of '.$schedule_operations()' and the already scheduled operations!")
+    }
   } else {
     mgt_db <- dbConnect(SQLite(), mgts_path)
     assigned_hru <- hru_attribute %>%
       select(all_of(unit_lbl), hru, all_of(hru_lbl) ,all_of(luse_lbl)) %>%
       mutate(schedule = NA_character_, n = 0)
+
+    schdl_yrs <- var_yrs
 
     dbWriteTable(conn = mgt_db, name = 'assigned_hru', value = assigned_hru)
     dbWriteTable(conn = mgt_db, name = 'scheduled_years', value = schdl_yrs)
