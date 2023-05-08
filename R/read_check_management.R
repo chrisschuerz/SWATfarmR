@@ -394,7 +394,7 @@ translate_mgt_table_2012 <- function(mgt_tbl, lookup) {
 #'
 #' @keywords internal
 #'
-compare_mgt <- function(mgt_new, mgt_old, schdl_ops) {
+compare_reset_mgt <- function(mgt_new, mgt_old, schdl_ops, project_path, project_name) {
   mgt0 <- mgt_old %>%
     group_by(land_use) %>%
     group_split()
@@ -436,6 +436,22 @@ compare_mgt <- function(mgt_new, mgt_old, schdl_ops) {
       if(choice == "proceed") {
         assigned_hrus[assigned_hrus[[4]] %in% mgt_diff,]$schedule <- NA_character_
         assigned_hrus[assigned_hrus[[4]] %in% mgt_diff,]$n <- 0
+
+        mgts_path <- paste0(project_path, '/', project_name, '.mgts')
+        mgt_db <- dbConnect(SQLite(), mgts_path)
+        dbWriteTable(conn = mgt_db,
+                     name = 'assigned_hru', value = assigned_hrus,
+                     overwrite = TRUE)
+
+        label_rmv <- unique(hrus_to_be_upd$schedule)
+
+        tbls <- dbListTables(mgt_db)
+        init_rmv <- paste0('init::', label_rmv)[paste0('init::', label_rmv) %in% tbls]
+        schd_rmv <- paste0('schd::', label_rmv)[paste0('schd::', label_rmv) %in% tbls]
+        tbls_rmv <- c(init_rmv, schd_rmv)
+        for (i in tbls_rmv) {
+          dbRemoveTable(mgt_db, i)
+        }
       } else {
         stop('Reading new management input cancelled!')
       }

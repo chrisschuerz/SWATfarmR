@@ -60,7 +60,7 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
     map2_df(., names(.), ~ mutate(.x, variable = .y, .before = 1)) %>%
     check_var_times(., start_year, end_year)
 
-  if (file.exists(mgts_path)) {
+  if (file.exists(mgts_path) & replace == 'missing') {
     mgt_db <- dbConnect(SQLite(), mgts_path)
     assigned_hru <- dbReadTable(conn = mgt_db, name = 'assigned_hru') %>%
       as_tibble(.)
@@ -76,6 +76,9 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
            "'.$schedule_operations()' and the already scheduled operations!")
     }
   } else {
+    if (replace == 'all' & file.exists(mgts_path)) {
+      file.remove(mgts_path)
+    }
     mgt_db <- dbConnect(SQLite(), mgts_path)
     assigned_hru <- hru_attribute %>%
       select(all_of(unit_lbl), hru, all_of(hru_lbl) ,all_of(luse_lbl)) %>%
@@ -128,10 +131,17 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
         schedule_i <- list(init_crop = NULL, schedule = NULL)
 
         if(nrow(mgt_hru_i) > 0) {
-          has_only_init <- all(mgt_hru_i$operation == init_lbl)
+          has_only_init_skip <- all(mgt_hru_i$operation %in% c(init_lbl, 'skip'))
 
-          if(has_only_init){
-            schedule_i$init_crop <- schedule_init(mgt_hru_i, version)
+          if(has_only_init_skip){
+            id_init <- which(mgt_hru_i$operation == init_lbl)
+            # id_skip <- which(mgt_hru_i$operation == 'skip')
+            if(length(id_init) > 0) {
+              schedule_i$init_crop <- schedule_init(mgt_hru_i, version)
+            }
+            # if(length(id_init) > 0) {
+            #   schedule_i$init_crop <- # Did not add the single skip OP
+            # }
           } else {
             j_op <- 1
             n_op <- nrow(mgt_hru_i)
@@ -207,10 +217,14 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
 
           init_already_assigned <- n_i == 0 & schedule_name %in% assigned_hru$schedule
           if(!is.null(schedule_i$init_crop) & !init_already_assigned) {
-            dbWriteTable(conn = mgt_db, name = paste0('init::',schedule_name), value = schedule_i$init_crop)
+            dbWriteTable(conn = mgt_db,
+                         name = paste0('init::',schedule_name),
+                         value = schedule_i$init_crop)
           }
           if(!is.null(schedule_i$schedule)) {
-            dbWriteTable(conn = mgt_db, name = paste0('schd::',schedule_name), value = schedule_i$schedule)
+            dbWriteTable(conn = mgt_db,
+                         name = paste0('schd::',schedule_name),
+                         value = schedule_i$schedule)
           }
           dbDisconnect(mgt_db)
       } else {
@@ -234,14 +248,12 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
   }
 
   if (version == '2012') {
-    return(list(scheduled_operations = schedule,
-                assigned_hrus = assigned_hru,
-                skipped_operations   = op_skip,
+    return(list(assigned_hrus = assigned_hru,
+                skipped_operations = op_skip,
                 scheduled_years = schdl_yrs))
   } else {
-    return(list(scheduled_operations = schedule,
-                assigned_hrus = assigned_hru,
-                skipped_operations   = op_skip,
+    return(list(assigned_hrus = assigned_hru,
+                skipped_operations = op_skip,
                 scheduled_years = schdl_yrs))
   }
 }

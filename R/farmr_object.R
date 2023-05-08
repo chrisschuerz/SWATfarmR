@@ -50,6 +50,8 @@ farmr_project <- R6::R6Class(
 
       self$.data$variables <- var_add$variables
       self$.data$meta$hru_var_connect <- var_add$con
+
+      self$save()
     },
 
     read_management = function(file, discard_schedule = 'no') {
@@ -68,9 +70,12 @@ farmr_project <- R6::R6Class(
 
       if(discard_schedule == 'new' & !is.null(self$.data$scheduled_operations)) {
         self$.data$scheduled_operations$assigned_hrus <-
-          compare_mgt(mgt_lkp,
-                      self$.data$management$schedule,
-                      self$.data$scheduled_operations)
+          compare_reset_mgt(mgt_lkp,
+                            self$.data$management$schedule,
+                            self$.data$scheduled_operations,
+                            self$.data$meta$project_path,
+                            self$.data$meta$project_name
+                           )
       }
 
       self$.data$management$schedule <- mgt_lkp$mgt_code
@@ -87,7 +92,7 @@ farmr_project <- R6::R6Class(
       #                       self$.data$meta$parameter_lookup)
 
       # self$check_rules <- check_rules()
-      self$schedule_operations <- function(start_year = NULL, end_year = NULL, n_schedule = NULL) {
+      self$schedule_operations <- function(start_year = NULL, end_year = NULL, n_schedule = NULL, replace = 'missing') {
 
         self$.data$scheduled_operations <-
           schedule_operation(mgt_schedule = self$.data$management$schedule,
@@ -98,6 +103,7 @@ farmr_project <- R6::R6Class(
                              start_year = start_year,
                              end_year = end_year,
                              n_schedule = n_schedule,
+                             replace = replace,
                              project_path = self$.data$meta$project_path,
                              project_name = self$.data$meta$project_name,
                              version = self$.data$meta$swat_version)
