@@ -178,6 +178,9 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
                        'and repeat the scheduling of the operations.')
                 } else if(is.null(date_j)){
                   op_skip <- document_op_skip(op_skip, attribute_hru_i, mgt_j, prev_op, j_op, version)
+                  mgt_db <- dbConnect(SQLite(), mgts_path)
+                  dbWriteTable(mgt_db, 'skipped_operations', op_skip[nrow(op_skip),], append = TRUE)
+                  dbDisconnect(mgt_db)
                 } else if (date_j >= max(var_tbl$date)) {
                   break()
                 } else {
@@ -206,7 +209,7 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
           assigned_hru[assigned_hru$hru == i_hru, 5] <- schedule_name
           assigned_hru[assigned_hru$hru == i_hru, 6] <- n_i
 
-          mgt_db <- dbConnect(SQLite(), paste0(project_path, '/', project_name, '.mgts'))
+          mgt_db <- dbConnect(SQLite(), mgts_path)
 
           sql_schdl <- paste0("UPDATE assigned_hru SET schedule = '", schedule_name, "' WHERE hru = ", i_hru)
           rs <- dbSendStatement(conn = mgt_db, statement = sql_schdl)

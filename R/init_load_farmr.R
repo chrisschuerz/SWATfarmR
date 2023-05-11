@@ -20,6 +20,12 @@ new_farmr <- function(project_name, project_path) {
 #'
 #' @param file File path of a swatfarmr project located in a TxtInOut folder.
 #'
+#' @importFrom DBI dbConnect dbDisconnect dbListTables dbReadTable
+#' @importFrom dplyr mutate %>%
+#' @importFrom lubridate ymd
+#' @importFrom RSQLite SQLite
+#' @importFrom tibble tibble
+#'
 #' @return Generates a new farmr_project in the working environment (as an R6
 #'   object) and saves the project the TxtInOut folder.
 #' @export
@@ -34,6 +40,22 @@ load_farmr <- function(file) {
   farmr_obj <- readRDS(file)
   farmr_obj$.data$meta$project_path <- project_path
   farmr_obj$.data$meta$project_name <- project_name
+
+  mgts_path <- paste0(project_path, '/', project_name, '.mgts')
+  if(file.exists(mgts_path)) {
+    mgt_db <- dbConnect(SQLite(), mgts_path)
+    mgt_tbls <- dbListTables(mgt_db)
+    farmr_obj$.data$scheduled_operations$scheduled_years <-
+      dbReadTable(mgt_db, 'scheduled_years') %>%
+      tibble(.)
+    if('skipped_operations' %in% mgt_tbls) {
+      farmr_obj$.data$scheduled_operations$skipped_operations <-
+        dbReadTable(mgt_db, 'skipped_operations') %>%
+        tibble(.) %>%
+        mutate(date_prev_op = ymd(19700101) + date_prev_op)
+    }
+    dbDisconnect(mgt_db)
+  }
 
   assign(project_name, farmr_obj, envir = sys.frame(-1))
   farmr_obj$save()
