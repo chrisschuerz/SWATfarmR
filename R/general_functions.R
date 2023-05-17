@@ -86,7 +86,7 @@ display_progress_hru <- function(id, n, nmax, t0){
 #' @importFrom lubridate as.period interval now seconds
 #' @keywords internal
 #'
-display_progress_pct <- function(n, nmax, t0){
+display_progress_pct <- function(n, nmax, t0, word){
   t1 <- now()
   time_elaps  <- interval(t0,t1) %>%
     round(.) %>%
@@ -96,7 +96,7 @@ display_progress_pct <- function(n, nmax, t0){
     seconds(.) %>%
     as.period(., unit = "days")
   prog <- paste0(round(100*n/nmax), "%")
-  cat("\r", "Progress:", prog,
+  cat("\r", word, prog,
       "  Time elapsed:", as.character(time_elaps),
       "  Time remaining:", as.character(time_remain),
       "   ")

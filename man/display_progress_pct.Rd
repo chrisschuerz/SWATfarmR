@@ -4,7 +4,7 @@
 \alias{display_progress_pct}
 \title{Display the progress if iterative processes as percentage value}
 \usage{
-display_progress_pct(n, nmax, t0)
+display_progress_pct(n, nmax, t0, word)
 }
 \arguments{
 \item{n}{Iteration step}

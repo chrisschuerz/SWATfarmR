@@ -252,7 +252,7 @@ read_attributes_2012 <- function(project_path, t0) {
   for (i in 1:n_hru) {
     attr_list[[i]] <-
       bind_cols(extract_hru_2012(hru_files[[i]]), extract_sol_2012(sol_files[[i]]))
-    display_progress_pct(i, n_hru, t0)
+    display_progress_pct(i, n_hru, t0, "Progress:")
   }
   attr_tbl <- map_df(attr_list, ~.x) %>%
     add_column(., file = file_list, .before = 1)

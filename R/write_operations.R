@@ -12,7 +12,7 @@
 #'
 #' @keywords internal
 #'
-write_operation <- function(path, mgt_raw, schedule, assigned_hrus,
+write_operation <- function(path, proj_name, mgt, mgt_raw, assigned_hrus,
                             start_year, end_year, year_range, version) {
 
   if(is.null(start_year)) {
@@ -29,11 +29,18 @@ write_operation <- function(path, mgt_raw, schedule, assigned_hrus,
          year_range[1], " and ", year_range[2], "!")
   }
 
+  unnassigned_hrus <- filter(assigned_hrus, lu_mgt %in% mgt$land_use, is.na(schedule))
+
+  if(nrow(unnassigned_hrus) > 0) {
+    stop('Scheduling of operations incomplete! \n',
+         "  Run .$schedule_operations(), with replace = 'missing' to schedule all missing operations.")
+  }
+
   cat("Writing management files:\n")
   if (version == 'plus') {
-    write_op_plus(path, mgt_raw, schedule, assigned_hrus, start_year, end_year)
+    write_op_plus(path, proj_name, mgt_raw, assigned_hrus, start_year, end_year)
   } else {
-    write_op_2012(path, mgt_raw, schedule, assigned_hrus, start_year, end_year)
+    write_op_2012(path, proj_name, mgt_raw, assigned_hrus, start_year, end_year)
   }
 }
 
@@ -54,8 +61,11 @@ write_operation <- function(path, mgt_raw, schedule, assigned_hrus,
 #'
 #' @keywords internal
 #'
-write_op_plus <- function(path, mgt_raw, schedule, assigned_hrus, start_year, end_year) {
+write_op_plus <- function(path, proj_name, mgt_raw, assigned_hrus, start_year, end_year) {
   t0 <- now()
+  cat("  - Loading scheduled operations:")
+  schedule <- load_scheduled_ops(path, proj_name)
+
   cat("  - Preparing 'hru-data.hru'\n")
   hru_data <- prepare_hru(mgt_raw, assigned_hrus)
   write_lines(hru_data, path%//%'hru-data.hru')
@@ -135,8 +145,12 @@ write_op_plus <- function(path, mgt_raw, schedule, assigned_hrus, start_year, en
 #'
 #' @keywords internal
 #'
-write_op_2012 <- function(path, mgt_raw, schedule, assigned_hrus, start_year, end_year) {
+write_op_2012 <- function(path, proj_name, mgt_raw, assigned_hrus, start_year, end_year) {
   t0 <- now()
+  cat("Loading scheduled operations:")
+  schedule <- load_scheduled_ops(path, proj_name)
+
+  cat("Writing scheduled operations: \n")
   n_hru <- nrow(assigned_hrus)
   for (i_hru in 1:n_hru) {
     hru_file_i <- assigned_hrus$file[i_hru]
@@ -164,7 +178,7 @@ write_op_2012 <- function(path, mgt_raw, schedule, assigned_hrus, start_year, en
       mgt_i <- c(mgt_i, "                17")
     }
     write_lines(mgt_i, path%//%hru_file_i%.%"mgt")
-    display_progress_pct(i_hru, n_hru, t0)
+    display_progress_pct(i_hru, n_hru, t0, "Progress:")
   }
   write_file_cio(path, start_year, end_year)
   finish_progress(n_hru, t0, "Finished writing", "'.mgt' file")
@@ -222,6 +236,50 @@ sort_mgt <- function(mgt) {
     rank(., ties.method = 'min')
   mgt_order <- order(1000*base_rnk + unit_rnk)
   mgt[mgt_order]
+}
+
+#' Load the scheduled operations from the SQLite data base
+#'
+#' @param project_path Path to the TxtInOut folder
+#' @param project_name Name of the farmR project
+#'
+#' @importFrom DBI dbConnect dbDisconnect dbListTables dbReadTable
+#' @importFrom lubridate now ymd
+#' @importFrom RSQLite SQLite
+#' @importFrom stringr str_detect str_remove str_sub
+#'
+#' @keywords internal
+#'
+load_scheduled_ops <- function(project_path, project_name) {
+  t0 <- now()
+  mgts_path <- paste0(project_path, '/', project_name, '.mgts')
+  mgt_db <- dbConnect(SQLite(), mgts_path)
+
+  tbls <- dbListTables(mgt_db)
+  tbls <- tbls[str_detect(tbls, 'init::|schd::')]
+
+  schedule <- list()
+  n <- length(tbls)
+  for (i in 1:n) {
+    tbl_i <- tbls[i]
+    mgt_name <- str_remove(tbl_i, 'init::|schd::')
+    tbl_type <- str_sub(tbl_i, 1,4)
+    tbl_type <- ifelse(tbl_type == 'init', 'init_crop', 'schedule')
+    if (!mgt_name %in% names(schedule)) {
+      schedule[[mgt_name]] <- list()
+    }
+    schedule[[mgt_name]][[tbl_type]] <- dbReadTable(mgt_db, tbl_i)
+    if(tbl_type == 'schedule') {
+      schedule[[mgt_name]][[tbl_type]]$date <-
+        ymd(19700101) + schedule[[mgt_name]][[tbl_type]]$date
+    }
+    display_progress_pct(i, n, t0, " - Loading scheduled operations:")
+  }
+
+  dbDisconnect(mgt_db)
+  cat("\r  - Loading scheduled operations: 100%  ", rep(' ', 55), '\n')
+
+  return(schedule)
 }
 
 #' Prepare the landuse.lum for the the generated operation schedule i
@@ -604,7 +662,7 @@ reset_mgt <- function(path, mgt_raw, version) {
     for (i_hru in 1:n_hru) {
       file_i <- names(mgt_raw)[i_hru]
       write_lines(mgt_raw[[file_i]], path%//%file_i%.%"mgt")
-      display_progress_pct(i_hru, n_hru, t0)
+      display_progress_pct(i_hru, n_hru, t0, "Progress:")
     }
     finish_progress(n_hru, t0, "Finished resetting", "'.mgt' file")
   }

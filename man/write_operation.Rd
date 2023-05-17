@@ -6,8 +6,9 @@
 \usage{
 write_operation(
   path,
+  proj_name,
+  mgt,
   mgt_raw,
-  schedule,
   assigned_hrus,
   start_year,
   end_year,
@@ -20,8 +21,6 @@ write_operation(
 
 \item{mgt_raw}{List of original files that are relevant for the mgt scheduling.}
 
-\item{schedule}{List of tibbles with the scheduled operations.}
-
 \item{assigned_hrus}{Tibble that links the mgt schedules to the HRUs}
 
 \item{start_year}{Numeric. Defines the start year for which to write operations.}
@@ -31,6 +30,8 @@ write_operation(
 \item{year_range}{numeric vector with start and end year of the scheduled operations.}
 
 \item{version}{String that indicates the SWAT version.}
+
+\item{schedule}{List of tibbles with the scheduled operations.}
 }
 \description{
 Write the mgt schedules into the respective files in the TxtInOut folder

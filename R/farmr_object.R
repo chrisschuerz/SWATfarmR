@@ -110,8 +110,9 @@ farmr_project <- R6::R6Class(
 
         self$write_operations <- function(start_year = NULL, end_year = NULL) {
           write_operation(path = self$.data$meta$project_path,
+                          proj_name = self$.data$meta$project_name,
+                          mgt = self$.data$management$schedule,
                           mgt_raw = self$.data$meta$mgt_raw,
-                          schedule = self$.data$scheduled_operations$scheduled_operations,
                           assigned_hrus = self$.data$scheduled_operations$assigned_hrus,
                           start_year = start_year,
                           end_year = end_year,

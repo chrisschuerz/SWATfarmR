@@ -4,20 +4,20 @@
 \alias{write_op_2012}
 \title{Write the management schedules for a SWAT2012 project}
 \usage{
-write_op_2012(path, mgt_raw, schedule, assigned_hrus, start_year, end_year)
+write_op_2012(path, proj_name, mgt_raw, assigned_hrus, start_year, end_year)
 }
 \arguments{
 \item{path}{Path to the TxtInOut folder}
 
 \item{mgt_raw}{List of original files that are relevant for the mgt scheduling.}
 
-\item{schedule}{List of tibbles with the scheduled operations.}
-
 \item{assigned_hrus}{Tibble that links the mgt schedules to the HRUs}
 
 \item{start_year}{Numeric. Defines the start year for which to write operations.}
 
 \item{end_year}{Numeric. Defines the last year for which to write operations.}
+
+\item{schedule}{List of tibbles with the scheduled operations.}
 }
 \description{
 Write the management schedules for a SWAT2012 project
