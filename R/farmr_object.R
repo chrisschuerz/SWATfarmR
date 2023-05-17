@@ -69,7 +69,7 @@ farmr_project <- R6::R6Class(
                               self$.data$meta$hru_attributes)
 
       if(discard_schedule == 'new' & !is.null(self$.data$scheduled_operations)) {
-        self$.data$scheduled_operations$assigned_hrus <-
+        self$.data$scheduled_operations <-
           compare_reset_mgt(mgt_lkp,
                             self$.data$management$schedule,
                             self$.data$scheduled_operations,

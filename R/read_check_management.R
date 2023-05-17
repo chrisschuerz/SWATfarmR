@@ -389,8 +389,10 @@ translate_mgt_table_2012 <- function(mgt_tbl, lookup) {
 #'   scheduled operations.
 #' @param schdl_ops List with data of previously scheduled operations
 #'
+#' @importFrom DBI dbConnect dbDisconnect dbListTables dbRemoveTable dbWriteTable
 #' @importFrom dplyr filter group_by group_split select %>%
 #' @importFrom purrr map_chr map2_lgl set_names
+#' @importFrom RSQLite SQLite
 #'
 #' @keywords internal
 #'
@@ -446,19 +448,39 @@ compare_reset_mgt <- function(mgt_new, mgt_old, schdl_ops, project_path, project
         label_rmv <- unique(hrus_to_be_upd$schedule)
 
         tbls <- dbListTables(mgt_db)
+
+        if('skipped_operations' %in% names(schdl_ops) &
+           any(hrus_to_be_upd$lu_mgt %in% schdl_ops$skipped_operations$landuse)) {
+
+          skipped_operations <- filter(schdl_ops$skipped_operations, ! landuse %in% hrus_to_be_upd$lu_mgt)
+          if(nrow(skipped_operations) > 0) {
+            schdl_ops$skipped_operations <- skipped_operations
+            dbWriteTable(conn = mgt_db,
+                         name = 'skipped_operations',
+                         value = skipped_operations,
+                         overwrite = TRUE)
+          } else {
+            skipped_operations <- NULL
+            dbRemoveTable(conn = mgt_db, name = 'skipped_operations')
+          }
+        }
+
         init_rmv <- paste0('init::', label_rmv)[paste0('init::', label_rmv) %in% tbls]
         schd_rmv <- paste0('schd::', label_rmv)[paste0('schd::', label_rmv) %in% tbls]
         tbls_rmv <- c(init_rmv, schd_rmv)
         for (i in tbls_rmv) {
           dbRemoveTable(mgt_db, i)
         }
+      dbDisconnect(mgt_db)
       } else {
         stop('Reading new management input cancelled!')
       }
     }
   }
 
-  return(assigned_hrus)
+  return(list(assigned_hrus = assigned_hrus,
+              skipped_operations = skipped_operations,
+              scheduled_years = schdl_ops$scheduled_years))
 }
 
 #' Check if two tables are identical
