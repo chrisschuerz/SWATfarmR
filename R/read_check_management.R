@@ -449,7 +449,7 @@ compare_reset_mgt <- function(mgt_new, mgt_old, schdl_ops, project_path, project
 
         tbls <- dbListTables(mgt_db)
 
-        if('skipped_operations' %in% names(schdl_ops) &
+        if(!is.null(schdl_ops$skipped_operations) &
            any(hrus_to_be_upd$lu_mgt %in% schdl_ops$skipped_operations$landuse)) {
 
           skipped_operations <- filter(schdl_ops$skipped_operations, ! landuse %in% hrus_to_be_upd$lu_mgt)
@@ -463,6 +463,8 @@ compare_reset_mgt <- function(mgt_new, mgt_old, schdl_ops, project_path, project
             skipped_operations <- NULL
             dbRemoveTable(conn = mgt_db, name = 'skipped_operations')
           }
+        } else {
+          skipped_operations <- NULL
         }
 
         init_rmv <- paste0('init::', label_rmv)[paste0('init::', label_rmv) %in% tbls]
