@@ -206,6 +206,7 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
           n_i <- n_max + 1
         }
 
+          init_already_assigned <- n_i == 0 & schedule_name %in% assigned_hru$schedule
           assigned_hru[assigned_hru$hru == i_hru, 5] <- schedule_name
           assigned_hru[assigned_hru$hru == i_hru, 6] <- n_i
 
@@ -218,7 +219,6 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
           rs <- dbSendStatement(conn = mgt_db, statement = sql_n)
           dbClearResult(rs)
 
-          init_already_assigned <- n_i == 0 & schedule_name %in% assigned_hru$schedule
           if(!is.null(schedule_i$init_crop) & !init_already_assigned) {
             dbWriteTable(conn = mgt_db,
                          name = paste0('init::',schedule_name),

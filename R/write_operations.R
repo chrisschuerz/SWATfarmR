@@ -68,40 +68,21 @@ write_op_plus <- function(path, proj_name, mgt_raw, assigned_hrus, start_year, e
 
   cat("  - Preparing 'hru-data.hru'\n")
   hru_data <- prepare_hru(mgt_raw, assigned_hrus)
-  write_lines(hru_data, path%//%'hru-data.hru')
 
   cat("  - Preparing 'landuse.lum'\n")
-  lum_head <- add_edit_timestamp(mgt_raw$luse_header)
-  lum_names <- lum_to_string(names(mgt_raw$landuse_lum))
+  landuse_lum <- prepare_lum(mgt_raw, schedule, assigned_hrus)
 
-  lum_mgt <- map2(schedule, names(schedule), ~prepare_lum_i(.x, .y, mgt_raw$landuse_lum,
-                                                            start_year, end_year)) %>%
-    sort_mgt(.)
-
-  landuse_lum <- map(lum_mgt, ~.x$lum) %>%
-    reduce(., c) %>%
-    c(lum_head, lum_names, .)
-
-  cat("  - Preparing 'schedule.mgt'\n")
-
-  mgt_col <- 'name                       numb_ops  numb_auto            op_typ       mon       day        hu_sch          op_data1          op_data2      op_data3'
-  mgt_head <- c(add_edit_timestamp(mgt_raw$management_sch[1]), mgt_col)
-  schedule_mgt <-  map(lum_mgt, ~.x$mgt) %>%
-    reduce(., c) %>%
-    c(mgt_head, .)
+  cat("  - Preparing 'management.sch'\n")
+  mgt_sch <-  prepare_mgt(mgt_raw, schedule, start_year, end_year)
 
   cat("  - Preparing 'plant.ini'\n")
-  ini_head <- c(add_edit_timestamp(mgt_raw$plant_ini[1]), mgt_raw$plant_ini[2])
-  plnt_ini <- map(schedule, ~ prepare_plant_ini_i(.x, start_year, end_year)) %>%
-    map2(., names(schedule), ~ build_ini_line(.x, .y)) %>%
-    unlist(.) %>%
-    unname(.) %>%
-    c(ini_head, .)
+  plant_ini <- prepare_ini(mgt_raw, schedule, start_year, end_year)
 
   cat("  - Writing files \n")
+  write_lines(hru_data, path%//%'hru-data.hru')
   write_lines(landuse_lum, path%//%'landuse.lum')
-  write_lines(schedule_mgt, path%//%'management.sch')
-  write_lines(plnt_ini, path%//%'plant.ini')
+  write_lines(mgt_sch, path%//%'management.sch')
+  write_lines(plant_ini, path%//%'plant.ini')
 
   cat("  - Updating 'time.sim'\n")
   time_sim <- mgt_raw$time_sim
@@ -201,11 +182,114 @@ prepare_hru <- function(mgt_raw, assigned_hrus) {
 
   hru_data <- mgt_raw$hru_data %>%
     left_join(., select(assigned_hrus, hru_name, schedule), by = c('name' = 'hru_name')) %>%
-    mutate(lu_mgt = schedule) %>%
+    mutate(lu_mgt = ifelse(!is.na(schedule), schedule, lu_mgt)) %>%
     select(- schedule) %>%
     apply(., 1, hru_to_string) %>%
     c(hru_head, hru_names, .)
   return(hru_data)
+}
+
+#' Prepare the landuse.lum for writing in SWAT+
+#'
+#' @param mgt_raw List of original files that are relevant for the mgt scheduling.
+#' @param schedule List of scheduled operations.
+#' @param assigned_hrus Tibble that links the mgt schedules to the HRUs.
+#'
+#' @importFrom dplyr arrange distinct left_join mutate rename select %>%
+#' @importFrom purrr map_lgl
+#' @importFrom stringr str_extract str_remove
+#' @importFrom tibble enframe
+#'
+#' @keywords internal
+#'
+prepare_lum <- function(mgt_raw, schedule, assigned_hrus) {
+  lum_head <- add_edit_timestamp(mgt_raw$luse_header)
+  lum_names <- lum_to_string(names(mgt_raw$landuse_lum))
+
+  has_init <- schedule %>%
+    map_lgl(., ~!(is.null(.x$init_crop) & is.null(.x$schedule))) %>%
+    enframe(., name = 'schedule', value = 'has_init')
+  has_schdl <- schedule %>%
+    map_lgl(., ~!is.null(.x$schedule)) %>%
+    enframe(., name = 'schedule', value = 'has_schdl')
+  landuse_lum <- assigned_hrus %>%
+    select(schedule, lu_mgt) %>%
+    distinct(schedule, .keep_all = TRUE) %>%
+    left_join(., has_init, by = 'schedule') %>%
+    left_join(., has_schdl, by = 'schedule') %>%
+    mutate(has_init  = ifelse(is.na(has_init), FALSE, has_init),
+           has_schdl = ifelse(is.na(has_schdl), FALSE, has_schdl)) %>%
+    left_join(., mgt_raw$landuse_lum, by = c('lu_mgt' = 'name')) %>%
+    rename(., name = schedule) %>%
+    mutate(name = ifelse(is.na(name), lu_mgt, name),
+           base = str_remove(lu_mgt, '\\_lum'),
+           lum_num  = str_extract(name, '\\_[:digit:]+\\_[:digit:]+'),
+           mgt = paste0(base, '_mgt', ifelse(is.na(lum_num), '', lum_num)),
+           mgt = ifelse(has_schdl, mgt, 'null'),
+           plnt_com = paste0(base, '_comm', ifelse(is.na(lum_num), '', lum_num)),
+           plnt_com = ifelse(has_init, plnt_com, 'null')) %>%
+    select(., -lu_mgt, -has_init, -has_schdl, -base, -lum_num) %>%
+    arrange(., name) %>%
+    apply(., 1, lum_to_string) %>%
+    c(lum_head, lum_names, .)
+  return(landuse_lum)
+}
+
+#' Prepare the management.sch for writing in SWAT+
+#'
+#' @param mgt_raw List of original files that are relevant for the mgt scheduling.
+#' @param schedule List of scheduled operations.
+#' @param start_year Numeric. Defines the start year for which to write operations.
+#' @param end_year Numeric. Defines the last year for which to write operations.
+#'
+#' @importFrom dplyr filter mutate %>%
+#' @importFrom lubridate year
+#' @importFrom purrr list_c map map2 map_lgl map_int
+#'
+#' @keywords internal
+#'
+prepare_mgt <- function(mgt_raw, schedule, start_year, end_year) {
+  mgt_col <- 'name                       numb_ops  numb_auto            op_typ       mon       day        hu_sch          op_data1          op_data2      op_data3'
+  mgt_head <- c(add_edit_timestamp(mgt_raw$management_sch[1]), mgt_col)
+
+  schdl_list <- schedule %>%
+    map(., ~ .x$schedule) %>%
+    .[map_lgl(., ~!is.null(.x))] %>%
+    map(., ~ filter(.x, year(date) >= start_year, year(date) <= end_year)) %>%
+    sort_mgt(.) %>%
+    map(., ~ apply(.x, 1, schdl_to_string))
+
+  schdl_head <- paste(sprintf('%-24s', names(schdl_list)),
+                      sprintf('%10d',map_int(schdl_list, length)),
+                      sprintf('%10d',0))
+  schdl_lines <- map2(schdl_head, schdl_list, c) %>%
+    list_c(.)
+
+  schdl <- c(mgt_head, schdl_lines)
+
+  return(schdl)
+}
+
+#' Prepare the plant.ini for writing in SWAT+
+#'
+#' @param mgt_raw List of original files that are relevant for the mgt scheduling.
+#' @param schedule List of scheduled operations.
+#' @param start_year Numeric. Defines the start year for which to write operations.
+#' @param end_year Numeric. Defines the last year for which to write operations.
+#'
+#' @importFrom dplyr %>%
+#' @importFrom purrr map map2
+#'
+#' @keywords internal
+#'
+prepare_ini <- function(mgt_raw, schedule, start_year, end_year) {
+  ini_head <- c(add_edit_timestamp(mgt_raw$plant_ini[1]), mgt_raw$plant_ini[2])
+  plnt_ini <- map(schedule, ~ prepare_plant_ini_i(.x, start_year, end_year)) %>%
+    map2(., names(schedule), ~ build_ini_line(.x, .y)) %>%
+    unlist(.) %>%
+    unname(.) %>%
+    c(ini_head, .)
+  return(plnt_ini)
 }
 
 #' Sort the management schedules by name, unit (sub or rtu), and number of realization.
@@ -297,7 +381,7 @@ load_scheduled_ops <- function(project_path, project_name) {
 #'
 #' @keywords internal
 #'
-prepare_lum_i <- function(schedule_i, name_i, lum_raw, start_year, end_year) {
+prepare_mgt_i <- function(schedule_i, name_i, lum_raw, start_year, end_year) {
   lum_init <- str_remove(name_i, '\\_[:digit:]+\\_[:digit:]+')
   lum_num <- str_extract(name_i, '\\_[:digit:]+\\_[:digit:]+')
   mgt_name <- paste0(str_remove(lum_init, '\\_lum'), '_mgt' , ifelse(is.na(lum_num), '', lum_num))
