@@ -245,6 +245,7 @@ prepare_lum <- function(mgt_raw, schedule, assigned_hrus) {
 #' @importFrom dplyr filter mutate %>%
 #' @importFrom lubridate year
 #' @importFrom purrr list_c map map2 map_lgl map_int
+#' @importFrom stringr str_extract str_remove
 #'
 #' @keywords internal
 #'
@@ -258,6 +259,13 @@ prepare_mgt <- function(mgt_raw, schedule, start_year, end_year) {
     map(., ~ filter(.x, year(date) >= start_year, year(date) <= end_year)) %>%
     sort_mgt(.) %>%
     map(., ~ apply(.x, 1, schdl_to_string))
+
+  list_names <- names(schdl_list)
+  mgt_init <- str_remove(list_names, '\\_[:digit:]+\\_[:digit:]+')
+  mgt_num <- str_extract(list_names, '\\_[:digit:]+\\_[:digit:]+')
+  mgt_names <- paste0(str_remove(mgt_init, '\\_lum'), '_mgt' ,
+                      ifelse(is.na(mgt_num), '', mgt_num))
+  names(schdl_list) <- mgt_names
 
   schdl_head <- paste(sprintf('%-24s', names(schdl_list)),
                       sprintf('%10d',map_int(schdl_list, length)),
