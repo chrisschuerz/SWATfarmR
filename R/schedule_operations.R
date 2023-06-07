@@ -137,7 +137,7 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
             id_init <- which(mgt_hru_i$operation == init_lbl)
             # id_skip <- which(mgt_hru_i$operation == 'skip')
             if(length(id_init) > 0) {
-              schedule_i$init_crop <- schedule_init(mgt_hru_i, version)
+              schedule_i$init_crop <- schedule_init(mgt_hru_i[id_init,], version)
             }
             # if(length(id_init) > 0) {
             #   schedule_i$init_crop <- # Did not add the single skip OP
