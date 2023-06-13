@@ -47,7 +47,7 @@ read_weather_plus <- function(project_path) {
   pcp <- map(pcp_files, ~ read_table_linewise(project_path%//%.x,
                                      col_names = c('year', 'jdn',
                                                    str_remove(.x, '\\.pcp$')),
-                                     col_types = rep('d',3), n_skip = 4)) %>%
+                                     col_types = rep('d',3), n_skip = 3)) %>%
     map(., ~ jdnyr_to_date(.x)) %>%
     reduce(., full_join, by = 'date')
 
@@ -55,7 +55,7 @@ read_weather_plus <- function(project_path) {
                                      col_names = c('year', 'jdn',
                                                    str_remove(.x, '\\.tmp$')%_%'max',
                                                    str_remove(.x, '\\.tmp$')%_%'min'),
-                                     col_types = rep('d',4), n_skip = 4)) %>%
+                                     col_types = rep('d',4), n_skip = 3)) %>%
     map(., ~ jdnyr_to_date(.x)) %>%
     reduce(., full_join, by = 'date')
 
