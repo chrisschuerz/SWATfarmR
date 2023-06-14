@@ -49,7 +49,11 @@ read_weather_plus <- function(project_path) {
                                                    str_remove(.x, '\\.pcp$')),
                                      col_types = rep('d',3), n_skip = 3)) %>%
     map(., ~ jdnyr_to_date(.x)) %>%
-    reduce(., full_join, by = 'date')
+    reduce(., full_join, by = 'date') %>%
+    mutate(across(.cols = !all_of('date'), ~ ifelse(.x == -99, NA, .x)))
+
+  print_na_summary(pcp, 'precipitation')
+
 
   tmp <- map(tmp_files, ~ read_table_linewise(project_path%//%.x,
                                      col_names = c('year', 'jdn',
@@ -57,7 +61,10 @@ read_weather_plus <- function(project_path) {
                                                    str_remove(.x, '\\.tmp$')%_%'min'),
                                      col_types = rep('d',4), n_skip = 3)) %>%
     map(., ~ jdnyr_to_date(.x)) %>%
-    reduce(., full_join, by = 'date')
+    reduce(., full_join, by = 'date') %>%
+    mutate(across(.cols = !all_of('date'), ~ ifelse(.x == -99, NA, .x)))
+
+  print_na_summary(tmp, 'temperature')
 
   tmax <- select(tmp, date, ends_with("_max")) %>%
     set_names(., str_remove(names(.), "_max"))
@@ -446,3 +453,31 @@ get_station_names <- function(file_path) {
     trimws() %>%
     .[nchar(.)>0]
 }
+
+#' Print a summary of NA values of weather station records
+#'
+#' @param tbl Table with weather station time series
+#' @param label Text string to be printed in warning message
+#'
+#' @importFrom dplyr %>%
+#' @importFrom purrr map_int
+#'
+#' @keywords internal
+#'
+print_na_summary <- function(tbl, label) {
+  count_na <- map_int(tbl[2:length(tbl)], ~sum(is.na(.x)))
+  count_na <- count_na[count_na > 0]
+  if(length(count_na) > 0) {
+    name_length <- max(nchar(names(count_na)))
+    name_print  <- paste0('Weather data:  ',
+                          paste(sprintf(paste0('%', name_length, 's'), names(count_na)),
+                                collapse = '  '))
+    value_print <- paste0('Number of NA:  ',
+                          paste(sprintf(paste0('%', name_length, 'd'), count_na),
+                                collapse = '  '))
+    warning('\nThe following ', label, ' data do have NA values:\n\n',
+            name_print, '\n', value_print, '\n\n',
+            'If the variables are used for scheduling avoid too many missing data!\n')
+  }
+}
+
