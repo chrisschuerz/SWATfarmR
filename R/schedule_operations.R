@@ -9,7 +9,7 @@
 #'
 #' @importFrom DBI dbClearResult dbConnect dbDisconnect dbReadTable dbSendStatement dbWriteTable
 #' @importFrom dplyr filter select %>%
-#' @importFrom lubridate now year years
+#' @importFrom lubridate now year years ymd
 #' @importFrom purrr map set_names
 #' @importFrom rlang sym
 #' @importFrom RSQLite SQLite
@@ -172,8 +172,12 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
                   stop('Scheduling operation number ', j_op, ' for the HRU ', i_hru,
                        " with the land_use '", hru_attribute$lu_mgt[i_hru], "' failed! \n",
                        'The date resulted in a NULL value. \n',
-                       'A reason can be that the date ranges of the lines ', j_op - 1, ' and ',
+                       'There can be a few reasons for that:\n\n',
+                       '  - The date ranges of the lines ', j_op - 1, ' and ',
                        j_op, " for the land_use '", hru_attribute$lu_mgt[i_hru], "' overlap.\n",
+                       '  - The variables (e.g. pcp) which were used for scheduling had all NA',
+                       ' values \n    in the respective time window after ',
+                       as.character(ymd(prev_op)), '.\n\n',
                        'Please fix and reload the management input table accordingly \n',
                        'and repeat the scheduling of the operations.')
                 } else if(is.null(date_j)){
@@ -427,7 +431,7 @@ schedule_date_j <- function(var_tbl, eval_str, prev_op) {
   wgt_tbl <- var_tbl %>%
     mutate(wgt = !!parse_expr(eval_str))
 
-  if(sum(wgt_tbl$wgt) > 0) {
+  if(sum(wgt_tbl$wgt, na.rm = TRUE) > 0) {
     date_j <- wgt_tbl %>%
       # filter(wgt > 0) %>%
       # group_by(year) %>%
