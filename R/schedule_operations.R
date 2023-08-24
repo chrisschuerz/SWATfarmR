@@ -8,12 +8,13 @@
 #'   fertilizer codes from SWAT data base.
 #'
 #' @importFrom DBI dbClearResult dbConnect dbDisconnect dbReadTable dbSendStatement dbWriteTable
-#' @importFrom dplyr filter select %>%
-#' @importFrom lubridate now year years ymd
-#' @importFrom purrr map set_names
+#' @importFrom dplyr case_when filter lag mutate row_number select slice %>%
+#' @importFrom lubridate now yday year years ymd
+#' @importFrom purrr map map_lgl map2_df set_names
 #' @importFrom rlang sym
 #' @importFrom RSQLite SQLite
-#' @importFrom stringr str_detect
+#' @importFrom stringr str_detect str_extract str_remove_all str_split
+#' @importFrom tibble add_row as_tibble tibble
 #' @importFrom tidyselect all_of
 #'
 #' @keywords internal
@@ -69,7 +70,7 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
     start_yrs_differ <- schdl_yrs$start_year != var_yrs$start_year
     end_yrs_differ <- schdl_yrs$end_year != var_yrs$end_year
     if (any(start_yrs_differ, end_yrs_differ) & replace != 'all') {
-      err_msg <- dplyr::case_when(start_yrs_differ & end_yrs_differ ~ "'start_year' and 'end_year'",
+      err_msg <- case_when(start_yrs_differ & end_yrs_differ ~ "'start_year' and 'end_year'",
                            start_yrs_differ ~ "'start_year'",
                            end_yrs_differ ~ "'end_year'")
       stop(err_msg, " are different for the current call of ",
@@ -133,6 +134,15 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
         if(nrow(mgt_hru_i) > 0) {
           has_only_init_skip <- all(mgt_hru_i$operation %in% c(init_lbl, 'skip'))
 
+          has_only_fix_date  <- mgt_hru_i %>%
+            filter(!operation %in% c(init_lbl, 'skip')) %>%
+            .$condition_schedule %>%
+            map(., ~str_remove_all(.x, '[:space:]+')) %>%
+            str_split(., '\\*') %>%
+            map(., ~ is.na(.x) | length(.x) == 1 & str_detect(.x, 'md==')) %>%
+            map_lgl(., ~ all(.x)) %>%
+            all(.)
+
           if(has_only_init_skip){
             id_init <- which(mgt_hru_i$operation == init_lbl)
             # id_skip <- which(mgt_hru_i$operation == 'skip')
@@ -142,6 +152,30 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
             # if(length(id_init) > 0) {
             #   schedule_i$init_crop <- # Did not add the single skip OP
             # }
+          } else if (has_only_fix_date) {
+            if(!attribute_hru_i[[luse_lbl]] %in% assigned_hru$schedule) {
+              id_init <- which(mgt_hru_i$operation == init_lbl)
+              # id_skip <- which(mgt_hru_i$operation == 'skip')
+              if(length(id_init) > 0) {
+                schedule_i$init_crop <- schedule_init(mgt_hru_i[id_init,], version)
+              }
+              n_year <- diff(unlist(var_yrs)) + 1
+
+              schedule_i$schedule <- mgt_hru_i %>%
+                filter(operation != init_lbl) %>%
+                add_skip_row(.) %>%
+                mutate(mmdd = str_extract(condition_schedule, '[:digit:]+'),
+                       mmdd = ifelse(operation == 'skip', '1231', mmdd),
+                       year = 0,
+                       year = ifelse(operation == 'skip', 1, year),
+                       year = lag(year, default = 1)) %>%
+                slice(rep(row_number(), n_year)) %>%
+                mutate(year = cumsum(year),
+                       year = year + var_yrs$start_year) %>%
+                filter(year %in% var_yrs$start_year:var_yrs$end_year) %>%
+                mutate(date = ymd(paste0(year, mmdd)), .before = 1) %>%
+                select(- condition_schedule, - mmdd, - year)
+            }
           } else {
             j_op <- 1
             n_op <- nrow(mgt_hru_i)
@@ -202,7 +236,7 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
             # schedule_i$schedule$date[schedule_i$schedule$operation == 0] <- NA
           }
         }
-        if(is.null(schedule_i$schedule)) {
+        if(is.null(schedule_i$schedule) | has_only_fix_date) {
           schedule_name <- attribute_hru_i[[luse_lbl]]
           n_i <- 0
         } else {
@@ -210,7 +244,7 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
           n_i <- n_max + 1
         }
 
-          init_already_assigned <- n_i == 0 & schedule_name %in% assigned_hru$schedule
+          schdl_already_assigned  <- n_i == 0 & schedule_name %in% assigned_hru$schedule
           assigned_hru[assigned_hru$hru == i_hru, 5] <- schedule_name
           assigned_hru[assigned_hru$hru == i_hru, 6] <- n_i
 
@@ -223,12 +257,12 @@ schedule_operation <- function(mgt_schedule, variables, lookup, hru_attribute,
           rs <- dbSendStatement(conn = mgt_db, statement = sql_n)
           dbClearResult(rs)
 
-          if(!is.null(schedule_i$init_crop) & !init_already_assigned) {
+          if(!is.null(schedule_i$init_crop) & !schdl_already_assigned) {
             dbWriteTable(conn = mgt_db,
                          name = paste0('init::',schedule_name),
                          value = schedule_i$init_crop)
           }
-          if(!is.null(schedule_i$schedule)) {
+          if(!is.null(schedule_i$schedule) & !schdl_already_assigned) {
             dbWriteTable(conn = mgt_db,
                          name = paste0('schd::',schedule_name),
                          value = schedule_i$schedule)
@@ -675,6 +709,24 @@ add_skip_year_flag <- function(schedule_tbl, variable, lookup) {
     select(-yr)
 
   return(schedule_tbl)
+}
+
+#' Add a skip row if last row is not a skip operation
+#'
+#' @param tbl management input table
+#'
+#' @returns The management input table with an added skip row
+#'
+#' @importFrom tibble add_row
+#'
+#' @keywords internal
+#'
+add_skip_row <- function(tbl) {
+  if(!tbl$operation[nrow(tbl)] == 'skip') {
+    tbl <- add_row(tbl, operation = 'skip')
+  }
+
+  return(tbl)
 }
 
 #' Set the skip flag for entries in the list of tibbles with only one row and
