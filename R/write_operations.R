@@ -158,7 +158,16 @@ write_op_2012 <- function(path, proj_name, mgt_raw, assigned_hrus, start_year, e
                          "   | NROT: number of years of rotation")
       mgt_i <- c(mgt_i, "                17")
     }
-    write_lines(mgt_i, path%//%hru_file_i%.%"mgt")
+
+    filename <- c(path%//%hru_file_i%.%"mgt") # Constructing the filename
+	  con <- file(filename, "w")
+	  #data <- mgt_i  # Extracting the element from the list
+	  writeLines(mgt_i,  con)  # Writing the data to MGT
+	  close(con)
+   
+    display_progress_pct(i_hru, n_hru, t0)
+    
+    #write_lines(mgt_i, path%//%hru_file_i%.%"mgt")
     display_progress_pct(i_hru, n_hru, t0, "Progress:")
   }
   write_file_cio(path, start_year, end_year)
@@ -753,7 +762,12 @@ reset_mgt <- function(path, mgt_raw, version) {
     t0 <- now()
     for (i_hru in 1:n_hru) {
       file_i <- names(mgt_raw)[i_hru]
-      write_lines(mgt_raw[[file_i]], path%//%file_i%.%"mgt")
+      filename <- c(path%//%hru_file_i%.%"mgt") # Constructing the filename
+	    con <- file(filename, "w")
+	    data <- mgt_i  # Extracting the element from the list
+	    writeLines(mgt_raw[[file_i]],  con)  # Writing the data to CSV
+	    close(con)
+      #write_lines(mgt_raw[[file_i]], path%//%file_i%.%"mgt")
       display_progress_pct(i_hru, n_hru, t0, "Progress:")
     }
     finish_progress(n_hru, t0, "Finished resetting", "'.mgt' file")
