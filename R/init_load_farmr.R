@@ -16,8 +16,12 @@
 #' @export
 
 new_farmr <- function(project_name, project_path, project_type = 'database') {
+  stopifnot(project_type %in% c('database', 'environment'))
+
   farmr_obj <- farmr_project$new(project_name = project_name,
-                                 project_path = project_path)
+                                 project_path = project_path,
+                                 project_type = project_type
+                                 )
 
   assign(project_name, farmr_obj, envir = sys.frame(-1))
   farmr_obj$save()
