@@ -3,12 +3,19 @@
 #' @param project_name the name of the farmr project.
 #' @param project_path Path to the SWAT TxtInOut folder to which the farmr
 #'   should be applied.
+#' @param project_type Define the mode how scheduled operations are saved. With
+#'   `project_type = 'database'` (default) a `*.mgts` object is generated aside
+#'   of the `*.farm` object in the project folder, where scheduled operations
+#'   are saved incrementally. This allows to continue with scheduling in case
+#'   an error occurs during the scheduling. With `project_type = 'environment'`
+#'   the scheduled operations are only saved in the R environment. In case of
+#'   an error then all already scheduled operations will be lost.
 #'
 #' @return Generates a new farmr_project in the working environment (as an R6
 #'   object) and saves the project the TxtInOut folder.
 #' @export
 
-new_farmr <- function(project_name, project_path) {
+new_farmr <- function(project_name, project_path, project_type = 'database') {
   farmr_obj <- farmr_project$new(project_name = project_name,
                                  project_path = project_path)
 

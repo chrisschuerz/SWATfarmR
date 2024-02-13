@@ -164,9 +164,9 @@ write_op_2012 <- function(path, proj_name, mgt_raw, assigned_hrus, start_year, e
 	  #data <- mgt_i  # Extracting the element from the list
 	  writeLines(mgt_i,  con)  # Writing the data to MGT
 	  close(con)
-   
+
     display_progress_pct(i_hru, n_hru, t0)
-    
+
     #write_lines(mgt_i, path%//%hru_file_i%.%"mgt")
     display_progress_pct(i_hru, n_hru, t0, "Progress:")
   }
@@ -223,7 +223,7 @@ prepare_lum <- function(mgt_raw, schedule, assigned_hrus) {
     enframe(., name = 'schedule', value = 'has_schdl')
   landuse_lum <- assigned_hrus %>%
     select(schedule, lu_mgt) %>%
-    distinct(schedule, .keep_all = TRUE) %>%
+    distinct(schedule, lu_mgt, .keep_all = TRUE) %>%
     left_join(., has_init, by = 'schedule') %>%
     left_join(., has_schdl, by = 'schedule') %>%
     mutate(has_init  = ifelse(is.na(has_init), FALSE, has_init),

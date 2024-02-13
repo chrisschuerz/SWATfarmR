@@ -17,7 +17,7 @@ farmr_project <- R6::R6Class(
   public = list(
     .data = list(),
 
-    initialize = function(project_name, project_path) {
+    initialize = function(project_name, project_path, project_type) {
       if(file.exists(project_path%//%project_name%.%"farm")){
         stop("FarmR project allready exists in"%&&%project_path)
       }
@@ -25,6 +25,7 @@ farmr_project <- R6::R6Class(
       t0 <- now()
       self$.data$meta$project_name <- project_name
       self$.data$meta$project_path <- project_path
+      self$.data$meta$project_type <- project_type
       self$.data$meta$swat_version <- check_version(project_path)
 
       self$.data$meta$hru_attributes <- read_hru_attributes(project_path,
