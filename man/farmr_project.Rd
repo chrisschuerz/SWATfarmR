@@ -22,7 +22,7 @@ farmr_project
 \if{latex}{\out{\hypertarget{method-farmr_project-new}{}}}
 \subsection{Method \code{new()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{farmr_project$new(project_name, project_path)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{farmr_project$new(project_name, project_path, project_type)}\if{html}{\out{</div>}}
 }
 
 }

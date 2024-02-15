@@ -75,7 +75,8 @@ farmr_project <- R6::R6Class(
                             self$.data$management$schedule,
                             self$.data$scheduled_operations,
                             self$.data$meta$project_path,
-                            self$.data$meta$project_name
+                            self$.data$meta$project_name,
+                            self$.data$meta$project_type
                            )
       }
 

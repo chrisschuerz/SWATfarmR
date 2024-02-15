@@ -4,12 +4,12 @@
 \alias{prepare_schedule_con}
 \title{Prepare the management schedule connection table}
 \usage{
-prepare_schedule_con(hru_attribute, version)
+prepare_schedule_con(hru_attributes, swat_version)
 }
 \arguments{
-\item{hru_attribute}{Tibble that provides the HRU attributes}
+\item{hru_attributes}{Tibble that provides the HRU attributes}
 
-\item{version}{label indicating the SWAT version}
+\item{swat_version}{label indicating the SWAT version}
 }
 \description{
 Prepare the management schedule connection table

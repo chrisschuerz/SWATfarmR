@@ -4,12 +4,16 @@
 \alias{read_mgt_lkp}
 \title{Read the management schedule table from a csv file}
 \usage{
-read_mgt_lkp(file, version, project_path, hru_attribute)
+read_mgt_lkp(file, swat_version, project_path, hru_attribute)
 }
 \arguments{
 \item{file}{Text string path to the csv file}
 
-\item{version}{String that indicates what SWAT version the project is.}
+\item{swat_version}{String that indicates what SWAT version the project is.}
+
+\item{project_path}{Text string path SWAT TxtInOut folder.}
+
+\item{hru_attributes}{Tibble that provides static HRU attributes.}
 }
 \description{
 Read the management schedule table from a csv file

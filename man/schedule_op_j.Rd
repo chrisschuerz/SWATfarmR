@@ -4,7 +4,7 @@
 \alias{schedule_op_j}
 \title{Add the operation j in the opeation schedule for HRU i}
 \usage{
-schedule_op_j(schedule_i, mgt_j, date_j, init_lbl, version)
+schedule_op_j(schedule_i, mgt_j, date_j, init_lbl, swat_version)
 }
 \arguments{
 \item{schedule_i}{Scheduled operations table for the HRU i}

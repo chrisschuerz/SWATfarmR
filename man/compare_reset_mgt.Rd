@@ -5,7 +5,14 @@
 \title{Compare the mgt schedule which is already stored in the farmr object with
 the new read schedule}
 \usage{
-compare_reset_mgt(mgt_new, mgt_old, schdl_ops, project_path, project_name)
+compare_reset_mgt(
+  mgt_new,
+  mgt_old,
+  schdl_ops,
+  project_path,
+  project_name,
+  project_type
+)
 }
 \arguments{
 \item{mgt_new}{Tibble with new read management schedule}

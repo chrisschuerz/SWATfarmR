@@ -4,31 +4,18 @@
 \alias{schedule_operation}
 \title{Schedule management operations for all HRUs based on static and dynamic rules}
 \usage{
-schedule_operation(
-  mgt_schedule,
-  variables,
-  lookup,
-  hru_attribute,
-  var_con,
-  start_year,
-  end_year,
-  n_schedule,
-  replace,
-  project_path,
-  project_name,
-  version
-)
+schedule_operation(data, start_year, end_year, n_schedule, replace)
 }
 \arguments{
 \item{mgt_schedule}{Tibble that provides mgt parameters and rules}
 
+\item{hru_attributes}{Tibble that provides static HRU attributes}
+
 \item{variables}{List of tibbles that provides time series of variables for
 all subbasins that can be implemented in dynamic rules.}
 
-\item{lookup}{list of tibbles with lookup tables for plant, tillage,
+\item{parameter_lookup}{list of tibbles with lookup tables for plant, tillage,
 fertilizer codes from SWAT data base.}
-
-\item{hru_attribute}{Tibble that provides static HRU attributes}
 }
 \description{
 Schedule management operations for all HRUs based on static and dynamic rules

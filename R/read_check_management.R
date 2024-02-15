@@ -1,21 +1,21 @@
 #' Read the management schedule table from a csv file
 #'
 #' @param file Text string path to the csv file
-#' @param version String that indicates what SWAT version the project is.
-#' @param version String that indicates the SWAT version.
-#' @param version String that indicates what SWAT version the project is.
+#' @param swat_version String that indicates what SWAT version the project is.
+#' @param project_path Text string path SWAT TxtInOut folder.
+#' @param hru_attributes Tibble that provides static HRU attributes.
 #'
 #' @keywords internal
 #'
 #'
-read_mgt_lkp <- function(file, version, project_path, hru_attribute) {
-  if(version == 'plus') {
+read_mgt_lkp <- function(file, swat_version, project_path, hru_attribute) {
+  if(swat_version == 'plus') {
     mgt_text <- read_mgt_table_plus(file)
     lookup  <- read_lookup_plus(project_path)
     check_mgt_table_plus(mgt_text, lookup, hru_attribute)
     mgt_code <- translate_mgt_table_plus(mgt_text, lookup)
     mgt_text <- NULL
-  } else if(version == '2012') {
+  } else if(swat_version == '2012') {
     mgt_text <- read_mgt_table_2012(file)
     lookup  <- read_lookup_2012(project_path)
     check_mgt_table_2012(mgt_text, lookup, hru_attribute)
@@ -37,7 +37,8 @@ read_mgt_table_plus <- function(file) {
   tbl <- read_csv(file, col_types = cols(weight = 'd',
                                          op_data3 = 'd',
                                          .default = 'c'), lazy = FALSE) %>%
-    select(land_use, management, weight, filter_attribute, condition_schedule, operation, 'op_data'%&%1:3)
+    select(land_use, management, weight, filter_attribute, condition_schedule,
+           operation, 'op_data'%&%1:3)
   return(tbl)
 }
 
@@ -59,7 +60,8 @@ read_mgt_table_2012 <- function(file) {
                                          operation = "c",
                                          mgt1 = "c",
                                          .default = "d"), lazy = FALSE) %>%
-    select(land_use, management, weight, filter_attribute, condition_schedule, operation, 'mgt'%&%1:9)
+    select(land_use, management, weight, filter_attribute, condition_schedule,
+           operation, 'mgt'%&%1:9)
   return(tbl)
 }
 
@@ -396,7 +398,11 @@ translate_mgt_table_2012 <- function(mgt_tbl, lookup) {
 #'
 #' @keywords internal
 #'
-compare_reset_mgt <- function(mgt_new, mgt_old, schdl_ops, project_path, project_name) {
+compare_reset_mgt <- function(mgt_new, mgt_old, schdl_ops,
+                              project_path, project_name, project_type) {
+
+  if(is.null(project_type)) project_type <- 'database' # To maintain downwards compatibility with farmR 3.x
+
   mgt0 <- mgt_old %>%
     group_by(land_use) %>%
     group_split()
@@ -422,13 +428,17 @@ compare_reset_mgt <- function(mgt_new, mgt_old, schdl_ops, project_path, project
 
   mgt_comp <- map2_lgl(mgt0, mgt1, ~is_identical(.x, .y))
   mgt_diff <- mgt_names[!mgt_comp]
-  assigned_hrus <- schdl_ops$assigned_hrus
+  hru_lum <- schdl_ops$assigned_hrus$lu_mgt
 
   if(any(!mgt_comp)) {
-    hrus_to_be_upd <- assigned_hrus[assigned_hrus[[4]] %in% mgt_diff,] %>%
+    hrus_to_be_upd <- schdl_ops$assigned_hrus[hru_lum %in% mgt_diff,] %>%
       filter(!is.na(schedule))
+    label_rmv <- unique(hrus_to_be_upd$schedule)
 
-    if (nrow(hrus_to_be_upd) > 0) {
+    skip_to_be_upd <- !is.null(schdl_ops$skipped_operations) &
+      any(hrus_to_be_upd$lu_mgt %in% schdl_ops$skipped_operations$landuse)
+
+    if (length(label_rmv) > 0) {
       choice <- select.list(choices = c("proceed", "cancel"),
                             title = paste("The new management is different for the following land uses\n",
                                           "for which operations were already scheduled:\n",
@@ -436,53 +446,67 @@ compare_reset_mgt <- function(mgt_new, mgt_old, schdl_ops, project_path, project
                                           "Continuing would delete the schedules for these land uses.\n",
                                           "Type '1' to proceed or '2' to cancel:"))
       if(choice == "proceed") {
-        assigned_hrus[assigned_hrus[[4]] %in% mgt_diff,]$schedule <- NA_character_
-        assigned_hrus[assigned_hrus[[4]] %in% mgt_diff,]$n <- 0
 
-        mgts_path <- paste0(project_path, '/', project_name, '.mgts')
-        mgt_db <- dbConnect(SQLite(), mgts_path)
-        dbWriteTable(conn = mgt_db,
-                     name = 'assigned_hru', value = assigned_hrus,
-                     overwrite = TRUE)
+        schdl_ops$assigned_hrus[hru_lum %in% mgt_diff,]$schedule <- NA_character_
+        schdl_ops$assigned_hrus[hru_lum %in% mgt_diff,]$n <- 0
 
-        label_rmv <- unique(hrus_to_be_upd$schedule)
-
-        tbls <- dbListTables(mgt_db)
-
-        if(!is.null(schdl_ops$skipped_operations) &
-           any(hrus_to_be_upd$lu_mgt %in% schdl_ops$skipped_operations$landuse)) {
-
-          skipped_operations <- filter(schdl_ops$skipped_operations, ! landuse %in% hrus_to_be_upd$lu_mgt)
-          if(nrow(skipped_operations) > 0) {
-            schdl_ops$skipped_operations <- skipped_operations
-            dbWriteTable(conn = mgt_db,
-                         name = 'skipped_operations',
-                         value = skipped_operations,
-                         overwrite = TRUE)
-          } else {
-            skipped_operations <- NULL
-            dbRemoveTable(conn = mgt_db, name = 'skipped_operations')
+        if(skip_to_be_upd) {
+          schdl_ops$skipped_operations <- schdl_ops$skipped_operations %>%
+            filter(! landuse %in% hrus_to_be_upd$lu_mgt)
+          if(nrow(schdl_ops$skipped_operations) == 0) {
+            schdl_ops$skipped_operations <- NULL
           }
-        } else {
-          skipped_operations <- NULL
         }
 
-        init_rmv <- paste0('init::', label_rmv)[paste0('init::', label_rmv) %in% tbls]
-        schd_rmv <- paste0('schd::', label_rmv)[paste0('schd::', label_rmv) %in% tbls]
-        tbls_rmv <- c(init_rmv, schd_rmv)
-        for (i in tbls_rmv) {
-          dbRemoveTable(mgt_db, i)
+        if(project_type == 'database') {
+          mgts_path <- paste0(project_path, '/', project_name, '.mgts')
+          mgts_db <- dbConnect(SQLite(), mgts_path)
+
+          dbWriteTable(conn = mgts_db,
+                       name = 'assigned_hrus', value = schdl_ops$assigned_hrus,
+                       overwrite = TRUE)
+
+          tbls <- dbListTables(mgts_db)
+
+          if(skip_to_be_upd & !is.null(schdl_ops$skipped_operations)) {
+            dbWriteTable(conn = mgts_db,
+                         name = 'skipped_operations',
+                         value = schdl_ops$skipped_operations,
+                         overwrite = TRUE)
+          } else if (skip_to_be_upd & is.null(schdl_ops$skipped_operations)) {
+            dbRemoveTable(conn = mgts_db, name = 'skipped_operations')
+          }
+
+          init_rmv <- paste0('init::', label_rmv)[paste0('init::', label_rmv) %in% tbls]
+          schd_rmv <- paste0('schd::', label_rmv)[paste0('schd::', label_rmv) %in% tbls]
+          tbls_rmv <- c(init_rmv, schd_rmv)
+          for (i in tbls_rmv) {
+            dbRemoveTable(mgts_db, i)
+          }
+
+          dbDisconnect(mgts_db)
+        } else {
+          for (i in label_rmv) {
+            schdl_ops$schedules[[i]] <- NULL
+          }
         }
-      dbDisconnect(mgt_db)
+
       } else {
         stop('Reading new management input cancelled!')
       }
     }
   }
 
-  return(list(assigned_hrus = assigned_hrus,
-              skipped_operations = skipped_operations,
-              scheduled_years = schdl_ops$scheduled_years))
+  if (project_type == 'database') {
+    return(list(assigned_hrus = schdl_ops$assigned_hrus,
+                skipped_operations = schdl_ops$skipped_operations,
+                scheduled_years = schdl_ops$scheduled_years))
+  } else {
+    return(list(assigned_hrus = schdl_ops$assigned_hrus,
+                skipped_operations = schdl_ops$skipped_operations,
+                scheduled_years = schdl_ops$scheduled_years,
+                schedules = schdl_ops$schedules))
+  }
 }
 
 #' Check if two tables are identical

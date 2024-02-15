@@ -4,13 +4,21 @@
 \alias{new_farmr}
 \title{Initiate a new SWATfarmR project}
 \usage{
-new_farmr(project_name, project_path)
+new_farmr(project_name, project_path, project_type = "database")
 }
 \arguments{
 \item{project_name}{the name of the farmr project.}
 
 \item{project_path}{Path to the SWAT TxtInOut folder to which the farmr
 should be applied.}
+
+\item{project_type}{Define the mode how scheduled operations are saved. With
+\code{project_type = 'database'} (default) a \verb{*.mgts} object is generated aside
+of the \verb{*.farm} object in the project folder, where scheduled operations
+are saved incrementally. This allows to continue with scheduling in case
+an error occurs during the scheduling. With \code{project_type = 'environment'}
+the scheduled operations are only saved in the R environment. In case of
+an error then all already scheduled operations will be lost.}
 }
 \value{
 Generates a new farmr_project in the working environment (as an R6

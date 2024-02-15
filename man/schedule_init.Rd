@@ -4,7 +4,7 @@
 \alias{schedule_init}
 \title{Schedule the initial crop operation}
 \usage{
-schedule_init(mgt_op, version)
+schedule_init(mgt_op, swat_version)
 }
 \arguments{
 \item{mgt_op}{Tibble with one line for the current operation}
