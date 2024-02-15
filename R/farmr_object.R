@@ -96,18 +96,21 @@ farmr_project <- R6::R6Class(
       self$schedule_operations <- function(start_year = NULL, end_year = NULL, n_schedule = NULL, replace = 'missing') {
 
         self$.data$scheduled_operations <-
-          schedule_operation(mgt_schedule = self$.data$management$schedule,
-                             variables = self$.data$variables,
-                             lookup = self$.data$meta$parameter_lookup,
-                             hru_attribute = self$.data$meta$hru_attributes,
-                             var_con = self$.data$meta$hru_var_connect,
+          schedule_operation(data = self$.data,
                              start_year = start_year,
                              end_year = end_year,
                              n_schedule = n_schedule,
-                             replace = replace,
-                             project_path = self$.data$meta$project_path,
-                             project_name = self$.data$meta$project_name,
-                             version = self$.data$meta$swat_version)
+                             replace = replace)
+
+            # mgt_schedule = self$.data$management$schedule,
+            #                  variables = self$.data$variables,
+            #                  lookup = self$.data$meta$parameter_lookup,
+            #                  hru_attribute = self$.data$meta$hru_attributes,
+            #                  var_con = self$.data$meta$hru_var_connect,
+            #                  project_path = self$.data$meta$project_path,
+            #                  project_name = self$.data$meta$project_name,
+            #                  project_type = self$.data$meta$project_type,
+            #                  version = self$.data$meta$swat_version)
 
         self$write_operations <- function(start_year = NULL, end_year = NULL) {
           write_operation(path = self$.data$meta$project_path,
