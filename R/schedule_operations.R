@@ -145,7 +145,7 @@ schedule_operation <- function(data, start_year, end_year, n_schedule, replace) 
             select(-land_use, -management, -weight, -filter_attribute)
         }
 
-        schedule_i <- list(init_crop = NULL, schedule = NULL)
+        schedule_i <- list(initial_plant = NULL, schedule = NULL)
 
         if(nrow(mgt_hru_i) > 0) {
           has_only_init_skip <- all(mgt_hru_i$operation %in% c(init_lbl, 'skip'))
@@ -163,17 +163,17 @@ schedule_operation <- function(data, start_year, end_year, n_schedule, replace) 
             id_init <- which(mgt_hru_i$operation == init_lbl)
             # id_skip <- which(mgt_hru_i$operation == 'skip')
             if(length(id_init) > 0) {
-              schedule_i$init_crop <- schedule_init(mgt_hru_i[id_init,], swat_version)
+              schedule_i$initial_plant <- schedule_init(mgt_hru_i[id_init,], swat_version)
             }
             # if(length(id_init) > 0) {
-            #   schedule_i$init_crop <- # Did not add the single skip OP
+            #   schedule_i$initial_plant <- # Did not add the single skip OP
             # }
           } else if (has_only_fix_date) {
             if(!attribute_hru_i[[luse_lbl]] %in% assigned_hrus$schedule) {
               id_init <- which(mgt_hru_i$operation == init_lbl)
               # id_skip <- which(mgt_hru_i$operation == 'skip')
               if(length(id_init) > 0) {
-                schedule_i$init_crop <- schedule_init(mgt_hru_i[id_init,], swat_version)
+                schedule_i$initial_plant <- schedule_init(mgt_hru_i[id_init,], swat_version)
               }
               n_year <- diff(unlist(var_yrs)) + 1
 
@@ -275,10 +275,10 @@ schedule_operation <- function(data, start_year, end_year, n_schedule, replace) 
           rs <- dbSendStatement(conn = mgts_db, statement = sql_n)
           dbClearResult(rs)
 
-          if(!is.null(schedule_i$init_crop) & !schdl_already_assigned) {
+          if(!is.null(schedule_i$initial_plant) & !schdl_already_assigned) {
             dbWriteTable(conn = mgts_db,
                          name = paste0('init::',schedule_name),
-                         value = schedule_i$init_crop)
+                         value = schedule_i$initial_plant)
           }
           if(!is.null(schedule_i$schedule) & !schdl_already_assigned) {
             dbWriteTable(conn = mgts_db,
@@ -289,8 +289,8 @@ schedule_operation <- function(data, start_year, end_year, n_schedule, replace) 
 
         } else if (!schdl_already_assigned) {
             schedules[[schedule_name]] <- list()
-          if(!is.null(schedule_i$init_crop)) {
-            schedules[[schedule_name]]$initial_plant <- schedule_i$init_crop
+          if(!is.null(schedule_i$initial_plant)) {
+            schedules[[schedule_name]]$initial_plant <- schedule_i$initial_plant
           }
           if(!is.null(schedule_i$schedule)) {
             schedules[[schedule_name]]$schedule <- schedule_i$schedule
@@ -539,8 +539,8 @@ schedule_date_j <- function(var_tbl, eval_str, prev_op) {
 #' @keywords internal
 #'
 schedule_op_j <- function(schedule_i, mgt_j, date_j, init_lbl, swat_version) {
-  if(mgt_j$operation == init_lbl & is.null(schedule_i$init_crop)) {
-    schedule_i$init_crop <- schedule_init(mgt_j, swat_version)
+  if(mgt_j$operation == init_lbl & is.null(schedule_i$initial_plant)) {
+    schedule_i$initial_plant <- schedule_init(mgt_j, swat_version)
   } else if (mgt_j$operation != init_lbl & !is.null(date_j)) {
     op <- mgt_j %>%
       select(-condition_schedule) %>%
@@ -605,7 +605,7 @@ compute_hu <- function(var_tbl, mgt_j, parameter_lookup, date_j, schedule_i, swa
   op_i <- mgt_j$operation
 
   if (swat_version == '2012') {
-    if(op_i == init_lbl & !is.null(date_j) & is.null(schedule_i$init_crop)) {
+    if(op_i == init_lbl & !is.null(date_j) & is.null(schedule_i$initial_plant)) {
       plant_i <- mgt_j$mgt1
       t_base <- filter(parameter_lookup$plant, value == plant_i) %>% .$t_base %>% .[1]
       phu <- mgt_j$mgt4
@@ -637,7 +637,7 @@ compute_hu <- function(var_tbl, mgt_j, parameter_lookup, date_j, schedule_i, swa
       }
     }
   } else if (swat_version == 'plus') {
-    if(op_i == init_lbl & !is.null(date_j) & is.null(schedule_i$init_crop)) {
+    if(op_i == init_lbl & !is.null(date_j) & is.null(schedule_i$initial_plant)) {
       plant_i <- mgt_j$op_data1
       hu_i <- mgt_j$op_data2 %>%
           str_split(., ',', simplify = TRUE) %>%

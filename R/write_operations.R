@@ -157,8 +157,8 @@ write_op_2012 <- function(path, proj_name, mgt_raw, assigned_hrus, schedules,
     mgt_i <- mgt_raw[[hru_file_i]]
     schedule_i <- schedules[[schdl_label_i]]
 
-    if(!is.null(schedule_i$init_crop)) {
-      mgt_i <- initialize_crop(mgt_i, schedule_i$init_crop)
+    if(!is.null(schedule_i$initial_plant)) {
+      mgt_i <- initialize_crop(mgt_i, schedule_i$initial_plant)
     } else {
       mgt_i[4] <- paste(sprintf("%16i", 0),
                         "   | IGRO: Land cover status: 0-none growing; 1-growing")
@@ -234,7 +234,7 @@ prepare_lum <- function(mgt_raw, schedule, assigned_hrus) {
   lum_names <- lum_to_string(names(mgt_raw$landuse_lum))
 
   has_init <- schedule %>%
-    map_lgl(., ~!(is.null(.x$init_crop) & is.null(.x$schedule))) %>%
+    map_lgl(., ~!(is.null(.x$initial_plant) & is.null(.x$schedule))) %>%
     enframe(., name = 'schedule', value = 'has_init')
   has_schdl <- schedule %>%
     map_lgl(., ~!is.null(.x$schedule)) %>%
@@ -383,7 +383,7 @@ load_scheduled_ops <- function(project_path, project_name) {
     tbl_i <- tbls[i]
     mgt_name <- str_remove(tbl_i, 'init::|schd::')
     tbl_type <- str_sub(tbl_i, 1,4)
-    tbl_type <- ifelse(tbl_type == 'init', 'init_crop', 'schedule')
+    tbl_type <- ifelse(tbl_type == 'init', 'initial_plant', 'schedule')
     if (!mgt_name %in% names(schedule)) {
       schedule[[mgt_name]] <- list()
     }
@@ -420,7 +420,7 @@ prepare_mgt_i <- function(schedule_i, name_i, lum_raw, start_year, end_year) {
   lum_init <- str_remove(name_i, '\\_[:digit:]+\\_[:digit:]+')
   lum_num <- str_extract(name_i, '\\_[:digit:]+\\_[:digit:]+')
   mgt_name <- paste0(str_remove(lum_init, '\\_lum'), '_mgt' , ifelse(is.na(lum_num), '', lum_num))
-  if (is.null(schedule_i$init_crop) & is.null(schedule_i$schedule)) {
+  if (is.null(schedule_i$initial_plant) & is.null(schedule_i$schedule)) {
     com_name <- 'null'
   } else {
     com_name <- paste0(str_remove(lum_init, '\\_lum'), '_comm', ifelse(is.na(lum_num), '', lum_num))
@@ -430,7 +430,7 @@ prepare_mgt_i <- function(schedule_i, name_i, lum_raw, start_year, end_year) {
     mutate(name = name_i,
            mgt = mgt_name,
            plnt_com = com_name) %>%
-           # plnt_com = ifelse(is.null(schedule_i$init_crop), plnt_com, schedule_i$init_crop)) %>%
+           # plnt_com = ifelse(is.null(schedule_i$initial_plant), plnt_com, schedule_i$initial_plant)) %>%
     lum_to_string(.)
 
   if(is.null(schedule_i$schedule)) {
@@ -466,12 +466,12 @@ prepare_plant_ini_i <- function(schedule_i, start_year, end_year) {
       filter(., operation %in% c('plnt', 'harv', 'hvkl', 'kill'))
 
     if(nrow(plnt_hrv) == 0) {
-      plnt_comm <- schedule_i$init_crop %>%
+      plnt_comm <- schedule_i$initial_plant %>%
         mutate(., lc_status = 'y', .after = plt_name)
     } else if (all(!unique(plnt_hrv$operation) %in% c('plnt', 'hvkl', 'kill'))) {
-      if(!is.null(schedule_i$init_crop)) {
+      if(!is.null(schedule_i$initial_plant)) {
         plnt_comm <- map_df(unique(plnt_hrv$op_data1),
-                            ~ mutate(schedule_i$init_crop, plt_name = .x)) %>%
+                            ~ mutate(schedule_i$initial_plant, plt_name = .x)) %>%
           mutate(., lc_status = 'y', .after = plt_name)
       } else {
         plnt_comm  <- tibble(plt_name  = unique(plnt_hrv$op_data1),
@@ -493,11 +493,11 @@ prepare_plant_ini_i <- function(schedule_i, start_year, end_year) {
         .$op_data1 %>%
         unique(.)
 
-      if(!is.null(schedule_i$init_crop) & length(plnt_name_lc_stat_y) > 0) {
+      if(!is.null(schedule_i$initial_plant) & length(plnt_name_lc_stat_y) > 0) {
         plnt_lc_stat_y <- map_df(plnt_name_lc_stat_y,
-                                 ~ mutate(schedule_i$init_crop, plt_name = .x)) %>%
+                                 ~ mutate(schedule_i$initial_plant, plt_name = .x)) %>%
           mutate(., lc_status = 'y', .after = plt_name)
-      } else if(is.null(schedule_i$init_crop) & length(plnt_name_lc_stat_y) > 0) {
+      } else if(is.null(schedule_i$initial_plant) & length(plnt_name_lc_stat_y) > 0) {
         plnt_lc_stat_y <- tibble(plt_name  = plnt_name_lc_stat_y,
                                  lc_status = 'y',
                                  lai_init  = 1,
@@ -526,8 +526,8 @@ prepare_plant_ini_i <- function(schedule_i, start_year, end_year) {
       }
       plnt_comm <- bind_rows(plnt_lc_stat_y, plnt_lc_stat_n)
     }
-  } else if (!is.null( schedule_i$init_crop)){
-    plnt_comm <- schedule_i$init_crop %>%
+  } else if (!is.null( schedule_i$initial_plant)){
+    plnt_comm <- schedule_i$initial_plant %>%
       mutate(., lc_status = 'y', .after = plt_name)
   } else {
     plnt_comm <- NULL
