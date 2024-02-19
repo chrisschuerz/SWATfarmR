@@ -4,7 +4,15 @@
 \alias{write_op_plus}
 \title{Write the management schedules for a SWAT+ project}
 \usage{
-write_op_plus(path, proj_name, mgt_raw, assigned_hrus, start_year, end_year)
+write_op_plus(
+  path,
+  proj_name,
+  mgt_raw,
+  assigned_hrus,
+  schedules,
+  start_year,
+  end_year
+)
 }
 \arguments{
 \item{path}{Path to the TxtInOut folder}
@@ -13,11 +21,11 @@ write_op_plus(path, proj_name, mgt_raw, assigned_hrus, start_year, end_year)
 
 \item{assigned_hrus}{Tibble that links the mgt schedules to the HRUs}
 
+\item{schedules}{List of tibbles with the scheduled operations.}
+
 \item{start_year}{Numeric. Defines the start year for which to write operations.}
 
 \item{end_year}{Numeric. Defines the last year for which to write operations.}
-
-\item{schedule}{List of tibbles with the scheduled operations.}
 }
 \description{
 Write the management schedules for a SWAT+ project

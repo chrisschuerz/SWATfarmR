@@ -1,19 +1,27 @@
 #' Write the mgt schedules into the respective files in the TxtInOut folder
 #'
-#' @param path Path to the TxtInOut folder
-#' @param mgt_raw List of original files that are relevant for the mgt scheduling.
-#' @param schedule List of tibbles with the scheduled operations.
-#' @param assigned_hrus Tibble that links the mgt schedules to the HRUs
+#' @param data List with all data stored in the farmR object.
 #' @param start_year Numeric. Defines the start year for which to write operations.
 #' @param end_year Numeric. Defines the last year for which to write operations.
-#' @param year_range numeric vector with start and end year of the scheduled operations.
-#' @param version String that indicates the SWAT version.
-#'
 #'
 #' @keywords internal
 #'
-write_operation <- function(path, proj_name, mgt, mgt_raw, assigned_hrus,
-                            start_year, end_year, year_range, version) {
+write_operation <- function(data, start_year, end_year) {
+
+  path  <- data$meta$project_path
+  proj_name <- data$meta$project_name
+  proj_type <- data$meta$project_type
+  mgt <- data$management$schedule
+  mgt_raw <- data$meta$mgt_raw
+  assigned_hrus <- data$scheduled_operations$assigned_hrus
+  year_range <- data$scheduled_operations$scheduled_years
+  version <- data$meta$swat_version
+
+  if (proj_type == 'environment') {
+    schedules <- data$scheduled_operations$schedules
+  } else {
+    schedules <- NULL
+  }
 
   if(is.null(start_year)) {
     start_year <- year_range[1]
@@ -38,9 +46,11 @@ write_operation <- function(path, proj_name, mgt, mgt_raw, assigned_hrus,
 
   cat("Writing management files:\n")
   if (version == 'plus') {
-    write_op_plus(path, proj_name, mgt_raw, assigned_hrus, start_year, end_year)
+    write_op_plus(path, proj_name, mgt_raw, assigned_hrus, schedules,
+                  start_year, end_year)
   } else {
-    write_op_2012(path, proj_name, mgt_raw, assigned_hrus, start_year, end_year)
+    write_op_2012(path, proj_name, mgt_raw, assigned_hrus, schedules,
+                  start_year, end_year)
   }
 }
 
@@ -48,7 +58,7 @@ write_operation <- function(path, proj_name, mgt, mgt_raw, assigned_hrus,
 #'
 #' @param path Path to the TxtInOut folder
 #' @param mgt_raw List of original files that are relevant for the mgt scheduling.
-#' @param schedule List of tibbles with the scheduled operations.
+#' @param schedules List of tibbles with the scheduled operations.
 #' @param assigned_hrus Tibble that links the mgt schedules to the HRUs
 #' @param start_year Numeric. Defines the start year for which to write operations.
 #' @param end_year Numeric. Defines the last year for which to write operations.
@@ -61,22 +71,26 @@ write_operation <- function(path, proj_name, mgt, mgt_raw, assigned_hrus,
 #'
 #' @keywords internal
 #'
-write_op_plus <- function(path, proj_name, mgt_raw, assigned_hrus, start_year, end_year) {
+write_op_plus <- function(path, proj_name, mgt_raw, assigned_hrus, schedules,
+                          start_year, end_year) {
   t0 <- now()
-  cat("  - Loading scheduled operations:")
-  schedule <- load_scheduled_ops(path, proj_name)
+
+  if (is.null(schedules)) {
+    cat("  - Loading scheduled operations:")
+    schedules <- load_scheduled_ops(path, proj_name)
+  }
 
   cat("  - Preparing 'hru-data.hru'\n")
   hru_data <- prepare_hru(mgt_raw, assigned_hrus)
 
   cat("  - Preparing 'landuse.lum'\n")
-  landuse_lum <- prepare_lum(mgt_raw, schedule, assigned_hrus)
+  landuse_lum <- prepare_lum(mgt_raw, schedules, assigned_hrus)
 
   cat("  - Preparing 'management.sch'\n")
-  mgt_sch <-  prepare_mgt(mgt_raw, schedule, start_year, end_year)
+  mgt_sch <-  prepare_mgt(mgt_raw, schedules, start_year, end_year)
 
   cat("  - Preparing 'plant.ini'\n")
-  plant_ini <- prepare_ini(mgt_raw, schedule, start_year, end_year)
+  plant_ini <- prepare_ini(mgt_raw, schedules, start_year, end_year)
 
   cat("  - Writing files \n")
   write_lines(hru_data, path%//%'hru-data.hru')
@@ -115,7 +129,7 @@ write_op_plus <- function(path, proj_name, mgt_raw, assigned_hrus, start_year, e
 #'
 #' @param path Path to the TxtInOut folder
 #' @param mgt_raw List of original files that are relevant for the mgt scheduling.
-#' @param schedule List of tibbles with the scheduled operations.
+#' @param schedules List of tibbles with the scheduled operations.
 #' @param assigned_hrus Tibble that links the mgt schedules to the HRUs
 #' @param start_year Numeric. Defines the start year for which to write operations.
 #' @param end_year Numeric. Defines the last year for which to write operations.
@@ -126,18 +140,22 @@ write_op_plus <- function(path, proj_name, mgt_raw, assigned_hrus, start_year, e
 #'
 #' @keywords internal
 #'
-write_op_2012 <- function(path, proj_name, mgt_raw, assigned_hrus, start_year, end_year) {
+write_op_2012 <- function(path, proj_name, mgt_raw, assigned_hrus, schedules,
+                          start_year, end_year) {
   t0 <- now()
-  cat("Loading scheduled operations:")
-  schedule <- load_scheduled_ops(path, proj_name)
+
+  if (is.null(schedules)) {
+    cat("  - Loading scheduled operations:")
+    schedules <- load_scheduled_ops(path, proj_name)
+  }
 
   cat("Writing scheduled operations: \n")
   n_hru <- nrow(assigned_hrus)
   for (i_hru in 1:n_hru) {
     hru_file_i <- assigned_hrus$file[i_hru]
-    schdl_label_i <- assigned_hrus$schedule[i_hru]
+    schdl_label_i <- assigned_hrus$schedules[i_hru]
     mgt_i <- mgt_raw[[hru_file_i]]
-    schedule_i <- schedule[[schdl_label_i]]
+    schedule_i <- schedules[[schdl_label_i]]
 
     if(!is.null(schedule_i$init_crop)) {
       mgt_i <- initialize_crop(mgt_i, schedule_i$init_crop)
