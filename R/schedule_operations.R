@@ -23,6 +23,9 @@ schedule_operation <- function(data, start_year, end_year, n_schedule, replace) 
 
   stopifnot(replace %in% c('missing', 'all'))
 
+  # reset to 'all' if no operations were scheduled yet
+  if (is.null(data$scheduled_operations)) replace <- 'all'
+
   mgt_schedule <- data$management$schedule
   variables  <- data$variables
   parameter_lookup  <- data$meta$parameter_lookup
