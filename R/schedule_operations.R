@@ -23,8 +23,6 @@ schedule_operation <- function(data, start_year, end_year, n_schedule, replace) 
 
   stopifnot(replace %in% c('missing', 'all'))
 
-  # reset to 'all' if no operations were scheduled yet
-  if (is.null(data$scheduled_operations)) replace <- 'all'
 
   mgt_schedule <- data$management$schedule
   variables  <- data$variables
@@ -38,6 +36,13 @@ schedule_operation <- function(data, start_year, end_year, n_schedule, replace) 
 
   if(project_type == 'database') {
     mgts_path <- paste0(project_path, '/', project_name, '.mgts')
+  } else {
+    mgts_path <- NA_character_
+  }
+
+  # reset to 'all' if no operations were scheduled yet
+  if (is.null(data$scheduled_operations) & !file.exists(mgts_path)) {
+    replace <- 'all'
   }
 
   # schedule <- list()
@@ -74,7 +79,7 @@ schedule_operation <- function(data, start_year, end_year, n_schedule, replace) 
     map2_df(., names(.), ~ mutate(.x, variable = .y, .before = 1)) %>%
     check_var_times(., start_year, end_year)
 
-  if (is.null(data$scheduled_operations)) {
+  if (is.null(data$scheduled_operations) & !file.exists(mgts_path)) {
     if (project_type == 'environment') {
       schedules <- list()
     }
@@ -85,9 +90,14 @@ schedule_operation <- function(data, start_year, end_year, n_schedule, replace) 
   } else {
     if (project_type == 'environment') {
       schedules <- data$scheduled_operations$schedules
+      assigned_hrus <- data$scheduled_operations$assigned_hrus
+      schdl_yrs <- data$scheduled_operations$scheduled_years
+    } else {
+      mgt_db <- dbConnect(SQLite(), mgts_path)
+      schdl_yrs <- tibble(dbReadTable(mgt_db, 'scheduled_years'))
+      assigned_hrus <- tibble(dbReadTable(mgt_db, 'assigned_hrus'))
+      dbDisconnect(mgt_db)
     }
-    assigned_hrus <- data$scheduled_operations$assigned_hrus
-    schdl_yrs <- data$scheduled_operations$scheduled_years
   }
 
   if(replace == 'missing') {

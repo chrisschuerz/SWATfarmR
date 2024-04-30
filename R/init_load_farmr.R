@@ -59,6 +59,9 @@ load_farmr <- function(file) {
     farmr_obj$.data$scheduled_operations$scheduled_years <-
       dbReadTable(mgt_db, 'scheduled_years') %>%
       tibble(.)
+    farmr_obj$.data$scheduled_operations$assigned_hrus <-
+      dbReadTable(mgt_db, 'assigned_hrus') %>%
+      tibble(.)
     if('skipped_operations' %in% mgt_tbls) {
       farmr_obj$.data$scheduled_operations$skipped_operations <-
         dbReadTable(mgt_db, 'skipped_operations') %>%
