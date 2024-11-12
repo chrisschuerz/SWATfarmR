@@ -124,9 +124,7 @@ farmr_project <- R6::R6Class(
     },
 
     save = function(){
-      obj_save <- get(x = self$.data$meta$project_name,
-                      envir = sys.frame(-1))
-      saveRDS(object = obj_save,
+      saveRDS(object = self,
               file = self$.data$meta$project_path%//%
                      self$.data$meta$project_name%.%
                      "farm")
